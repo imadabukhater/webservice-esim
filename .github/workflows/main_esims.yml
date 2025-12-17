@@ -55,6 +55,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+          path: ./deployment
+
+      # Create deployment package
+      - name: Prepare deployment package
+        run: |
+          cd deployment
+          zip -r ../app.zip .
 
       # Deploy to Azure Web App
       - name: Deploy to Azure Web App
@@ -62,7 +69,5 @@ jobs:
         with:
           app-name: 'esims'
           slot-name: 'Production'
-          package: .
+          package: app.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0B5D637776FB4901899C4E2E053DBB18 }}
-          clean: true
-          restart: true

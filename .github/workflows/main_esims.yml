@@ -50,7 +50,7 @@ jobs:
         with:
           app-name: 'esims'
           slot-name: 'Production'
-          package: ./webservices-esims/dist    # Deploy the build folder only
+          package: ./dist    # Deploy the build folder only
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0B5D637776FB4901899C4E2E053DBB18 }}
           clean: true
           restart: true

@@ -1,0 +1,17 @@
+services:
+  esims-app-backend:
+    container_name: esims-app-backend
+    image: esims-app-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # 👇 1
+    environment:
+      NODE_ENV: development
+      PORT: '9000'
+      CORS_ORIGINS: '["http://localhost:5173", "http://localhost"]' # 👈 2
+      CORS_MAX_AGE: 10800
+      DATABASE_URL: mysql://eims:eims1234@host.docker.internal:3306/esims 
+      AUTH_JWT_SECRET: eensuperveiligsecretvoorindevelopment
+    ports:
+      - '9000:9000'

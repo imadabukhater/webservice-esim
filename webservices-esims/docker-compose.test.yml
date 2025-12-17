@@ -1,0 +1,21 @@
+services:
+  db:
+    image: mysql:8.0
+    ports:
+      - '3308:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: esims_test
+      MYSQL_USER: eims
+      MYSQL_PASSWORD: eims1234
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '--silent']
+      timeout: 30s
+      interval: 30s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  db_data:

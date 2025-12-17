@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1764253973358,
+      "tag": "0000_wise_roxanne_simpson",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1765906556821,
+      "tag": "0001_noisy_terrax",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1765979872588,
+      "tag": "0002_living_living_tribunal",
+      "breakpoints": true
+    }
+  ]
+}

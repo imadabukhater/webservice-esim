@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -23,12 +23,14 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: npm install and build
-        working-directory: ./webservices-esims   # ⬅ project folder
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+
+      - name: Install dependencies and build
+        working-directory: ./webservices-esims
         run: |
-          npm install
-          npm run build --if-present
-          npm run test:e2e --if-present
+          pnpm install --frozen-lockfile
+          pnpm build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -52,5 +54,5 @@ jobs:
         with:
           app-name: 'esims'
           slot-name: 'Production'
-          package: ./webservices-esims
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0B5D637776FB4901899C4E2E053DBB18 }}

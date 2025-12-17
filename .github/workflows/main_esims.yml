@@ -34,13 +34,16 @@ jobs:
         working-directory: ./webservices-esims
         run: pnpm build
 
-
-      # Upload build output as artifact
+      # Upload complete application for deployment
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: ./webservices-esims/dist  # Only the build output
+          path: |
+            ./webservices-esims/dist
+            ./webservices-esims/node_modules
+            ./webservices-esims/package.json
+            ./webservices-esims/pnpm-lock.yaml
 
   deploy:
     runs-on: ubuntu-latest
@@ -59,7 +62,7 @@ jobs:
         with:
           app-name: 'esims'
           slot-name: 'Production'
-          package: ./node-app   # <-- path where the artifact lands
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0B5D637776FB4901899C4E2E053DBB18 }}
           clean: true
           restart: true

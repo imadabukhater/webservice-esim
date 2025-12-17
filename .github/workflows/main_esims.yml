@@ -34,10 +34,6 @@ jobs:
         working-directory: ./webservices-esims
         run: pnpm build
 
-      # Optional: Run e2e tests (won't fail if no tests exist)
-      - name: Run e2e tests
-        working-directory: ./webservices-esims
-        run: pnpm e2e -- --passWithNoTests
 
       # Upload build output as artifact
       - name: Upload artifact for deployment

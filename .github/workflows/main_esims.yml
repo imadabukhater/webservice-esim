@@ -31,6 +31,7 @@ jobs:
 
       # 4️⃣ Install dependencies
       - name: Install dependencies
+        working-directory: webservices-esims
         run: pnpm install --frozen-lockfile
 
       # 5️⃣ Build NestJS app

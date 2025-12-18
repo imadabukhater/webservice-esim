@@ -1,2 +1,5 @@
+packages:
+  - 'webservices-esims'
+
 ignoredBuiltDependencies:
   - esbuild

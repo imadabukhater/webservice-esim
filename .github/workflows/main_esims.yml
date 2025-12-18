@@ -27,16 +27,16 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: ./webservices-esims/pnpm-lock.yaml
+          cache-dependency-path: webservices-esims/pnpm-lock.yaml
 
       # 4️⃣ Install dependencies
       - name: Install dependencies
         working-directory: webservices-esims
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       # 5️⃣ Build NestJS app
       - name: Build application
-        working-directory: ./webservices-esims
+        working-directory: webservices-esims
         run: pnpm build
 
       # 6️⃣ Deploy to Azure Web App (Code)

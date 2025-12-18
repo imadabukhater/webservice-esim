@@ -35,11 +35,16 @@ jobs:
         working-directory: webservices-esims
         run: pnpm build
 
+      - name: Create deployment package
+        run: |
+          cd webservices-esims
+          zip -r ../deploy.zip . -x "*.git*" "node_modules/@*" ".env*"
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: esims
           slot-name: Production
-          package: webservices-esims
+          package: deploy.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E86FA527103D4D3A9C802346D9F2B327 }}
           startup-command: 'node dist/src/main.js'

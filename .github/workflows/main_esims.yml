@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -42,3 +42,4 @@ jobs:
           slot-name: Production
           package: webservices-esims
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E86FA527103D4D3A9C802346D9F2B327 }}
+          startup-command: 'node dist/src/main.js'

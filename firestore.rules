@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function prof()     { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProf()  { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    // المدير يجب أن يدخل بكلمة المرور فقط (وليس بحساب Google) — حماية إضافية
+    function viaPassword() { return signedIn() && request.auth.token.firebase.sign_in_provider == 'password'; }
+    function isAdmin()  { return hasProf() && viaPassword() && prof().role == 'admin' && prof().active == true; }
+    function isAgent()  { return hasProf() && prof().role == 'agent' && prof().active == true; }
+
+    // الحساب الوحيد المسموح له أن يصبح مديراً (مرة واحدة فقط)
+    function isOwnerEmail() { return viaPassword() && request.auth.token.email == 'moataz1995@shahn.app'; }
+
+    match /meta/{d} {
+      allow read: if true;
+      allow create: if isOwnerEmail() && d == 'admin'
+                    && !exists(/databases/$(database)/documents/meta/admin)
+                    && request.resource.data.uid == request.auth.uid;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      allow create:
+        // 1) المدير ينشئ وكيلاً مباشرة
+        if (isAdmin() && request.resource.data.role == 'agent')
+        // 2) أي شخص يسجّل نفسه وكيلاً: الحساب يبدأ "بانتظار التفعيل" ولا يملك أي صلاحية
+        || (signedIn() && request.auth.uid == uid
+            && !isOwnerEmail()
+            && request.resource.data.role == 'agent'
+            && request.resource.data.active == false
+            && request.resource.data.pending == true
+            && request.resource.data.keys().hasOnly(['username','name','phone','whatsapp','role','active','pending','createdAt','email','provider']))
+        // 3) إنشاء المدير الوحيد: بريد moataz1995 فقط ولمرة واحدة
+        || (isOwnerEmail() && request.auth.uid == uid
+            && request.resource.data.role == 'admin'
+            && !exists(/databases/$(database)/documents/meta/admin)
+            && getAfter(/databases/$(database)/documents/meta/admin).data.uid == uid);
+
+      allow update, delete: if isAdmin();
+    }
+
+    match /companies/{id} {
+      allow read: if isAdmin() || isAgent();
+      allow write: if isAdmin();
+    }
+    match /packages/{id} {
+      allow read: if isAdmin() || isAgent();
+      allow write: if isAdmin();
+    }
+
+    match /lines/{id} {
+      allow read: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    match /orders/{id} {
+      allow read: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
+      allow create: if isAdmin() || (isAgent()
+                    && request.resource.data.agentId == request.auth.uid
+                    && request.resource.data.status == 'pending');
+      // الوكيل يستطيع فقط إلغاء طلبه وهو قيد الانتظار
+      allow update: if isAdmin() || (isAgent()
+                    && resource.data.agentId == request.auth.uid
+                    && resource.data.status == 'pending'
+                    && request.resource.data.status == 'cancelled'
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+      allow delete: if isAdmin();
+    }
+
+    match /payments/{id} {
+      allow read: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // رسائل الدعم: الوكيل ينشئ ويقرأ رسائله فقط، والمدير يرد ويغلق
+    match /tickets/{id} {
+      allow read: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
+      allow create: if isAgent()
+                    && request.resource.data.agentId == request.auth.uid
+                    && request.resource.data.status == 'open';
+      allow update, delete: if isAdmin();
+    }
+
+    // إعدادات عامة (رسوم eSIM): قراءة للجميع المفعّلين، كتابة للمدير
+    match /settings/{id} {
+      allow read: if isAdmin() || isAgent();
+      allow write: if isAdmin();
+    }
+    // رموز إشعارات الهاتف: كل مستخدم يكتب رمز جهازه فقط. لا قراءة من التطبيق (الخادم وحده يقرأها)
+    match /tokens/{t} {
+      allow create, update: if request.auth != null
+                            && request.resource.data.uid == request.auth.uid
+                            && request.resource.data.keys().hasOnly(['uid','platform','updatedAt']);
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read: if false;
+    }
+  }
+}

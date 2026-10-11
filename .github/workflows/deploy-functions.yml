@@ -1,0 +1,28 @@
+name: Deploy notifications server (Cloud Functions)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install function dependencies
+        run: npm --prefix functions install
+
+      - name: Deploy functions
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          REGION: ${{ secrets.FN_REGION }}
+        run: |
+          echo "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          echo "FN_REGION=${REGION:-us-central1}" > functions/.env
+          npx --yes firebase-tools@latest deploy --only functions --project "$PROJECT_ID" --non-interactive --force

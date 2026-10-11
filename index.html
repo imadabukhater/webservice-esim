@@ -1,0 +1,1423 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0f766e">
+<title>شحن سلكوم</title>
+<style>
+:root{--p:#0f766e;--p2:#115e59;--pl:#ccfbf1;--bg:#f1f5f4;--card:#fff;--tx:#0f172a;--mu:#64748b;--ln:#e2e8f0;--rd:#dc2626;--gr:#16a34a;--or:#d97706;--bl:#2563eb}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,"Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:15px}
+body{padding-bottom:calc(76px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:20;background:var(--p);color:#fff;padding:calc(10px + var(--safe-area-inset-top,env(safe-area-inset-top,0px))) 16px 10px;display:flex;align-items:center;gap:10px}
+header h1{font-size:18px;margin:0;flex:1}
+header .who{font-size:12px;opacity:.9}
+.dot{width:9px;height:9px;border-radius:50%;background:#4ade80;display:inline-block;margin-inline-end:4px}
+.dot.off{background:#fbbf24}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+nav{position:fixed;bottom:0;inset-inline:0;background:#fff;border-top:1px solid var(--ln);display:flex;padding-bottom:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));z-index:20}
+nav button{flex:1;border:0;background:none;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mu);position:relative}
+nav button span{font-size:20px;line-height:1}
+nav button.on{color:var(--p);font-weight:700}
+nav .bd{position:absolute;top:4px;inset-inline-start:calc(50% + 6px);background:var(--rd);color:#fff;border-radius:10px;font-size:10px;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.card{background:var(--card);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.sub{color:var(--mu);font-size:12.5px;margin-top:2px}
+.t{margin-top:8px;border-top:1px dashed var(--ln);padding-top:6px}
+.end{text-align:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.num{direction:ltr;unicode-bidi:embed;display:inline-block}
+.pill{font-size:11.5px;padding:2px 9px;border-radius:20px;background:#e2e8f0;color:#334155;white-space:nowrap}
+.pill.pending{background:#fef3c7;color:#92400e}.pill.done,.pill.active{background:#dcfce7;color:#166534}
+.pill.rejected,.pill.disconnected{background:#fee2e2;color:#991b1b}.pill.cancelled,.pill.refunded{background:#e2e8f0;color:#475569}
+.logo{border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex:none;object-fit:contain;background:#fff}
+.btn{display:block;width:100%;border:0;background:var(--p);color:#fff;padding:13px;border-radius:12px;font-weight:700;margin-top:10px}
+.btn.s{background:#e2f5f2;color:var(--p2)}.btn.d{background:#fee2e2;color:#991b1b}.btn.w{background:#fff;border:1px solid var(--ln);color:var(--tx)}
+.btn:disabled{opacity:.5}
+.btns{display:flex;gap:8px}.btns .btn{flex:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chip{border:1px solid var(--ln);background:#fff;padding:7px 14px;border-radius:20px;white-space:nowrap;font-size:13.5px}
+.chip.on{background:var(--p);color:#fff;border-color:var(--p)}
+.f{display:block;margin-top:10px}.f span{display:block;font-size:12.5px;color:var(--mu);margin-bottom:4px}
+.f input,.f select,.f textarea,.search{width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:11px 12px;background:#fff;outline:none}
+.f input:focus,.f select:focus,.f textarea:focus,.search:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.search{margin-bottom:10px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px}.chk input{width:20px;height:20px}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.big button{border:0;border-radius:16px;padding:16px 4px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.08);display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;font-size:13px}
+.big button span{font-size:28px}
+.bal{background:linear-gradient(135deg,var(--p),#0e9488);color:#fff;border-radius:18px;padding:16px;margin-bottom:6px}
+.bal b{font-size:30px;display:block;margin-top:2px}
+.bal.ok{background:linear-gradient(135deg,#166534,#16a34a)}
+.bal.low{background:linear-gradient(135deg,#991b1b,#dc2626)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{background:#fff;border-radius:14px;padding:10px;text-align:center}.stats b{display:block;font-size:20px}.stats small{color:var(--mu)}
+h3{margin:14px 2px 8px;font-size:15px}
+.empty{text-align:center;color:var(--mu);padding:30px 10px}
+.fab{position:fixed;inset-inline-start:16px;bottom:calc(88px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)));width:56px;height:56px;border-radius:50%;border:0;background:var(--p);color:#fff;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:15}
+.ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sh{background:#f8fafc;width:100%;max-width:720px;max-height:92vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;animation:up .2s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.shh{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--ln)}
+.x{border:0;background:#e2e8f0;border-radius:50%;width:32px;height:32px}
+.shb{padding:6px 16px calc(18px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)));overflow:auto}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eef2f7;gap:10px}.kv span:first-child{color:var(--mu)}
+#toast{position:fixed;bottom:calc(90px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)));inset-inline:16px;margin:auto;max-width:420px;background:#0f172a;color:#fff;padding:11px 14px;border-radius:12px;text-align:center;z-index:99;display:none}
+.auth{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;max-width:420px;margin:auto}
+.auth .brand{text-align:center;margin-bottom:14px}.auth .brand>div:first-child{font-size:54px}.auth .brand .sub{font-size:13.5px;line-height:1.6}.auth h2{margin:4px 0}
+.err{color:var(--rd);font-size:13px;margin-top:8px;min-height:18px}
+.demo{background:#fef3c7;color:#92400e;border-radius:10px;padding:8px 10px;font-size:12.5px;margin-bottom:10px}
+.offer{background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fed7aa}
+.link{background:none;border:0;color:var(--p);padding:10px;width:100%;margin-top:6px}
+.neg{color:var(--rd)}.pos{color:var(--gr)}
+.prev{background:var(--pl);color:var(--p2);border-radius:10px;padding:8px 10px;margin-top:10px;font-weight:700;min-height:36px}
+.logoprev{display:flex;align-items:center;gap:10px;margin-top:10px}
+.btn.wa{background:#25d366;color:#04361a}
+.hb{border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:50%;width:38px;height:38px;font-size:18px;flex:none}
+.or{color:var(--or)}
+.pill.open{background:#fef3c7;color:#92400e}.pill.resolved{background:#dcfce7;color:#166534}
+.opt{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--ln);border-radius:12px;padding:12px;margin-top:8px}.opt input{width:20px;height:20px}.opt:has(input:checked){border-color:var(--p);background:var(--pl)}
+nav button{font-size:10.5px}
+.big button{text-align:center;line-height:1.35}
+.cos{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.cot{flex:none;width:84px;border:2px solid transparent;background:#fff;border-radius:14px;padding:8px 4px;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+.cot.on{border-color:var(--p);background:var(--pl)}
+.pkt{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:8px;cursor:pointer}
+.pkt:active{border-color:var(--p)}
+.pr{font-size:18px;color:var(--p2)}
+.fx{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.fx i{font-style:normal;background:#f1f5f9;border-radius:8px;padding:3px 8px;font-size:12px}
+details.pkd{margin-top:6px;font-size:12.5px;color:var(--mu);line-height:1.6}details.pkd summary{color:var(--p);cursor:pointer}
+.ch2{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.ch2 button{display:flex;align-items:center;gap:12px;text-align:start;border:1px solid var(--ln);background:#fff;border-radius:16px;padding:16px}
+.ch2 button>span{font-size:30px}.ch2 button b{display:block;font-size:16px}.ch2 button small{color:var(--mu)}
+.ostrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.ostrip .oc{flex:none;width:150px;border-radius:14px;padding:10px;border:1px solid #fed7aa;background:linear-gradient(135deg,#fff7ed,#ffedd5)}
+.sug{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.sug button{border:1px solid var(--ln);background:#fff;border-radius:10px;padding:6px 10px}
+.ordiv{display:flex;align-items:center;gap:10px;color:var(--mu);margin:14px 0 4px;font-size:13px}.ordiv:before,.ordiv:after{content:'';flex:1;height:1px;background:#cbd5e1}
+.btn.g{background:#fff;color:var(--tx);border:1px solid #cbd5e1;display:flex;align-items:center;justify-content:center;gap:8px}
+.hlp{background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin:8px 0;padding:0 12px}.hlp summary{padding:12px 0;font-weight:700;cursor:pointer}.hlp .hb2{padding:0 0 12px;line-height:1.8;font-size:14px}.hlp ol,.hlp ul{margin:4px 0;padding-inline-start:20px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modals"></div>
+<div id="toast"></div>
+<script src="firebase-config.js"></script>
+<script src="catalog.js"></script>
+<script>
+'use strict';
+/* ====================== أدوات عامة ====================== */
+const $=(s,e=document)=>e.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>(Math.round((+n||0)*100)/100).toLocaleString('en-US')+' ₪';
+const digits=s=>String(s||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^\d]/g,'');
+const pad=n=>String(n).padStart(2,'0');
+const fmt=t=>{if(!t)return'';const d=new Date(t);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const clean=o=>JSON.parse(JSON.stringify(o));
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',3200)}
+const A=o=>Object.entries(o||{}).map(([k,v])=>` ${k}="${esc(v)}"`).join('');
+const F={
+  text:(n,l,v='',a)=>`<label class="f"><span>${l}</span><input name="${n}" value="${esc(v)}"${A(a)}></label>`,
+  num:(n,l,v='',a)=>`<label class="f"><span>${l}</span><input name="${n}" type="number" inputmode="decimal" step="any" value="${esc(v)}"${A(a)}></label>`,
+  pass:(n,l,a)=>`<label class="f"><span>${l}</span><input name="${n}" type="password" autocomplete="off"${A(a)}></label>`,
+  sel:(n,l,o,v)=>`<label class="f"><span>${l}</span><select name="${n}">${o.map(([k,t])=>`<option value="${esc(k)}"${String(k)===String(v)?' selected':''}>${esc(t)}</option>`).join('')}</select></label>`,
+  area:(n,l,v='')=>`<label class="f"><span>${l}</span><textarea name="${n}" rows="2">${esc(v)}</textarea></label>`,
+  chk:(n,l,v)=>`<label class="chk"><input type="checkbox" name="${n}"${v?' checked':''}> ${l}</label>`
+};
+const V=(el,n)=>{const i=el.querySelector(`[name="${n}"]`);if(!i)return'';return i.type==='checkbox'?i.checked:i.value.trim()};
+
+/* ====================== اللغة: عربي / English ====================== */
+let LANG='ar';try{LANG=localStorage.getItem('shahn_lang')==='en'?'en':'ar'}catch(e){}
+const APP=window.APP||{name:'شحن سلكوم',nameEn:'Shahn Cellcom',version:'2.0.0'};
+const CAT=window.CATALOG||{ver:0,billDefaults:[],brand:{},cos:[],games:[]};
+const EN={"شحن سلكوم": "Shahn Cellcom", "تأكيد": "Confirm", "إلغاء": "Cancel", "اسم المستخدم": "Username", "رقم التواصل": "Contact number", "اسم المستخدم أو كلمة المرور غير صحيحة": "Wrong username or password", "اسم المستخدم مستخدم من قبل": "Username already taken", "كلمة المرور ضعيفة": "Weak password", "أحرف على الأقل": "characters minimum", "لا يوجد اتصال بالإنترنت": "No internet connection", "محاولات كثيرة، حاول لاحقاً": "Too many attempts, try later", "ليست لديك صلاحية لهذه العملية": "You are not allowed to do this", "حدث خطأ": "An error occurred", "هذا الحساب معطّل": "This account is disabled", "تم الإعداد مسبقاً": "Already set up", "غير مسموح": "Not allowed", "الحساب غير مسجّل في النظام": "Account is not registered", "شحن كرت": "Card top-up", "شحن فاتورة": "Bill payment", "تفعيل فاتورة جديدة": "New bill activation", "تجديد خط": "Line renewal", "زبون سابق": "existing customer", "شحن ألعاب وتطبيقات": "Games & apps top-up", "قيد المعالجة": "In progress", "تم الحل": "Resolved", "قيد الانتظار": "Pending", "منفّذ": "Done", "مرفوض": "Rejected", "ملغي": "Cancelled", "مسترجع": "Refunded", "فعّال": "Active", "مفصول": "Disconnected", "دقيقة": "min", "غير محدود": "Unlimited", "يوم": "days", "الطلبات": "Orders", "عرض جديد": "New offer", "عروض أخرى": "more offers", "تم تعطيل هذا الحساب": "This account was disabled", "تم تفعيل حسابك": "Your account is activated", "يمكنك الآن إرسال الطلبات": "You can now send orders", "وكيل جديد": "New agent", "بانتظار التفعيل": "awaiting activation", "طلب جديد": "New order", "تم تنفيذ طلبك": "Your order is done", "تم رفض طلبك": "Your order was rejected", "تم شحن رصيدك": "Your balance was topped up", "رسالة دعم جديدة": "New support message", "تم حل طلب الدعم": "Support request resolved", "تعذر تحميل": "Could not load", "تعذر تشغيل التطبيق": "Could not start the app", "الوكلاء": "Agents", "الخطوط": "Lines", "المحاسبة": "Accounting", "الشركات": "Companies", "المزيد": "More", "الرئيسية": "Home", "طلباتي": "My orders", "خطوطي": "My lines", "العروض": "Offers", "حسابي": "My account", "تجريبي": "Demo", "متصل": "Online", "بدون إنترنت": "Offline", "شحن رصيد": "Recharge", "واتساب الدعم": "Support WhatsApp", "وضع تجريبي": "Demo mode", "البيانات محفوظة على هذا الجهاز فقط ولا تُشارك بين الأجهزة": "data is saved on this device only and is not shared between devices", "تسجيل دخول المدير": "Manager", "الوكيل": "Agent", "لم يتم ربط قاعدة بيانات": "database not connected yet", "بعد": "in", "كلمة المرور": "Password", "دخول": "Log in", "إنشاء حساب وكيل جديد": "Create a new agent account", "إنشاء حساب وكيل": "Create agent account", "بعد الإنشاء تواصل مع الدعم الفني على واتساب لتفعيل حسابك وشحن رصيدك": "After signing up, contact support on WhatsApp to activate your account and top up your balance", "الاسم الكامل": "Full name", "إنجليزي": "English", "حروف وأرقام": "letters and numbers", "تأكيد كلمة المرور": "Confirm password", "رقم الواتساب": "WhatsApp number", "إنشاء الحساب": "Create account", "لدي حساب": "I have an account", "تسجيل الدخول": "Log in", "حسابك بانتظار التفعيل": "Your account is awaiting activation", "تم إنشاء الحساب": "Account created", "تواصل مع الدعم الفني على واتساب ليتم تفعيل حسابك وشحن رصيدك، وسيفتح التطبيق تلقائياً بعد التفعيل": "Contact support on WhatsApp to activate your account and top up your balance; the app opens automatically once activated", "التواصل مع الدعم عبر واتساب": "Contact support on WhatsApp", "تسجيل الخروج": "Log out", "إعداد حساب المدير": "Manager account setup", "لمالك التطبيق فقط": "App owner only", "يُنفَّذ مرة واحدة ثم يُقفل": "runs once, then locks", "الاسم": "Name", "إنشاء حساب المدير": "Create manager account", "رجوع": "Back", "رصيد الوكيل غير كافٍ": "Agent balance is not enough", "رسائل الدعم": "Support messages", "منفّذة": "Done", "مرفوضة": "Rejected", "الكل": "All", "لا توجد طلبات": "No orders", "نتيجة": "results", "لا توجد نتائج ضمن خطوطك": "No results in your lines", "المعروضات": "Offers", "عرض الكل": "View all", "رصيدك المتاح": "Your available balance", "محجوز لطلبات قيد الانتظار": "Reserved for pending orders", "رصيدك صفر": "Your balance is zero", "لا يمكنك إرسال طلبات": "you cannot send orders", "تواصل مع الدعم الفني لشحن رصيدك": "Contact support to top up your balance", "شحن رصيد كرت": "Card top-up", "تفعيل فاتورة": "Bill activation", "ادخل الرقم أو الاسم أو رقم الشريحة": "Enter number, name or SIM number", "خطوط فعّالة": "Active lines", "خطوط مفصولة": "Disconnected lines", "طلبات معلّقة": "Pending orders", "رسالة للدعم الفني": "Message support", "الدعم الفني على واتساب": "Support on WhatsApp", "آخر الطلبات": "Recent orders", "لا توجد طلبات بعد": "No orders yet", "ينتهي": "Expires", "منتهٍ": "expired", "بدون اسم": "No name", "لا توجد خطوط": "No lines", "بحث بالرقم أو الشريحة أو اسم الزبون": "Search by number, SIM or customer name", "فعّالة": "Active", "مفصولة": "Disconnected", "تنتهي قريباً": "Expiring soon", "كل الوكلاء": "All agents", "كل الشركات": "All companies", "جديد": "New", "إجمالي أرصدة الوكلاء": "Total agent balances", "معطّل": "Disabled", "خط فعّال": "active lines", "الرصيد": "Balance", "لا يوجد وكلاء مفعّلون بعد": "No active agents yet", "ألعاب وتطبيقات": "Games & apps", "كرت": "Card", "فاتورة": "Bill", "موقوفة": "Paused", "منتهي": "Expired", "ينتهي العرض": "Offer ends", "التفاصيل": "Details", "كروت": "Cards", "فواتير": "Bills", "مبلغ حر": "Open amount", "عمولة": "Commission", "باقة": "packages", "لا توجد شركات": "No companies", "لا توجد عناصر": "No items", "باقات الفواتير": "Bill packages", "باقات الكروت": "Card packages", "إضافة": "Add", "تحديث الشركات والباقات الافتراضية": "update default companies & packages", "إضافة باقة": "Add package", "جيجا": "GB", "لكل الشركات": "to all companies", "كل الباقات": "All packages", "لا توجد عروض حالياً": "No offers right now", "خصم": "Deduction", "تسوية": "adjustment", "لا توجد حركات": "No transactions", "اليوم": "Today", "أيام": "days", "هذا الشهر": "This month", "التفعيلات": "Activations", "شحن الكروت": "Card top-ups", "شحن الفواتير": "Bill payments", "منها رسوم": "of which fees", "إجمالي المصروف": "Total spent", "رصيد أُضيف في الفترة": "Balance added in period", "الرصيد الحالي": "Current balance", "إجمالي أرصدة الوكلاء الآن": "Total agent balances now", "حسب الشركة": "By company", "تُحسب الأرقام تلقائياً من كل طلب تنفّذه ومن شحنات الرصيد التي تضيفها": "Figures are calculated automatically from every order you execute and every top-up you add", "حسب الوكيل": "By agent", "تفعيل": "activations", "ألعاب": "games", "لا يوجد وكلاء": "No agents", "محاسبتي التلقائية": "My automatic accounting", "كشف الحساب": "Statement", "تغيير كلمة المرور": "Change password", "المدير": "Manager", "عدد الوكلاء": "Agents", "وكلاء رصيدهم صفر": "Agents with zero balance", "إجمالي الخطوط": "Total lines", "وضع التخزين": "Storage", "محلي": "local", "سحابي": "cloud", "رسوم تفعيل": "activation fee", "تعديل": "Edit", "مسح بيانات التجربة": "Clear demo data", "أدخل الاسم": "Enter the name", "حرفاً إنجليزياً أو أرقاماً": "English letters or digits", "اسم المستخدم محجوز": "Username is reserved", "كلمتا المرور غير متطابقتين": "Passwords do not match", "أدخل رقم التواصل": "Enter the contact number", "أدخل رقم الواتساب": "Enter the WhatsApp number", "جارٍ إنشاء الحساب": "Creating account", "أدخل اسم المستخدم وكلمة المرور": "Enter username and password", "جارٍ الدخول": "Logging in", "جارٍ الإنشاء": "Creating", "تسجيل الخروج؟": "Log out?", "خروج": "Log out", "سيتم مسح كل بيانات التجربة": "All demo data will be erased", "مسح": "Erase", "كلمة المرور الحالية": "Current password", "الجديدة": "New password", "تأكيد الجديدة": "Confirm new password", "حفظ": "Save", "غير متطابقتين": "Do not match", "تم تغيير كلمة المرور": "Password changed", "كل الشركات والباقات الافتراضية موجودة مسبقاً": "All default companies and packages already exist", "سيتم إضافة الشركات والباقات الافتراضية الناقصة فقط": "Only missing default companies and packages will be added", "لا يُعدَّل شيء موجود": "nothing existing is changed", "عنصراً": "items", "تمت الإضافة": "Added", "كل الشركات لديها باقة": "All companies already have the package", "جيجا بسعر": "GB at", "يوماً": "days", "إلى": "to", "شركة؟": "companies?", "تمت إضافة الباقة لـ": "Package added to", "شركة": "companies", "سلكوم": "Cellcom", "بلفون": "Pelephone", "بارتنر": "Partner", "رامي ليفي للاتصالات": "Rami Levy Communications", "رامي ليفي": "Rami Levy", "موبايل": "Mobile", "جولان تيليكوم": "Golan Telecom", "جولان": "Golan", "كلام": "Kalam", "ويكوم": "Wecom", "هوت موبايل": "Hot Mobile", "هوت": "Hot", "هوت توك": "Hot Talk", "بيج توك": "Big Talk", "شهري": "Monthly", "جوال": "Jawwal", "أوريدو": "Ooredoo", "اوريدو": "Ooredoo", "ببجي موبايل": "PUBG Mobile", "فري فاير": "Free Fire", "جوجل بلاي": "Google Play", "آيتونز": "iTunes", "نتفلكس": "Netflix", "باقة 30 يوم": "30-day package", "باقة 500 جيجا": "500 GB package", "رقم": "No.", "الشركة": "Company", "رقم الهاتف": "Phone number", "معرّف الحساب": "Account ID", "رقم الشريحة": "SIM number", "نوع الشريحة": "SIM type", "الباقة": "Package", "المدة": "Duration", "الزبون": "Customer", "المبلغ": "Amount", "تم إرسال الطلب": "Order sent", "وصل طلبك إلى المدير وسيتم تنفيذه، وسيصلك إشعار هنا عند التنفيذ": "Your order reached the manager and will be executed; you will be notified here when it is done", "إبلاغ الدعم عبر واتساب": "Notify support on WhatsApp", "إغلاق": "Close", "لا توجد ألعاب أو تطبيقات متاحة حالياً، تواصل مع المدير": "No games or apps available yet, contact the manager", "لا توجد باقات كروت متاحة بعد، تواصل مع المدير": "No card packages available yet, contact the manager", "شحن بمبلغ حر": "Open-amount top-up", "الحد الأدنى": "Minimum", "عمولتك": "your commission", "لا توجد باقات لهذه الشركة": "No packages for this company", "شحن": "Top up", "معرّف اللاعب": "Player ID", "رقم الحساب": "account number", "البريد": "email", "اسم الزبون": "Customer name", "اختياري": "optional", "ادخل الرقم": "Enter the number", "المبلغ على حسابك": "Charged to you", "أدخل معرّف اللاعب أو رقم الحساب": "Enter the player ID or account number", "أدخل رقم هاتف صحيح": "Enter a valid phone number", "الحد الأدنى للشحن": "Minimum top-up is", "رصيدك لا يكفي": "Your balance is not enough", "المتاح": "available", "لا يكفي لهذا الطلب": "is not enough for this order", "تواصل مع الدعم لشحن رصيدك": "Contact support to top up your balance", "فصل": "Disconnect", "مفصول منذ": "Disconnected since", "فعّال حتى": "Active until", "انتهى التفعيل": "Activation ended", "منذ": "ago", "الحالة": "Status", "آخر شحنة": "Last top-up", "اشتراك فاتورة جديد": "New bill subscription", "رقم جديد": "New number", "شريحة": "SIM", "أو": "or", "تجديد خط قائم": "Renew an existing line", "أدخل رقمه لعرض حالته": "enter the number to see its status", "لا توجد شركات متاحة بعد، تواصل مع المدير": "No companies available yet, contact the manager", "ادخل رقم الخط القائم": "Enter the existing line number", "عدد الفترات": "Number of periods", "المدة الأساسية للباقة": "the package base duration", "شريحة عادية": "Regular SIM", "أدخل رقم الشريحة": "enter the SIM number", "شريحة إلكترونية": "eSIM", "تكلفة تفعيل": "Activation cost", "تُضاف على سعر الباقة": "added to the package price", "إن كان معروفاً": "if known", "رقم الهوية": "ID number", "ملاحظات": "Notes", "إرسال الطلب": "Send order", "يشمل رسوم": "includes fee", "هذا الرقم غير موجود ضمن خطوطك": "This number is not in your lines", "يمكنك إرسال الطلب وسيراجعه المدير": "You can send the order and the manager will review it", "اختر باقة": "Choose a package", "أدخل رقم الشريحة أو اختر": "Enter the SIM number or choose", "أدخل رقم هاتف الزبون السابق": "Enter the existing customer number", "رقم الهاتف غير صحيح": "Invalid phone number", "أدخل اسم الزبون": "Enter the customer name", "تفاصيل الطلب": "Order details", "الطلب غير موجود": "Order not found", "رقم الطلب": "Order no.", "النوع": "Type", "رسوم": "fee", "الهوية": "ID", "المبلغ المطلوب": "Requested amount", "المحسوب على الوكيل": "Charged to agent", "المحسوب المتوقع": "Expected charge", "ملاحظات الوكيل": "Agent notes", "ملاحظة المدير": "Manager note", "التاريخ": "Date", "وقت التنفيذ": "Executed at", "رفض": "Reject", "تنفيذ": "Execute", "مراسلة الوكيل على واتساب": "Message agent on WhatsApp", "إلغاء الطلب": "Cancel order", "استرجاع الطلب": "Refund order", "إلغاء المبلغ": "cancel the charge", "رفض الطلب": "Reject order", "سبب الرفض": "Reason", "تم الرفض": "Rejected", "إلغاء هذا الطلب؟": "Cancel this order?", "تم الإلغاء": "Cancelled", "سيُخصم المبلغ من حساب الوكيل ويُعتبر الطلب مسترجعاً": "The charge will be reversed and the order marked refunded", "استرجاع": "Refund", "تم الاسترجاع": "Refunded", "تنفيذ الطلب": "Execute order", "مطلوب": "required", "مدة التفعيل": "Activation duration", "المبلغ المحسوب على الوكيل": "Amount charged to agent", "ملاحظة": "Note", "تأكيد التنفيذ": "Confirm execution", "أدخل المبلغ": "Enter the amount", "اشحن رصيده أولاً": "top up his balance first", "أدخل رقم الهاتف": "Enter the phone number", "أدخل مدة التفعيل بالأيام": "Enter the activation duration in days", "الرقم مسجّل عند وكيل آخر، انقله أولاً من تبويب الخطوط": "The number belongs to another agent; transfer it first from Lines", "تم تنفيذ الطلب": "Order executed", "تعديل وكيل": "Edit agent", "اسم الوكيل": "Agent name", "تم الحفظ": "Saved", "تم إنشاء الوكيل": "Agent created", "واتساب": "WhatsApp", "حساب جديد بانتظار التفعيل": "New account awaiting activation", "تفعيل الحساب": "Activate account", "مراسلته على واتساب": "Message on WhatsApp", "الرصيد المتاح": "Available balance", "شحن رصيد الوكيل": "Top up agent balance", "خطوطه": "His lines", "تعطيل": "Disable", "المحاسبة التلقائية": "Automatic accounting", "تفعيل هذا الحساب؟": "Activate this account?", "تعطيل الحساب؟ لن يستطيع الدخول": "Disable the account? The agent will not be able to log in", "تم": "Done", "رفض هذا الحساب؟": "Reject this account?", "تم تفعيل الحساب": "Account activated", "اشحن رصيده ليبدأ العمل": "Top up his balance to start working", "المبلغ المُضاف": "Amount added", "شحن الرصيد": "Top up balance", "أدخل مبلغاً صحيحاً": "Enter a valid amount", "تم شحن الرصيد": "Balance topped up", "لا يوجد وكلاء مفعّلون، فعّل وكيلاً أولاً": "No active agents, activate an agent first", "أضف شركة أولاً": "Add a company first", "تعديل خط": "Edit line", "خط جديد": "New line", "تاريخ انتهاء التفعيل": "Activation expiry date", "بدون": "None", "الرقم موجود مسبقاً": "Number already exists", "إضافة يدوية": "Added manually", "نقل من": "Transferred from", "تفاصيل الخط": "Line details", "غير موجود": "Not found", "إلكترونية": "eSIM", "عادية": "regular", "آخر تفعيل": "Last activation", "أُضيف": "Added", "تجديد الخط": "Renew line", "رسالة للدعم عن هذا الرقم": "Message support about this number", "نقل لوكيل": "Transfer to agent", "فصل الخط": "Disconnect line", "إعادة تفعيل": "Reactivate", "حذف": "Delete", "السجل": "History", "حذف الخط نهائياً؟": "Delete the line permanently?", "تم الحذف": "Deleted", "لا يوجد وكيل آخر": "No other agent", "نقل الخط": "Transfer line", "نقل إلى الوكيل": "Transfer to agent", "نقل": "Transfer", "تم النقل": "Transferred", "تعديل شركة": "Edit company", "شركة جديدة": "New company", "شركة اتصالات": "Telecom company", "لعبة": "Game", "تطبيق": "Apply", "عمولة الوكيل على الكروت": "Agent commission on cards", "تُطبَّق على المبلغ الحر": "applies to open amounts", "متاحة في شحن الكروت": "Available for card top-up", "متاحة في تفعيل الفواتير": "Available for bill activation", "مثل جوال وأوريدو": "like Jawwal and Ooredoo", "الحد الأدنى للمبلغ الحر": "Minimum open amount", "تلقائياً": "automatically", "اختيار لوجو": "Choose logo", "خلل تقني": "Technical fault", "تبديل": "Swap", "تحويل إلى": "Convert to", "إنترنت ضعيف": "Weak internet", "فصل رقم": "Disconnect number", "طلب دعم": "Support request", "الرقم": "Number", "لا توجد رسائل دعم": "No support messages", "أو اختر من خطوطك": "or pick from your lines", "اختر": "Choose", "اختر نوع الطلب": "Choose the request type", "إرسال للدعم": "Send to support", "تم إرسال رسالتك": "Message sent", "وصلت رسالتك إلى الدعم الفني، وسيصلك إشعار هنا عند الرد": "Your message reached support; you will be notified here when they reply", "إرسالها أيضاً عبر واتساب": "Also send it on WhatsApp", "رسالة دعم": "Support message", "غير موجودة": "Not found", "ملاحظة الوكيل": "Agent note", "رد الدعم": "Support reply", "وقت الحل": "Resolved at", "رد على الوكيل": "reply to agent", "إرسالها عبر واتساب": "Send on WhatsApp", "فتح الخط": "Open line", "رد للوكيل": "Reply to agent", "الرسوم": "Fee", "الدقائق": "Minutes", "عدد الرسائل": "SMS count", "حجم الجيجات": "Data size", "المدة (أيام)": "Duration (days)", "السعر على الوكيل": "Price to agent", "وصف": "Description", "تفاصيل": "details", "عرض": "Offer", "يظهر في المعروضات": "shown in Offers", "تاريخ انتهاء العرض": "Offer end date", "إرسال إشعار للوكلاء بهذا العرض عند الحفظ": "Notify agents about this offer on save", "متاحة للوكلاء": "Available to agents", "تعديل باقة": "Edit package", "باقة جديدة": "New package", "الشركة / اللعبة": "Company / game", "اللعبة": "Game", "اسم الباقة": "Package name", "نوع الباقة": "Package type", "السعر": "Price", "حذف الباقة؟": "Delete the package?", "الخطوط والطلبات القديمة ستبقى": "old lines and orders stay", "أدخل اسم الباقة": "Enter the package name", "أدخل السعر": "Enter the price", "مفعّلة": "Enabled", "حذف نهائياً؟": "Delete permanently?", "لا يمكن الحذف": "Cannot delete", "مرتبطة بباقات أو خطوط": "linked to packages or lines", "عطّلها بدلاً من ذلك": "disable it instead", "تعذر قراءة الصورة": "Could not read the image", "إضافة باقة 500 جيجا بسعر": "Add 500 GB package at", "الأيام": "days", "اللغة": "Language", "عربي": "العربية", "تغيير الرصيد": "Change balance", "شحن رصيد للوكيل": "Top up agent", "رسوم تفعيل eSIM": "eSIM activation fee", "الرسوم (₪) تُضاف على سعر الباقة": "Fee (₪) added to the package price", "تم إلغاء تسجيل الدخول": "Sign-in cancelled", "الدخول بحساب": "Sign in with", "غير مفعّل في": "is not enabled in", "هذا البريد مسجّل بطريقة دخول أخرى": "This email is registered with another sign-in method", "يعمل بعد ربط التطبيق بقاعدة بيانات": "works after connecting the app to the", "انظر الدليل": "see the guide", "حساب المدير يدخل باسم المستخدم وكلمة المرور فقط": "The manager account signs in with username and password only", "غير مضبوط بعد": "is not configured yet", "في": "in", "إعدادات": "settings", "غير مكتملة": "incomplete", "أضف بصمة": "add the", "وتأكد من": "fingerprint and check the", "لا يوجد حساب": "No", "على هذا الهاتف، أضفه من إعدادات الهاتف": "account on this phone; add one in phone settings", "تعذر الدخول بحساب": "Could not sign in with", "انتهت الجلسة، ادخل بحساب": "Session expired, sign in with", "مرة أخرى": "again", "أو للوكلاء": "or for agents", "التسجيل السريع بحساب": "Quick sign-up with", "أو باسم مستخدم وكلمة مرور": "or with username and password", "أكمل إنشاء حساب الوكيل": "Complete your agent account", "تم الدخول بحساب": "Signed in with", "أدخل رقم التواصل ورقم الواتساب، ثم تواصل مع الدعم لتفعيل حسابك وشحن رصيدك": "Enter your contact and WhatsApp numbers, then contact support to activate your account and top up your balance", "إلغاء واستخدام حساب آخر": "Cancel and use another account", "حساب": "account", "جارٍ الدخول بحساب": "Signing in with", "حساب Google": "Google account", "الوكيل غير موجود": "Agent not found", "انتهت الجلسة، سجّل الدخول من جديد": "Session expired, log in again", "تعذر الاتصال بخادم تغيير كلمة المرور": "Could not reach the password server", "تحقق من الإنترنت ومن نشر الخادم": "check the internet and that the server is deployed", "الدليل": "guide", "خادم تغيير كلمة المرور غير منشور بعد": "The password server is not deployed yet", "تعذر تغيير كلمة المرور": "Could not change the password", "تم تعديل رصيدك": "Your balance was adjusted", "تصحيح رصيد": "Balance correction", "تصحيحات الرصيد": "Balance corrections", "هذا الوكيل يدخل بحساب": "This agent signs in with", "ولا يملك كلمة مرور في التطبيق": "and has no password in the app", "تغيير كلمة مرور": "Change password of", "كلمة المرور الجديدة": "New password", "أعد كتابتها": "Retype it", "حفظ كلمة المرور": "Save password", "جارٍ الحفظ": "Saving", "أبلغ الوكيل بها": "tell the agent", "للتصحيح عند حدوث خلل فني فقط": "For correcting a technical fault only", "يُسجَّل في كشف الحساب ويصل الوكيل إشعار": "It is logged in the statement and the agent is notified", "نوع التصحيح": "Correction type", "إضافة للرصيد": "Add to balance", "خصم من الرصيد": "Deduct from balance", "ضبط الرصيد على مبلغ محدد": "Set balance to an exact amount", "السبب": "Reason", "تطبيق التصحيح": "Apply correction", "الرصيد بعد التصحيح": "Balance after correction", "لا يوجد تغيير في الرصيد": "No change in balance", "لا يمكن أن يصبح الرصيد سالباً": "The balance cannot become negative", "اكتب سبب التصحيح": "Write the reason for the correction", "تغيير رصيد": "Change balance of", "تم تصحيح الرصيد": "Balance corrected", "تعديل البيانات": "Edit details", "تصحيح الرصيد": "Balance correction", "خلل فني": "technical fault", "من": "from", "سجّل الدخول من جديد": "log in again", "📘 كيف أستخدم التطبيق؟ (تعليمات الشحن)": "📘 How do I use the app? (top-up guide)", "📘 تعليمات استخدام التطبيق": "📘 App usage guide", "إنترنت فقط": "Data only", "تعبئة": "Credit", "سنة": "1 year", "سنتين": "2 years", "لمدة سنتين": "for 2 years", "دولي": "intl", "للسلطة": "for PA", "كوشر": "Kosher", "مكالمات فقط": "calls only", "＋ Add باقات الفاتورة الافتراضية (500 GB و150 GB) to all companies": "＋ Add default bill packages (500 GB & 150 GB) to all companies", "🆕 يتوفر تحديث للكتالوج (باقات وأسعار جديدة). اضغط الزر أدناه لإضافة الناقص فقط.": "🆕 A catalog update is available (new packages and prices). Tap the button below to add only what is missing.", "إضافة باقات الفاتورة الافتراضية (500 جيجا بـ 60 ₪ و150 جيجا بـ 50 ₪)": "Add default bill packages (500 GB for 60 ₪ and 150 GB for 50 ₪)", "＋ إضافة باقات الفاتورة الافتراضية (500 جيجا و150 جيجا) لكل الشركات": "＋ Add default bill packages (500 GB & 150 GB) to all companies", "كل الشركات لديها باقات الفاتورة الافتراضية (500 جيجا و150 جيجا)": "All companies already have the default bill packages (500 GB & 150 GB)", "تعليمات": "Guide", "تعليمات استخدام التطبيق": "App usage guide", "فهمت": "Got it", "كيف أستخدم التطبيق؟": "How do I use the app?", "تعليمات الشحن": "top-up guide", "باقات الفاتورة الافتراضية": "default bill packages", "و": "&", "يتوفر تحديث للكتالوج": "A catalog update is available", "باقات وأسعار جديدة": "new packages and prices", "اضغط الزر أدناه لإضافة الناقص فقط": "tap the button below to add only what is missing"};
+const AR_RUN=/[ء-ي٠-٩ٰ-ۓ][ء-يً-ٰٟ-ۓـ\s،؟]*[ء-يً-ٰٟ-ۓـ؟]|[ء-ي]/g;
+const EN_RULES=[[/بعد (\d+) يوم/g,'in $1 days'],[/منذ (\d+) يوم/g,'$1 days ago'],[/\(\+(\d+) عروض أخرى\)/g,'(+$1 more offers)'],[/(\d+) نتيجة/g,'$1 results']];
+function trRun(r){
+  const k=r.replace(/\s+/g,' ').trim();if(EN[k]!=null)return EN[k];
+  const w=k.split(' '),out=[];let i=0;
+  while(i<w.length){let j=w.length,hit=null;for(;j>i;j--){const q=w.slice(i,j).join(' ');if(EN[q]!=null){hit=EN[q];break}}
+    if(hit!=null){out.push(hit);i=j}else{out.push(w[i]);i++}}
+  return out.join(' ');
+}
+function T(x){
+  if(LANG!=='en'||!x||!/[؀-ۿ]/.test(x))return x;
+  let t=String(x);EN_RULES.forEach(([a,b])=>{t=t.replace(a,b)});
+  return t.replace(AR_RUN,m=>trRun(m));
+}
+const SKIP='[translate=no],script,style,textarea';
+function trNode(n){
+  if(LANG!=='en'||!n)return;
+  if(n.nodeType===3){const p=n.parentElement;if(!p||p.closest(SKIP)||!/[؀-ۿ]/.test(n.data))return;const v=T(n.data);if(v!==n.data)n.data=v;return}
+  if(n.nodeType!==1||n.closest(SKIP))return;
+  const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT),ns=[];while(w.nextNode())ns.push(w.currentNode);
+  ns.forEach(t=>trNode(t));
+  [n,...n.querySelectorAll('[placeholder],[aria-label]')].forEach(e=>['placeholder','aria-label'].forEach(a=>{const v=e.getAttribute(a);if(v&&/[؀-ۿ]/.test(v)&&!e.closest(SKIP))e.setAttribute(a,T(v))}));
+}
+function langInit(){
+  document.documentElement.lang=LANG;document.documentElement.dir=LANG==='en'?'ltr':'rtl';
+  if(LANG!=='en')return;
+  document.title='Recharge';
+  new MutationObserver(ms=>ms.forEach(m=>{if(m.type==='characterData')trNode(m.target);else m.addedNodes.forEach(trNode)})).observe(document.body,{childList:true,subtree:true,characterData:true});
+}
+const langSw=()=>`<div class="chips" translate="no" style="justify-content:center"><button class="chip ${LANG==='ar'?'on':''}" data-act="lang" data-v="ar">عربي</button><button class="chip ${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button></div>`;
+
+/* ====================== نوافذ منبثقة ====================== */
+const sheets=[];let hist=false,skip=0;
+function pushH(){if(!hist){history.pushState({sh:1},'');hist=true}}
+function popH(){setTimeout(()=>{if(!sheets.length&&hist){hist=false;skip++;history.back()}},60)}
+window.addEventListener('popstate',()=>{if(skip){skip--;return}hist=false;if(sheets.length){sheets.pop().remove();if(sheets.length)pushH()}});
+function sheet(title,body,live){
+  const el=document.createElement('div');el.className='ov';
+  el.innerHTML=`<div class="sh"><div class="shh"><b>${esc(title)}</b><button class="x" data-close>✕</button></div><div class="shb"></div></div>`;
+  const b=$('.shb',el);
+  if(live){el.refresh=()=>{b.innerHTML=live()};el.refresh()}else b.innerHTML=body;
+  el.addEventListener('click',e=>{if(e.target===el||e.target.closest('[data-close]'))closeSheet(el)});
+  $('#modals').appendChild(el);sheets.push(el);pushH();return el;
+}
+function closeSheet(el){const i=sheets.indexOf(el||sheets[sheets.length-1]);if(i<0)return;const s=sheets.splice(i,1)[0];s.remove();s.onclose&&s.onclose();popH()}
+function confirmBox(msg,okText='تأكيد',danger){
+  return new Promise(res=>{
+    const el=sheet('تأكيد',`<p>${esc(msg)}</p><div class="btns"><button class="btn w" data-close>إلغاء</button><button class="btn ${danger?'d':''}" data-ok>${okText}</button></div>`);
+    let done=false;el.onclose=()=>{if(!done)res(false)};
+    $('[data-ok]',el).onclick=()=>{done=true;closeSheet(el);res(true)};
+  });
+}
+
+/* ====================== الخلفية: Firebase أو تجريبي ====================== */
+const EMAIL=u=>u.toLowerCase()+'@shahn.app';
+const SUPPORT='972567725080',ADMIN_USER='moataz1995';
+const waNum=n=>{let d=digits(n);if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('0'))d='972'+d.slice(1);return d};
+function openWA(text,phone){
+  const a=document.createElement('a');a.href='https://wa.me/'+waNum(phone||SUPPORT)+(text?'?text='+encodeURIComponent(text):'');
+  a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
+}
+const supMsg=()=>'مرحباً، أنا '+(S.me.name||'')+' ('+S.me.username+') وكيل في تطبيق '+APP.name+'. أحتاج مساعدة.';
+const regMsg=u=>'مرحباً، أنا '+(u.name||'')+' (اسم المستخدم: '+u.username+'). سجّلت حساب وكيل في تطبيق '+APP.name+'، أرجو تفعيل حسابي وشحن رصيدي. رقم التواصل: '+(u.phone||'')+'.';
+const okUser=u=>/^[a-z0-9._-]{3,30}$/.test(u);
+function errMsg(e){
+  const c=(e&&e.code)||'';const m=(e&&e.message)||'';
+  if(/invalid-credential|user-not-found|wrong-password|invalid-login/.test(c))return'اسم المستخدم أو كلمة المرور غير صحيحة';
+  if(c==='auth/email-already-in-use')return'اسم المستخدم مستخدم من قبل';
+  if(c==='auth/weak-password')return'كلمة المرور ضعيفة (6 أحرف على الأقل)';
+  if(c==='auth/network-request-failed'||c==='unavailable')return'لا يوجد اتصال بالإنترنت';
+  if(c==='auth/too-many-requests')return'محاولات كثيرة، حاول لاحقاً';
+  if(c==='permission-denied')return'ليست لديك صلاحية لهذه العملية';
+  if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return'تم إلغاء تسجيل الدخول';
+  if(c==='auth/operation-not-allowed')return'الدخول بحساب Google غير مفعّل في Firebase بعد';
+  if(c==='auth/account-exists-with-different-credential')return'هذا البريد مسجّل بطريقة دخول أخرى';
+  return m||'حدث خطأ';
+}
+const rid=()=>'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+const Local={
+  name:'demo',key:'shahn_demo_v1',
+  async init(){
+    try{this.D=JSON.parse(localStorage.getItem(this.key))}catch(e){}
+    this.D=this.D||{users:[],companies:[],packages:[],lines:[],orders:[],payments:[],meta:{}};
+    ['tickets','settings'].forEach(k=>{this.D[k]=this.D[k]||[]});
+    const u=this.D.users.find(x=>x.id===this.D.session);
+    return{user:u?this.pub(u):null,needsSetup:!this.D.meta.admin};
+  },
+  save(){try{localStorage.setItem(this.key,JSON.stringify(this.D))}catch(e){}},
+  pub(u){const c={...u};delete c.password;return c},
+  newId(){return rid()},
+  async login(un,pw){
+    const u=this.D.users.find(x=>x.username===un.toLowerCase());
+    if(!u||u.password!==pw)throw{code:'auth/invalid-credential'};
+    if(u.active===false&&!u.pending)throw{message:'هذا الحساب معطّل'};
+    this.D.session=u.id;this.save();return this.pub(u);
+  },
+  async setupAdmin(un,pw,name){
+    if(this.D.meta.admin)throw{message:'تم الإعداد مسبقاً'};
+    if(un.toLowerCase()!==ADMIN_USER)throw{message:'غير مسموح'};
+    const u={id:rid(),username:un.toLowerCase(),password:pw,name,role:'admin',active:true,createdAt:Date.now()};
+    this.D.users.push(u);this.D.meta.admin=u.id;this.D.session=u.id;this.save();return this.pub(u);
+  },
+  async createAgent(un,pw,prof){
+    if(this.D.users.some(x=>x.username===un.toLowerCase()))throw{code:'auth/email-already-in-use'};
+    if(pw.length<6)throw{code:'auth/weak-password'};
+    const u={id:rid(),username:un.toLowerCase(),password:pw,role:'agent',active:true,createdAt:Date.now(),...prof};
+    this.D.users.push(u);this.save();this.emit();return u.id;
+  },
+  async registerAgent(un,pw,prof){
+    if(this.D.users.some(x=>x.username===un.toLowerCase()))throw{code:'auth/email-already-in-use'};
+    if(pw.length<6)throw{code:'auth/weak-password'};
+    const u={id:rid(),username:un.toLowerCase(),password:pw,role:'agent',active:false,pending:true,createdAt:Date.now(),...prof};
+    this.D.users.push(u);this.D.session=u.id;this.save();return this.pub(u);
+  },
+  async setAgentPassword(uid,pw){const u=this.D.users.find(x=>x.id===uid&&x.role==='agent');if(!u)throw{message:'الوكيل غير موجود'};if(pw.length<6)throw{code:'auth/weak-password'};u.password=pw;this.save();return true},
+  async loginGoogle(){throw{message:'الدخول بحساب Google يعمل بعد ربط التطبيق بقاعدة بيانات Firebase (انظر الدليل)'}},
+  async logout(){this.D.session=null;this.save();this.stop()},
+  async changePassword(o,n){const u=this.D.users.find(x=>x.id===this.D.session);if(u.password!==o)throw{code:'auth/invalid-credential'};if(n.length<6)throw{code:'auth/weak-password'};u.password=n;this.save()},
+  start(p,cb){this.prof=p;this.cb=cb;this.emit()},
+  stop(){this.cb=null},
+  emit(){
+    if(!this.cb)return;const D=this.D,p=this.prof,adm=p.role==='admin',cb=this.cb;
+    const me=D.users.find(x=>x.id===p.id);cb('me',me?this.pub(me):null);
+    if(me&&me.pending)return;
+    cb('companies',D.companies.map(x=>({...x})));cb('packages',D.packages.map(x=>({...x})));cb('settings',D.settings.map(x=>({...x})));
+    if(adm){cb('users',D.users.map(x=>this.pub(x)));['lines','orders','payments','tickets'].forEach(c=>cb(c,D[c].map(x=>({...x}))))}
+    else{cb('users',[]);['lines','orders','payments','tickets'].forEach(c=>cb(c,D[c].filter(x=>x.agentId===p.id).map(x=>({...x}))))}
+  },
+  async write(ops){
+    ops.forEach(o=>{
+      const arr=this.D[o.c];const i=arr.findIndex(x=>x.id===o.id);
+      if(o.t==='del'){if(i>=0)arr.splice(i,1)}
+      else if(i>=0)Object.assign(arr[i],clean(o.d));else arr.push({id:o.id,...clean(o.d)});
+    });
+    this.save();this.emit();
+  },
+  reset(){localStorage.removeItem(this.key);location.reload()}
+};
+
+const FB={
+  name:'firebase',
+  async init(){
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+    this.auth=firebase.auth();this.db=firebase.firestore();
+    try{this.db.settings({experimentalAutoDetectLongPolling:true})}catch(e){}
+    try{await this.db.enablePersistence({synchronizeTabs:false})}catch(e){}
+    const u=await new Promise(r=>{const un=this.auth.onAuthStateChanged(x=>{un();r(x)})});
+    if(u){try{return{user:await this.profile(u.uid)}}catch(e){if(e&&e.code==='no-profile'&&this.isG(u))return{user:null,greg:this.gInfo(u)};return{user:null}}}
+    let ns=null;try{ns=!(await this.db.doc('meta/admin').get()).exists}catch(e){}
+    return{user:null,needsSetup:ns};
+  },
+  newId(c){return this.db.collection(c).doc().id},
+  async profile(uid){
+    const s=await this.db.doc('users/'+uid).get();
+    if(!s.exists)throw{code:'no-profile',message:'الحساب غير مسجّل في النظام'};
+    const p={id:s.id,...s.data()};
+    if(p.role==='admin'&&this.isG(this.auth.currentUser)){await this.auth.signOut();throw{message:'حساب المدير يدخل باسم المستخدم وكلمة المرور فقط'}}
+    if(p.active===false&&!p.pending){await this.auth.signOut();throw{message:'هذا الحساب معطّل'}}
+    return p;
+  },
+  async login(un,pw){const c=await this.auth.signInWithEmailAndPassword(EMAIL(un),pw);
+    try{return await this.profile(c.user.uid)}catch(e){await this.auth.signOut();throw e}},
+  async setupAdmin(un,pw,name){
+    if(un.toLowerCase()!==ADMIN_USER)throw{message:'غير مسموح'};
+    const c=await this.auth.createUserWithEmailAndPassword(EMAIL(un),pw);const uid=c.user.uid;
+    const b=this.db.batch();
+    b.set(this.db.doc('meta/admin'),{uid,at:Date.now()});
+    b.set(this.db.doc('users/'+uid),{username:un.toLowerCase(),name,role:'admin',active:true,createdAt:Date.now()});
+    try{await b.commit()}catch(e){try{await c.user.delete()}catch(_){}throw e}
+    return{id:uid,username:un.toLowerCase(),name,role:'admin',active:true};
+  },
+  async createAgent(un,pw,prof){
+    const sec=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(window.FIREBASE_CONFIG,'sec');
+    const c=await sec.auth().createUserWithEmailAndPassword(EMAIL(un),pw);
+    const uid=c.user.uid;await sec.auth().signOut();
+    await this.db.doc('users/'+uid).set(clean({username:un.toLowerCase(),role:'agent',active:true,createdAt:Date.now(),...prof}));
+    return uid;
+  },
+  async registerAgent(un,pw,prof){
+    const c=await this.auth.createUserWithEmailAndPassword(EMAIL(un),pw);const uid=c.user.uid;
+    const d={username:un.toLowerCase(),role:'agent',active:false,pending:true,createdAt:Date.now(),...prof};
+    try{await this.db.doc('users/'+uid).set(clean(d))}catch(e){try{await c.user.delete()}catch(_){}throw e}
+    return{id:uid,...d};
+  },
+  /* الدخول بحساب Google: على الهاتف عبر إضافة SocialLogin (Credential Manager)، وفي المتصفح عبر نافذة Google */
+  async setAgentPassword(uid,pw){
+    const u=this.auth.currentUser;if(!u)throw{message:'انتهت الجلسة، سجّل الدخول من جديد'};
+    const tok=await u.getIdToken(true);
+    const url='https://'+(window.FN_REGION||'us-central1')+'-'+((window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.projectId)||'project')+'.cloudfunctions.net/adminSetPassword';
+    let r;try{r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify({data:{uid,password:pw}})})}catch(e){throw{message:'تعذر الاتصال بخادم تغيير كلمة المرور. تحقق من الإنترنت ومن نشر الخادم (الدليل 5-ط)'}}
+    let j={};try{j=await r.json()}catch(e){}
+    if(r.status===404)throw{message:'خادم تغيير كلمة المرور غير منشور بعد (الدليل 5-ط)'};
+    if(!r.ok||j.error)throw{message:(j.error&&j.error.message)||'تعذر تغيير كلمة المرور'};
+    return true;
+  },
+  isG(u){return!!u&&(u.providerData||[]).some(x=>x&&x.providerId==='google.com')},
+  gInfo(u){return{uid:u.uid,email:String(u.email||'').toLowerCase(),name:u.displayName||''}},
+  SL(){return window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()&&Capacitor.Plugins&&Capacitor.Plugins.SocialLogin},
+  async loginGoogle(){
+    const SL=this.SL();let cred;
+    if(SL){
+      const wc=window.GOOGLE_WEB_CLIENT_ID;
+      if(!wc)throw{message:'الدخول بحساب Google غير مضبوط بعد (GOOGLE_WEB_CLIENT_ID في firebase-config.js)'};
+      if(!this.slReady){await SL.initialize({google:{webClientId:wc}});this.slReady=true}
+      let r;try{r=await SL.login({provider:'google',options:{}})}catch(e){
+        const m=String((e&&(e.message||e.errorMessage))||e||'');
+        if(/cancel/i.test(m))throw{message:'تم إلغاء تسجيل الدخول'};
+        if(/28444|developer console/i.test(m))throw{message:'إعدادات Google غير مكتملة: أضف بصمة SHA-1 في Firebase وتأكد من Web client ID'};
+        if(/no credential/i.test(m))throw{message:'لا يوجد حساب Google على هذا الهاتف، أضفه من إعدادات الهاتف'};
+        throw{message:'تعذر الدخول بحساب Google: '+m};
+      }
+      const tok=r&&r.result&&r.result.idToken;if(!tok)throw{message:'تعذر الدخول بحساب Google'};
+      cred=await this.auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(tok));
+    }else cred=await this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    const u=cred.user;
+    try{return{user:await this.profile(u.uid)}}catch(e){if(e&&e.code==='no-profile')return{greg:this.gInfo(u)};throw e}
+  },
+  async completeGoogle(prof){
+    const u=this.auth.currentUser;if(!u)throw{message:'انتهت الجلسة، ادخل بحساب Google مرة أخرى'};
+    const em=String(u.email||'').toLowerCase();
+    const d={username:em||u.uid,email:em,provider:'google',role:'agent',active:false,pending:true,createdAt:Date.now(),...prof};
+    await this.db.doc('users/'+u.uid).set(clean(d));return{id:u.uid,...d};
+  },
+  async logout(){this.stop();try{const SL=this.SL();if(SL&&this.slReady)await SL.logout({provider:'google'})}catch(e){}await this.auth.signOut()},
+  async changePassword(o,n){const u=this.auth.currentUser;
+    await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,o));await u.updatePassword(n)},
+  start(p,cb){
+    const db=this.db;this.un=[];
+    const sub=(c,q)=>this.un.push(q.onSnapshot(s=>cb(c,s.docs.map(d=>({id:d.id,...d.data()}))),e=>cb(c,null,e)));
+    this.un.push(db.doc('users/'+p.id).onSnapshot(s=>cb('me',s.exists?{id:s.id,...s.data()}:null),e=>cb('me',null,e)));
+    if(p.pending)return;
+    sub('companies',db.collection('companies'));sub('packages',db.collection('packages'));sub('settings',db.collection('settings'));
+    if(p.role==='admin'){['users','lines','orders','payments','tickets'].forEach(c=>sub(c,db.collection(c)));}
+    else{cb('users',[]);['lines','orders','payments','tickets'].forEach(c=>sub(c,db.collection(c).where('agentId','==',p.id)))}
+  },
+  stop(){(this.un||[]).forEach(f=>f());this.un=[]},
+  write(ops){
+    const b=this.db.batch();
+    ops.forEach(o=>{const r=this.db.collection(o.c).doc(o.id);if(o.t==='del')b.delete(r);else b.set(r,clean(o.d),{merge:true})});
+    return b.commit();
+  }
+};
+let B=Local;
+
+/* ====================== الحالة ====================== */
+const S={me:null,users:[],companies:[],packages:[],lines:[],orders:[],payments:[],tickets:[],settings:[],knownT:new Map(),tkInit:false,knownP:new Map(),payInit:false,tab:'',ui:{lst:'active',cat:'companies',q:'',off:'offers',per:'month'},needsSetup:false,known:new Map(),ordInit:false,knownU:new Map(),usersInit:false};
+const TYPE={card:'شحن كرت',bill:'شحن فاتورة',activate_new:'تفعيل فاتورة جديدة',activate_old:'تجديد خط (زبون سابق)',game:'شحن ألعاب وتطبيقات'};
+const STAT={open:'قيد المعالجة',resolved:'تم الحل',pending:'قيد الانتظار',done:'منفّذ',rejected:'مرفوض',cancelled:'ملغي',refunded:'مسترجع',active:'فعّال',disconnected:'مفصول'};
+const isAdmin=()=>S.me&&S.me.role==='admin';
+const co=id=>S.companies.find(c=>c.id===id);
+const pk=id=>S.packages.find(p=>p.id===id);
+const ag=id=>S.users.find(u=>u.id===id);
+const agents=()=>S.users.filter(u=>u.role==='agent'&&!u.pending);
+const pendAgents=()=>S.users.filter(u=>u.role==='agent'&&u.pending);
+const catVer=()=>{const x=S.settings.find(y=>y.id==='main');return x&&x.catVer!=null?+x.catVer:0};
+const esimFee=()=>{const x=S.settings.find(y=>y.id==='main');return x&&x.esimFee!=null?+x.esimFee:10};
+// رصيد مسبق الدفع: الشحنات التي يضيفها المدير − الطلبات المنفّذة (لا ديون ولا رصيد سالب)
+const bal=aid=>{let b=0;S.orders.forEach(o=>{if(o.agentId===aid&&o.status==='done')b-=+o.amount||0});S.payments.forEach(p=>{if(p.agentId===aid)b+=p.kind==='debt'?-(+p.amount||0):(+p.amount||0)});return Math.round(b*100)/100};
+const reserved=aid=>S.orders.filter(o=>o.agentId===aid&&o.status==='pending').reduce((t,o)=>t+(+o.suggested||0),0);
+const avail=aid=>Math.round((bal(aid)-reserved(aid))*100)/100;
+const pend=()=>S.orders.filter(o=>o.status==='pending').length;
+const nf=n=>(+n).toLocaleString('en-US');
+const pkInfo=p=>[p.minutes?nf(p.minutes)+' دقيقة':'',p.sms?nf(p.sms)+' SMS':'',p.unlimited?'غير محدود':(p.gb?p.gb+' GB':''),p.days?p.days+' يوم':''].filter(Boolean).join(' • ');
+const pkChips=p=>[p.minutes?'📞 '+nf(p.minutes)+' دقيقة':'',p.sms?'✉️ '+nf(p.sms)+' SMS':'',p.unlimited?'🌐 غير محدود':(p.gb?'🌐 '+nf(p.gb)+' GB':''),p.days?'📅 '+p.days+' يوم':''].filter(Boolean).map(x=>`<i>${x}</i>`).join('');
+/* أنواع الشركات والباقات: اتصالات (كرت / فاتورة) أو ألعاب وتطبيقات */
+const isGame=c=>!!c&&c.kind==='game';
+const pkKind=p=>p.kind||'bill';
+const pkLive=p=>p.active!==false&&!(p.offerEnd&&p.offerEnd<today());
+const byPrice=(a,b)=>(+a.price||0)-(+b.price||0);
+const cardPk=cid=>S.packages.filter(p=>p.companyId===cid&&pkKind(p)==='card'&&pkLive(p)).sort(byPrice);
+const billPk=cid=>S.packages.filter(p=>p.companyId===cid&&pkKind(p)==='bill'&&pkLive(p)).sort(byPrice);
+const gamePk=cid=>S.packages.filter(p=>p.companyId===cid&&pkLive(p));
+const cardCos=()=>S.companies.filter(c=>c.active!==false&&!isGame(c)&&c.card!==false&&(c.free||cardPk(c.id).length));
+const billCos=()=>S.companies.filter(c=>c.active!==false&&!isGame(c)&&c.bill!==false);
+const gameCos=()=>S.companies.filter(c=>c.active!==false&&isGame(c)&&gamePk(c.id).length);
+const r2=n=>Math.round(n*100)/100;
+const colors=['#0f766e','#2563eb','#9333ea','#db2777','#ea580c','#ca8a04','#475569','#059669'];
+const brandOf=c=>{const m=CAT.brand||{};const k=normN((c&&c.name)||'');for(const n in m)if(normN(n)===k)return m[n];return null};
+function logo(c,s=40){
+  if(c&&c.logo)return`<img class="logo" src="${esc(c.logo)}" style="width:${s}px;height:${s}px">`;
+  const bd=brandOf(c);
+  if(bd)return`<div class="logo" translate="no" style="width:${s}px;height:${s}px;background:${bd[0]};color:${bd[2]||'#fff'};font-size:${s*(String(bd[1]).length>2?.28:String(bd[1]).length>1?.36:.5)}px;letter-spacing:-.5px">${esc(bd[1])}</div>`;
+  const n=T((c&&c.name)||'?');let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))%colors.length;
+  return`<div class="logo" style="width:${s}px;height:${s}px;background:${colors[h]};font-size:${s*.45}px">${esc(n[0])}</div>`;
+}
+const pill=s=>`<span class="pill ${s}">${STAT[s]||s}</span>`;
+
+/* ====================== الكتابة ====================== */
+async function W(ops,ok){
+  try{
+    const p=B.write(ops);
+    if(B.name==='demo')await p;else if(p&&p.catch)p.catch(e=>toast(errMsg(e)));
+    if(ok)toast(ok);return true;
+  }catch(e){toast(errMsg(e));return false}
+}
+
+/* ====================== إشعارات ====================== */
+const LN=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
+async function notifInit(){const n=LN();if(!n)return;try{await n.requestPermissions();await n.createChannel({id:'orders',name:'الطلبات',importance:4,vibration:true})}catch(e){}}
+/* إشعارات الهاتف الحقيقية (FCM) — تعمل والتطبيق مغلق عند نشر خادم الإشعارات */
+const PN=()=>window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()&&Capacitor.Plugins&&Capacitor.Plugins.PushNotifications;
+let pnBound=false;
+async function saveToken(tok){
+  if(!tok||!S.me||B.name!=='firebase')return;
+  S.pushToken=tok;
+  try{await B.db.doc('tokens/'+tok).set({uid:S.me.id,platform:'android',updatedAt:Date.now()})}catch(e){}
+}
+async function pushInit(){
+  const n=PN();if(!n||B.name!=='firebase'||!S.me)return;
+  try{
+    if(!pnBound){
+      pnBound=true;
+      n.addListener('registration',t=>saveToken(t&&t.value));
+      n.addListener('registrationError',()=>{});
+      n.addListener('pushNotificationReceived',()=>{});
+    }
+    let st=await n.checkPermissions();
+    if(st.receive!=='granted')st=await n.requestPermissions();
+    if(st.receive==='granted')await n.register();
+  }catch(e){}
+}
+async function pushDrop(){
+  const t=S.pushToken;S.pushToken=null;
+  if(!t||B.name!=='firebase')return;
+  try{await Promise.race([B.db.doc('tokens/'+t).delete(),new Promise(r=>setTimeout(r,2500))])}catch(e){}
+}
+async function notify(t,b){
+  t=T(t);b=T(b);toast(t+(b?' — '+b:''));try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}
+  const n=LN();if(n&&!(S.pushToken&&document.hidden)){try{await n.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title:t,body:b||'',channelId:'orders',schedule:{at:new Date(Date.now()+300),allowWhileIdle:true}}]})}catch(e){}}
+}
+
+/* إشعار العروض الجديدة / المحدَّثة للوكيل */
+function offerCheck(docs){
+  if(!S.me)return;
+  const k='shahn_offseen_'+S.me.id;let seen=0;try{seen=+localStorage.getItem(k)||0}catch(e){}
+  const live=docs.filter(p=>p.isOffer&&pkLive(p)&&p.notifyAt);
+  const mx=Math.max(seen||Date.now(),...docs.map(p=>+p.notifyAt||0));
+  if(seen){const fresh=live.filter(p=>p.notifyAt>seen).sort((a,b)=>b.notifyAt-a.notifyAt);
+    if(fresh.length){const p=fresh[0],c=co(p.companyId);notify('عرض جديد 🎁',(c?c.name+': ':'')+p.name+' — '+money(p.price)+(fresh.length>1?' (+'+(fresh.length-1)+' عروض أخرى)':''))}}
+  try{localStorage.setItem(k,String(mx))}catch(e){}
+}
+/* ====================== بيانات واردة ====================== */
+let rT,errShown=false;
+function onData(col,docs,err){
+  if(err){if(!errShown){errShown=true;toast(errMsg(err))}return}
+  if(col==='me'){
+    if(!docs){doLogout();return}
+    if(docs.active===false&&!docs.pending){doLogout();toast('تم تعطيل هذا الحساب');return}
+    const was=S.me&&S.me.pending;S.me=docs;
+    if(was&&!docs.pending){B.stop();S.known=new Map();S.ordInit=false;S.tab='home';B.start(docs,onData);notify('تم تفعيل حسابك','يمكنك الآن إرسال الطلبات')}
+    clearTimeout(rT);rT=setTimeout(()=>{if(S.me)render()},60);return;
+  }
+  S[col]=docs;
+  if(col==='users'&&isAdmin()){
+    if(S.usersInit)docs.forEach(u=>{if(!S.knownU.has(u.id)&&u.pending)notify('وكيل جديد',(u.name||u.username)+' بانتظار التفعيل')});
+    docs.forEach(u=>S.knownU.set(u.id,1));S.usersInit=true;
+  }
+  if(col==='orders'){
+    if(S.ordInit){
+      docs.forEach(o=>{
+        const old=S.known.get(o.id);
+        if(isAdmin()){if(old===undefined&&o.status==='pending')notify('طلب جديد',(o.agentName||'')+' — '+TYPE[o.type])}
+        else if(old==='pending'&&(o.status==='done'||o.status==='rejected'))notify(o.status==='done'?'تم تنفيذ طلبك':'تم رفض طلبك',TYPE[o.type]+(o.number?' '+o.number:''));
+      });
+    }
+    docs.forEach(o=>S.known.set(o.id,o.status));S.ordInit=true;
+  }
+  if(col==='packages'&&!isAdmin())offerCheck(docs);
+  if(col==='payments'&&!isAdmin()){
+    if(S.payInit)docs.forEach(p=>{if(S.knownP.has(p.id)||p.kind==='debt')return;if(p.kind==='adjust')notify('تم تعديل رصيدك',((+p.amount>0)?'+':'−')+money(Math.abs(p.amount))+(p.note?' — '+p.note:''));else notify('تم شحن رصيدك','+'+money(p.amount))});
+    docs.forEach(p=>S.knownP.set(p.id,1));S.payInit=true;
+  }
+  if(col==='tickets'){
+    if(S.tkInit)docs.forEach(t=>{const old=S.knownT.get(t.id);
+      if(isAdmin()){if(old===undefined&&t.status==='open')notify('رسالة دعم جديدة',(t.agentName||'')+' — '+tkName(t.kind))}
+      else if(old==='open'&&t.status==='resolved')notify('تم حل طلب الدعم',tkName(t.kind)+' '+(t.number||''))});
+    docs.forEach(t=>S.knownT.set(t.id,t.status));S.tkInit=true;
+  }
+  clearTimeout(rT);rT=setTimeout(()=>{if(S.me)render();sheets.forEach(s=>s.refresh&&s.refresh())},60);
+}
+
+/* ====================== الدخول ====================== */
+async function boot(){
+  try{
+    if(window.FIREBASE_CONFIG){
+      const base='';
+      for(const f of['firebase-app-compat.js','firebase-auth-compat.js','firebase-firestore-compat.js'])
+        await new Promise((res,rej)=>{const e=document.createElement('script');e.src=base+f;e.onload=res;e.onerror=()=>rej(new Error('تعذر تحميل '+f));document.head.appendChild(e)});
+      B=FB;
+    }
+    const r=await B.init();S.needsSetup=r.needsSetup;
+    if(r.user)enter(r.user);else{S.greg=r.greg||null;render()}
+  }catch(e){$('#app').innerHTML=`<div class="auth"><div class="card">تعذر تشغيل التطبيق:<br>${esc(errMsg(e))}</div></div>`}
+}
+function enter(p){
+  S.me=p;S.tab=p.role==='admin'?'orders':'home';S.ui.ofilter=p.role==='admin'?'pending':'all';
+  S.known=new Map();S.ordInit=false;S.knownU=new Map();S.usersInit=false;S.knownT=new Map();S.tkInit=false;S.knownP=new Map();S.payInit=false;errShown=false;
+  B.start(p,onData);notifInit();pushInit();render();helpFirst(p);
+}
+async function doLogout(){
+  try{await pushDrop()}catch(e){}
+  try{await B.logout()}catch(e){}
+  Object.assign(S,{me:null,users:[],companies:[],packages:[],lines:[],orders:[],payments:[],tickets:[],settings:[]});
+  while(sheets.length)sheets.pop().remove();
+  S.setup=false;S.reg=false;S.greg=null;render();
+}
+
+/* ====================== العرض ====================== */
+const ADMIN_TABS=[['orders','الطلبات','📥'],['agents','الوكلاء','👥'],['lines','الخطوط','📶'],['acct','المحاسبة','📊'],['catalog','الشركات','🏢'],['more','المزيد','⚙️']];
+const AGENT_TABS=[['home','الرئيسية','🏠'],['orders','طلباتي','🧾'],['lines','خطوطي','📶'],['offers','العروض','🎁'],['account','حسابي','👤']];
+let dirty=false;
+function render(){
+  const app=$('#app');
+  if(!S.me){app.innerHTML=S.greg?viewGReg():S.reg?viewRegister():S.setup?viewSetup():viewLogin();return}
+  if(S.me.pending){app.innerHTML=viewPending();return}
+  const ae=document.activeElement;
+  if(ae&&ae.matches&&ae.matches('#app input,#app textarea')){dirty=true;return}
+  dirty=false;
+  const y=window.scrollY,tabs=isAdmin()?ADMIN_TABS:AGENT_TABS;
+  const v=VIEWS[S.tab]||VIEWS.orders;
+  const online=B.name==='demo'?'<span class="dot off"></span>تجريبي':(navigator.onLine?'<span class="dot"></span>متصل':'<span class="dot off"></span>بدون إنترنت');
+  app.innerHTML=`<header><h1>${esc((tabs.find(t=>t[0]===S.tab)||[])[1]||APP.name)}</h1>${isAdmin()?'':'<button class="hb" data-act="help" aria-label="تعليمات">❓</button><button class="hb" data-act="support" aria-label="واتساب الدعم">💬</button>'}<div class="who">${online}<br>${esc(S.me.name||S.me.username)}</div></header>
+  <main>${B.name==='demo'?'<div class="demo">⚠️ وضع تجريبي: البيانات محفوظة على هذا الجهاز فقط ولا تُشارك بين الأجهزة.</div>':''}${v()}</main>
+  <nav>${tabs.map(t=>`<button data-act="tab" data-t="${t[0]}" class="${S.tab===t[0]?'on':''}"><span>${t[2]}</span>${t[1]}${(()=>{const n=!isAdmin()?0:t[0]==='orders'?pend()+openTk():t[0]==='agents'?pendAgents().length:0;return n?`<i class="bd">${n}</i>`:''})()}</button>`).join('')}</nav>`;
+  window.scrollTo(0,y);
+}
+window.addEventListener('online',()=>S.me&&render());window.addEventListener('offline',()=>S.me&&render());
+document.addEventListener('focusout',()=>setTimeout(()=>{if(dirty&&S.me)render()},120));
+
+function viewLogin(){
+  return`<div class="auth"><div class="brand"><div data-act="brandTap">⚡</div><h2>${esc(APP.name)}</h2><div class="sub">تسجيل دخول المدير / الوكيل</div></div>
+  ${B.name==='demo'?'<div class="demo">وضع تجريبي (لم يتم ربط قاعدة بيانات Firebase بعد)</div>':''}
+  <div class="card">${F.text('u','اسم المستخدم','',{autocapitalize:'none',autocomplete:'username',dir:'ltr'})}${F.pass('p','كلمة المرور',{dir:'ltr'})}
+  <div class="err" id="err"></div><button class="btn" data-act="login">دخول</button>
+  <div class="ordiv">أو للوكلاء</div><button class="btn g" data-act="gLogin">🔑 الدخول بحساب Google</button></div>
+  <button class="btn s" data-act="showReg">إنشاء حساب وكيل جديد</button><div style="margin-top:14px">${langSw()}</div></div>`;
+}
+function viewRegister(){
+  return`<div class="auth"><div class="brand"><div>🧑‍💼</div><h2>إنشاء حساب وكيل</h2><div class="sub">بعد الإنشاء تواصل مع الدعم الفني على واتساب لتفعيل حسابك وشحن رصيدك</div></div>
+  <div class="card"><button class="btn g" style="margin-top:0" data-act="gLogin">🔑 التسجيل السريع بحساب Google</button><div class="ordiv">أو باسم مستخدم وكلمة مرور</div>${F.text('n','الاسم الكامل','')}${F.text('u','اسم المستخدم (إنجليزي: حروف وأرقام)','',{autocapitalize:'none',dir:'ltr'})}${F.pass('p','كلمة المرور (6 أحرف على الأقل)',{dir:'ltr'})}${F.pass('p2','تأكيد كلمة المرور',{dir:'ltr'})}
+  ${F.text('ph','رقم التواصل','',{inputmode:'tel',dir:'ltr'})}${F.text('wa','رقم الواتساب','',{inputmode:'tel',dir:'ltr'})}
+  <div class="err" id="err"></div><button class="btn" data-act="regGo">إنشاء الحساب</button></div>
+  <button class="link" data-act="showLogin">لدي حساب — تسجيل الدخول</button></div>`;
+}
+function viewGReg(){
+  const g=S.greg||{};
+  return`<div class="auth"><div class="brand"><div>🧑‍💼</div><h2>أكمل إنشاء حساب الوكيل</h2><div class="sub">تم الدخول بحساب Google: <span class="num">${esc(g.email||'')}</span><br>أدخل رقم التواصل ورقم الواتساب، ثم تواصل مع الدعم لتفعيل حسابك وشحن رصيدك.</div></div>
+  <div class="card">${F.text('n','الاسم الكامل',g.name||'')}${F.text('ph','رقم التواصل','',{inputmode:'tel',dir:'ltr'})}${F.text('wa','رقم الواتساب','',{inputmode:'tel',dir:'ltr'})}
+  <div class="err" id="err"></div><button class="btn" data-act="gRegGo">إنشاء الحساب</button></div>
+  <button class="link" data-act="gCancel">إلغاء واستخدام حساب آخر</button></div>`;
+}
+function viewPending(){
+  return`<div class="auth"><div class="brand"><div>⏳</div><h2>حسابك بانتظار التفعيل</h2><div class="sub">تم إنشاء الحساب (${esc(S.me.username)}). تواصل مع الدعم الفني على واتساب ليتم تفعيل حسابك وشحن رصيدك، وسيفتح التطبيق تلقائياً بعد التفعيل.</div></div>
+  <div class="card"><button class="btn wa" data-act="support">💬 التواصل مع الدعم عبر واتساب</button><div class="sub" style="text-align:center;margin-top:8px"><span class="num">+972 56-772-5080</span></div></div>
+  <button class="link" data-act="logout">تسجيل الخروج</button></div>`;
+}
+function viewSetup(){
+  return`<div class="auth"><div class="brand"><div>👑</div><h2>إعداد حساب المدير</h2><div class="sub">لمالك التطبيق فقط — يُنفَّذ مرة واحدة ثم يُقفل</div></div>
+  <div class="card">${F.text('n','الاسم','Moataz')}${F.text('u','اسم المستخدم',ADMIN_USER,{readonly:'readonly',dir:'ltr'})}${F.pass('p','كلمة المرور (6 أحرف على الأقل)',{dir:'ltr'})}${F.pass('p2','تأكيد كلمة المرور',{dir:'ltr'})}
+  <div class="err" id="err"></div><button class="btn" data-act="setupGo">إنشاء حساب المدير</button></div>
+  <button class="link" data-act="showLogin">رجوع</button></div>`;
+}
+/* ---- الطلبات ---- */
+function orderCard(o,adm){
+  const c=co(o.companyId);const amt=o.status==='done'?o.amount:(o.suggested!=null?o.suggested:o.reqAmount);
+  return`<div class="card" data-act="orderOpen" data-id="${o.id}"><div class="row">${logo(c,42)}<div class="grow"><b>${TYPE[o.type]||o.type}</b>${o.no?' <span class="sub num">#'+o.no+'</span>':''}
+  <div class="sub">${esc(c?c.name:'—')}${o.number?' • <span class="num">'+esc(o.number)+'</span>':o.account?' • <span class="num">'+esc(o.account)+'</span>':''}</div>
+  ${adm?`<div class="sub">👤 ${esc(o.agentName||'')}</div>`:''}${adm&&o.status==='pending'&&bal(o.agentId)<(+o.suggested||0)?'<div class="sub neg">⚠️ رصيد الوكيل غير كافٍ</div>':''}</div>
+  <div class="end"><b>${money(amt)}</b>${pill(o.status)}</div></div>
+  <div class="sub t">${fmt(o.createdAt)}${o.customerName?' • '+esc(o.customerName):''}</div></div>`;
+}
+function viewOrders(){
+  const f=S.ui.ofilter,adm=isAdmin();
+  const tg=`<div class="chips">${[['orders','الطلبات'],['support','رسائل الدعم ('+openTk()+')']].map(c=>`<button class="chip ${(S.ui.otab||'orders')===c[0]?'on':''}" data-act="set" data-k="otab" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>`;
+  if(S.ui.otab==='support')return tg+viewTickets();
+  const cnt=s=>S.orders.filter(o=>o.status===s).length;
+  const chips=[['pending','قيد الانتظار ('+cnt('pending')+')'],['done','منفّذة'],['rejected','مرفوضة'],['all','الكل']];
+  let l=S.orders.filter(o=>f==='all'||o.status===f||(f==='rejected'&&(o.status==='cancelled'||o.status==='refunded')));
+  l.sort((a,b)=>b.createdAt-a.createdAt);
+  return`${tg}<div class="chips">${chips.map(c=>`<button class="chip ${f===c[0]?'on':''}" data-act="set" data-k="ofilter" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
+  ${l.length?l.map(o=>orderCard(o,adm)).join(''):'<div class="empty">لا توجد طلبات</div>'}`;
+}
+/* ---- رئيسية الوكيل ---- */
+function homeSearch(){
+  const raw=(S.ui.hq||'').trim();if(!raw)return'';
+  const isNum=/^[\d\s+\-()٠-٩۰-۹]+$/.test(raw);let q=digits(raw);if(q.startsWith('972'))q='0'+q.slice(3);
+  const qt=raw.toLowerCase();
+  const l=S.lines.filter(x=>isNum?((x.number||'').includes(q)||(x.sim||'').includes(q)):((x.customerName||'').toLowerCase().includes(qt)||(x.number||'').includes(q)&&q.length>=3)).sort((a,b)=>(a.number||'').localeCompare(b.number||'')).slice(0,30);
+  return l.length?`<div class="sub" style="margin-bottom:6px">${l.length} نتيجة</div>`+l.map(lineCard).join(''):'<div class="empty" style="padding:14px">لا توجد نتائج ضمن خطوطك.</div>';
+}
+function homeOffers(){
+  const l=S.packages.filter(p=>p.isOffer&&pkLive(p)&&(!co(p.companyId)||co(p.companyId).active!==false));
+  if(!l.length)return'';
+  return`<h3>🎁 المعروضات <button class="link" style="width:auto;display:inline;padding:0 8px" data-act="tab" data-t="offers">عرض الكل</button></h3><div class="ostrip">${l.slice(0,10).map(p=>`<div class="oc" data-act="pkOrder" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc((co(p.companyId)||{}).name||'')}</div><b class="pr">${money(p.price)}</b></div>`).join('')}</div>`;
+}
+function viewHome(){
+  const b=bal(S.me.id),act=S.lines.filter(l=>l.status==='active').length,dis=S.lines.length-act;
+  const res=reserved(S.me.id);
+  const recent=[...S.orders].sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
+  return`<div class="bal ${b>0?'ok':'low'}"><small>رصيدك المتاح</small><b>${money(b)}</b>${res?`<small>محجوز لطلبات قيد الانتظار: ${money(res)}</small>`:''}</div>${b<=0?'<div class="demo">رصيدك صفر — لا يمكنك إرسال طلبات. تواصل مع الدعم الفني لشحن رصيدك.</div>':''}
+  <div class="big"><button data-act="newOrder" data-t="card"><span>💳</span>شحن رصيد كرت</button><button data-act="newOrder" data-t="activate"><span>📲</span>تفعيل فاتورة</button><button data-act="newOrder" data-t="game"><span>🎮</span>شحن ألعاب وتطبيقات</button></div>
+  <input class="search" id="hq" placeholder="ادخل الرقم أو الاسم أو رقم الشريحة" value="${esc(S.ui.hq||'')}" inputmode="search" autocomplete="off">
+  <div id="hlist">${homeSearch()}</div>
+  ${homeOffers()}
+  <div class="stats" style="margin-top:12px"><div><b>${act}</b><small>خطوط فعّالة</small></div><div><b>${dis}</b><small>خطوط مفصولة</small></div><div><b>${pend()}</b><small>طلبات معلّقة</small></div></div>
+  <button class="btn s" data-act="help">📘 كيف أستخدم التطبيق؟ (تعليمات الشحن)</button>
+  <button class="btn" data-act="tkNew">🛠️ رسالة للدعم الفني</button>
+  <button class="btn wa" data-act="support">💬 الدعم الفني على واتساب</button>
+  <h3>آخر الطلبات</h3>${recent.length?recent.map(o=>orderCard(o,false)).join(''):'<div class="empty">لا توجد طلبات بعد</div>'}`;
+}
+/* ---- الخطوط ---- */
+function linesFiltered(){
+  const q=digits(S.ui.q),qt=(S.ui.q||'').trim().toLowerCase(),now=Date.now();
+  return S.lines.filter(l=>{
+    if(S.ui.lst==='soon'){if(!(l.status==='active'&&l.expiresAt&&l.expiresAt-now<=6048e5))return false}
+    else if(S.ui.lst!=='all'&&l.status!==S.ui.lst)return false;
+    if(isAdmin()){if(S.ui.fag&&l.agentId!==S.ui.fag)return false;if(S.ui.fco&&l.companyId!==S.ui.fco)return false}
+    if(!qt)return true;
+    return(q&&((l.number||'').includes(q)||(l.sim||'').includes(q)))||(l.customerName||'').toLowerCase().includes(qt);
+  }).sort((a,b)=>(a.number||'').localeCompare(b.number||''));
+}
+const fmtD=t=>{const d=new Date(t);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()};
+function expLine(l){
+  if(!l.expiresAt)return'';
+  const d=Math.ceil((l.expiresAt-Date.now())/864e5);
+  return`<div class="sub ${d<0?'neg':d<=7?'or':''}">ينتهي ${fmtD(l.expiresAt)} (${d<0?'منتهٍ':'بعد '+d+' يوم'})</div>`;
+}
+function lineCard(l){
+  const c=co(l.companyId),p=pk(l.packageId),a=isAdmin()?ag(l.agentId):null;
+  return`<div class="card" data-act="lineOpen" data-id="${l.id}"><div class="row">${logo(c,40)}<div class="grow"><b class="num">${esc(l.number)}</b>${l.esim?' <span class="pill active">eSIM</span>':''}
+  <div class="sub">${esc(l.customerName||'بدون اسم')} • ${esc(c?c.name:'')}${p?' • '+esc(p.name):''}</div>${l.sim?`<div class="sub">SIM: <span class="num">${esc(l.sim)}</span></div>`:''}${expLine(l)}${a?`<div class="sub">👤 ${esc(a.name||a.username)}</div>`:''}</div>${pill(l.status)}</div></div>`;
+}
+const linesList=()=>{const l=linesFiltered();return l.length?l.map(lineCard).join(''):'<div class="empty">لا توجد خطوط</div>'};
+function viewLines(){
+  const adm=isAdmin(),now=Date.now();
+  const cnt=s=>S.lines.filter(l=>l.status===s).length;
+  const soon=S.lines.filter(l=>l.status==='active'&&l.expiresAt&&l.expiresAt-now<=6048e5).length;
+  return`<input class="search" id="q" placeholder="بحث بالرقم أو الشريحة أو اسم الزبون" value="${esc(S.ui.q)}" inputmode="search">
+  <div class="chips">${[['active','فعّالة ('+cnt('active')+')'],['disconnected','مفصولة ('+cnt('disconnected')+')'],['soon','تنتهي قريباً ('+soon+')'],['all','الكل']].map(c=>`<button class="chip ${S.ui.lst===c[0]?'on':''}" data-act="set" data-k="lst" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
+  ${adm?`<div class="btns"><label class="f" style="flex:1;margin:0 0 8px"><select data-sel="fag"><option value="">كل الوكلاء</option>${agents().map(a=>`<option value="${a.id}"${S.ui.fag===a.id?' selected':''}>${esc(a.name||a.username)}</option>`).join('')}</select></label>
+  <label class="f" style="flex:1;margin:0 0 8px"><select data-sel="fco"><option value="">كل الشركات</option>${S.companies.map(c=>`<option value="${c.id}"${S.ui.fco===c.id?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label></div>`:''}
+  <div id="llist">${linesList()}</div>${adm?'<button class="fab" data-act="lineNew">＋</button>':''}`;
+}
+/* ---- الوكلاء ---- */
+function viewAgents(){
+  const ls=agents(),pa=pendAgents();const tot=ls.reduce((s,a)=>s+bal(a.id),0);
+  const pendHTML=pa.length?`<h3 style="margin-top:0">⏳ بانتظار التفعيل (${pa.length})</h3>`+pa.map(a=>`<div class="card offer" data-act="agentOpen" data-id="${a.id}"><div class="row"><div class="logo" style="width:42px;height:42px;background:var(--or)">${esc((a.name||a.username)[0])}</div>
+    <div class="grow"><b>${esc(a.name||a.username)}</b><div class="sub">@${esc(a.username)} • <span class="num">${esc(a.whatsapp||a.phone||'')}</span></div></div><span class="pill pending">جديد</span></div></div>`).join(''):'';
+  return`${pendHTML}<div class="bal"><small>إجمالي أرصدة الوكلاء</small><b>${money(tot)}</b></div>
+  ${ls.length?ls.map(a=>{const b=bal(a.id);const n=S.lines.filter(l=>l.agentId===a.id&&l.status==='active').length;
+    return`<div class="card" data-act="agentOpen" data-id="${a.id}"><div class="row"><div class="logo" style="width:42px;height:42px;background:var(--p)">${esc((a.name||a.username)[0])}</div>
+    <div class="grow"><b>${esc(a.name||a.username)}</b>${a.active===false?' <span class="pill disconnected">معطّل</span>':''}<div class="sub">@${esc(a.username)} • ${n} خط فعّال</div></div>
+    <div class="end"><b class="${b>0?'pos':'neg'}">${money(b)}</b><span class="sub">الرصيد</span></div></div></div>`}).join(''):'<div class="empty">لا يوجد وكلاء مفعّلون بعد.</div>'}
+  <button class="fab" data-act="agentNew">＋</button>`;
+}
+/* ---- الشركات والباقات ---- */
+function pkCard(p,adm){
+  const c=co(p.companyId);const exp=p.offerEnd&&p.offerEnd<today();
+  const kl=isGame(c)?'ألعاب وتطبيقات':pkKind(p)==='card'?'كرت':'فاتورة';
+  return`<div class="card ${p.isOffer?'offer':''}" ${adm?`data-act="pkEdit" data-id="${p.id}"`:`data-act="pkOrder" data-id="${p.id}"`}><div class="row">${logo(c,40)}<div class="grow"><b>${esc(p.name)}</b>${p.isOffer?' 🎁':''}${p.active===false?' <span class="pill disconnected">موقوفة</span>':''}${exp?' <span class="pill disconnected">منتهي</span>':''}
+  <div class="sub">${esc(c?c.name:'')} • ${kl}${pkInfo(p)?' • '+pkInfo(p):''}</div>${p.desc&&adm?`<div class="sub" translate="no">${esc(p.desc.length>90?p.desc.slice(0,90)+'…':p.desc)}</div>`:''}${p.offerEnd?`<div class="sub">ينتهي العرض: ${esc(p.offerEnd)}</div>`:''}</div>
+  <div class="end"><b>${money(p.price)}</b></div></div>${!adm&&p.desc?`<details class="pkd"><summary>التفاصيل</summary><span translate="no">${esc(p.desc)}</span></details>`:''}</div>`;
+}
+function viewCatalog(){
+  const t=S.ui.cat;
+  let body='';
+  if(t==='companies'){
+    body=S.companies.length?S.companies.map(c=>{
+      const fl=isGame(c)?'🎮 ألعاب وتطبيقات':[c.card!==false?'كروت':'',c.bill!==false?'فواتير':'',c.free?'مبلغ حر':''].filter(Boolean).join(' • ')+(+c.commission?' • عمولة '+(+c.commission)+'%':'');
+      return`<div class="card" data-act="coEdit" data-id="${c.id}"><div class="row">${logo(c,46)}<div class="grow"><b>${esc(c.name)}</b>${c.active===false?' <span class="pill disconnected">موقوفة</span>':''}
+      <div class="sub">${S.packages.filter(p=>p.companyId===c.id).length} باقة • ${fl}</div></div></div></div>`}).join('')
+    :'<div class="empty">لا توجد شركات.</div>';
+  }else{
+    const ok=p=>{const c=co(p.companyId);return t==='offers'?p.isOffer:t==='games'?isGame(c):t==='cards'?(!isGame(c)&&pkKind(p)==='card'):(!isGame(c)&&pkKind(p)==='bill')};
+    const l=S.packages.filter(ok).sort((a,b)=>(a.companyId||'').localeCompare(b.companyId||''));
+    body=l.length?l.map(p=>pkCard(p,true)).join(''):'<div class="empty">لا توجد عناصر</div>';
+  }
+  const kind=t==='cards'?'card':t==='games'?'game':'bill';
+  return`<div class="chips">${[['companies','الشركات'],['packages','باقات الفواتير'],['cards','باقات الكروت'],['games','ألعاب وتطبيقات'],['offers','العروض']].map(c=>`<button class="chip ${t===c[0]?'on':''}" data-act="set" data-k="cat" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>${t==='companies'?(catVer()!==CAT.ver?'<div class="demo">🆕 يتوفر تحديث للكتالوج (باقات وأسعار جديدة). اضغط الزر أدناه لإضافة الناقص فقط.</div>':'')+'<button class="btn s" data-act="coDefaults">＋ إضافة / تحديث الشركات والباقات الافتراضية</button>'+(S.companies.length?'<button class="btn s" data-act="addBillDef">＋ إضافة باقات الفاتورة الافتراضية (500 جيجا و150 جيجا) لكل الشركات</button>':''):''}${body}
+  <button class="fab" data-act="${t==='companies'?'coNew':'pkNew'}" data-offer="${t==='offers'?1:''}" data-kind="${kind}">＋</button>`;
+}
+function viewOffers(){
+  const t=S.ui.off;const td=today();
+  let l=S.packages.filter(p=>p.active!==false&&(!co(p.companyId)||co(p.companyId).active!==false));
+  l=t==='offers'?l.filter(p=>p.isOffer&&!(p.offerEnd&&p.offerEnd<td)):l;
+  if(S.ui.ofc)l=l.filter(p=>p.companyId===S.ui.ofc);
+  return`<div class="chips">${[['offers','🎁 العروض'],['all','كل الباقات']].map(c=>`<button class="chip ${t===c[0]?'on':''}" data-act="set" data-k="off" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
+  <div class="chips"><button class="chip ${!S.ui.ofc?'on':''}" data-act="set" data-k="ofc" data-v="">كل الشركات</button>${S.companies.filter(c=>c.active!==false).map(c=>`<button class="chip ${S.ui.ofc===c.id?'on':''}" data-act="set" data-k="ofc" data-v="${c.id}">${esc(c.name)}</button>`).join('')}</div>
+  ${l.length?l.map(p=>pkCard(p,false)).join(''):'<div class="empty">لا توجد عروض حالياً</div>'}`;
+}
+/* ---- حسابي / المزيد ---- */
+function statement(aid){
+  const rows=[];
+  S.orders.filter(o=>o.agentId===aid&&o.status==='done').forEach(o=>rows.push({t:o.doneAt||o.createdAt,d:-(+o.amount||0),txt:(TYPE[o.type]||'')+' — '+((co(o.companyId)||{}).name||'')+(o.number?' '+o.number:'')}));
+  S.payments.filter(p=>p.agentId===aid).forEach(p=>rows.push({t:p.createdAt,d:p.kind==='debt'?-(+p.amount||0):(+p.amount||0),txt:(p.kind==='debt'?'خصم / تسوية':p.kind==='adjust'?'تصحيح رصيد':'شحن رصيد')+(p.note?' — '+p.note:'')}));
+  rows.sort((a,b)=>a.t-b.t);let r=0;rows.forEach(x=>{r+=x.d;x.bal=r});return rows.reverse();
+}
+const stmtHTML=aid=>{const s=statement(aid);return s.length?s.map(x=>`<div class="kv"><span>${fmt(x.t)}<br><small>${esc(x.txt)}</small></span><span style="text-align:end"><b class="${x.d>0?'pos':'neg'}">${x.d>0?'+':'−'}${money(Math.abs(x.d))}</b><br><small>الرصيد ${money(x.bal)}</small></span></div>`).join(''):'<div class="empty">لا توجد حركات</div>'};
+/* ---- المحاسبة التلقائية ---- */
+function perFrom(){
+  const p=S.ui.per||'month',d=new Date();d.setHours(0,0,0,0);
+  if(p==='today')return d.getTime();
+  if(p==='week'){d.setDate(d.getDate()-6);return d.getTime()}
+  if(p==='month'){d.setDate(1);return d.getTime()}
+  return 0;
+}
+function acct(aid){
+  const from=perFrom();const r={act:{n:0,s:0},card:{n:0,s:0},bill:{n:0,s:0},game:{n:0,s:0},adj:0,esim:{n:0,s:0},pay:0,debt:0,total:0,co:{}};
+  S.orders.forEach(o=>{
+    if(o.status!=='done'||(aid&&o.agentId!==aid))return;
+    const t=o.doneAt||o.createdAt;if(t<from)return;
+    const k=o.type.startsWith('activate')?'act':o.type;if(!r[k])return;
+    const a=+o.amount||0;r[k].n++;r[k].s+=a;r.total+=a;if(k==='act'&&o.esim){r.esim.n++;r.esim.s+=+o.esimFee||0}
+    const cn=(co(o.companyId)||{}).name||'—';r.co[cn]=(r.co[cn]||0)+a;
+  });
+  S.payments.forEach(p=>{
+    if((aid&&p.agentId!==aid)||p.createdAt<from)return;
+    if(p.kind==='debt')r.debt+=+p.amount||0;else if(p.kind==='adjust')r.adj+=+p.amount||0;else r.pay+=+p.amount||0;
+  });
+  return r;
+}
+function acctHTML(aid){
+  const r=acct(aid),per=S.ui.per||'month';
+  const chips=[['today','اليوم'],['week','7 أيام'],['month','هذا الشهر'],['all','الكل']].map(c=>`<button class="chip ${per===c[0]?'on':''}" data-act="set" data-k="per" data-v="${c[0]}">${c[1]}</button>`).join('');
+  const kv=(l,v,c)=>`<div class="kv"><span>${l}</span><b class="${c||''}">${v}</b></div>`;
+  const cos=Object.entries(r.co).sort((a,b)=>b[1]-a[1]);
+  const cur=aid?bal(aid):agents().reduce((s,a)=>s+bal(a.id),0);
+  return`<div class="chips">${chips}</div><div class="card">
+  ${kv('التفعيلات ('+r.act.n+')',money(r.act.s))}${kv('شحن الكروت ('+r.card.n+')',money(r.card.s))}${r.bill.n?kv('شحن الفواتير ('+r.bill.n+')',money(r.bill.s)):''}${kv('ألعاب وتطبيقات ('+r.game.n+')',money(r.game.s))}${r.esim.n?kv('منها رسوم eSIM ('+r.esim.n+')',money(r.esim.s)):''}
+  ${kv('إجمالي المصروف',money(r.total))}${kv('رصيد أُضيف في الفترة',money(r.pay),'pos')}${r.adj?kv('تصحيحات الرصيد',(r.adj>0?'+':'−')+money(Math.abs(r.adj)),r.adj>0?'pos':'neg'):''}
+  ${kv(aid?'الرصيد الحالي':'إجمالي أرصدة الوكلاء الآن',money(cur),cur>0?'pos':'neg')}</div>
+  ${cos.length?'<div class="card"><b>حسب الشركة</b>'+cos.map(c=>kv(esc(c[0]),money(c[1]))).join('')+'</div>':''}`;
+}
+function viewAcct(){
+  return`<div class="sub" style="margin-bottom:6px">تُحسب الأرقام تلقائياً من كل طلب تنفّذه ومن شحنات الرصيد التي تضيفها.</div>${acctHTML(null)}
+  <h3>حسب الوكيل</h3>${agents().map(a=>{const x=acct(a.id),b=bal(a.id);
+    return`<div class="card" data-act="agentOpen" data-id="${a.id}"><div class="row"><div class="grow"><b>${esc(a.name||a.username)}</b><div class="sub">${x.act.n} تفعيل • ${x.card.n} كرت • ${x.game.n} ألعاب</div></div>
+    <div class="end"><b>${money(x.total)}</b><span class="sub ${b>0?'':'neg'}">الرصيد ${money(b)}</span></div></div></div>`}).join('')||'<div class="empty">لا يوجد وكلاء</div>'}`;
+}
+function viewAccount(){
+  const b=bal(S.me.id);
+  return`<div class="bal ${b>0?'ok':'low'}"><small>رصيدك المتاح</small><b>${money(b)}</b></div>
+  <div class="card"><div class="kv"><span>الاسم</span><b>${esc(S.me.name||'')}</b></div><div class="kv"><span>${S.me.provider==='google'?'حساب Google':'اسم المستخدم'}</span><b class="num">${esc(S.me.username)}</b></div></div>
+  <h3>محاسبتي التلقائية</h3>${acctHTML(S.me.id)}
+  <h3>كشف الحساب</h3><div class="card">${stmtHTML(S.me.id)}</div>
+  <button class="btn s" data-act="help">📘 تعليمات استخدام التطبيق</button>
+  <button class="btn wa" data-act="support">💬 الدعم الفني على واتساب</button>
+  <div class="sub" style="text-align:center;margin-top:8px" translate="no">${esc(LANG==='en'?APP.nameEn:APP.name)} • v${esc(APP.version)}</div>
+  <h3>🌐 اللغة</h3>${langSw()}
+  ${S.me.provider==='google'?'':'<button class="btn w" data-act="chpass">تغيير كلمة المرور</button>'}<button class="btn d" data-act="logout">تسجيل الخروج</button>`;
+}
+function viewMore(){
+  const empty=agents().filter(a=>bal(a.id)<=0).length;
+  return`<div class="card"><div class="kv"><span>المدير</span><b>${esc(S.me.name||'')}</b></div><div class="kv"><span>اسم المستخدم</span><b class="num">${esc(S.me.username)}</b></div>
+  <div class="kv"><span>عدد الوكلاء</span><b>${agents().length}</b></div><div class="kv"><span>وكلاء رصيدهم صفر</span><b>${empty}</b></div>
+  <div class="kv"><span>إجمالي الخطوط</span><b>${S.lines.length}</b></div><div class="kv"><span>وضع التخزين</span><b>${B.name==='demo'?'تجريبي (محلي)':'Firebase (سحابي)'}</b></div></div>
+  <button class="btn w" data-act="esimFee">رسوم تفعيل eSIM: ${money(esimFee())} — تعديل</button>
+  <h3>🌐 اللغة</h3>${langSw()}
+  <button class="btn w" data-act="chpass">تغيير كلمة المرور</button>
+  ${B.name==='demo'?'<button class="btn w" data-act="demoReset">مسح بيانات التجربة</button>':''}
+  <button class="btn d" data-act="logout">تسجيل الخروج</button>`;
+}
+const VIEWS={orders:viewOrders,home:viewHome,lines:viewLines,agents:viewAgents,catalog:viewCatalog,offers:viewOffers,account:viewAccount,acct:viewAcct,more:viewMore};
+
+/* ====================== الإجراءات ====================== */
+const ACT={
+  tab:(d)=>{S.tab=d.t;S.ui.q='';S.ui.hq='';render();window.scrollTo(0,0)},
+  set:(d)=>{S.ui[d.k]=d.v;render();sheets.forEach(s=>s.refresh&&s.refresh())},
+  showSetup:()=>{S.setup=true;render()},showLogin:()=>{S.setup=false;S.reg=false;render()},showReg:()=>{S.reg=true;render()},
+  brandTap:()=>{S.taps=(S.taps||0)+1;clearTimeout(S.tapT);S.tapT=setTimeout(()=>{S.taps=0},2500);if(S.taps>=7&&S.needsSetup!==false){S.taps=0;S.setup=true;render()}},
+  lang:(d)=>{try{localStorage.setItem('shahn_lang',d.v)}catch(e){}location.reload()},
+  support:()=>openWA(S.me&&S.me.pending?regMsg(S.me):supMsg()),
+  tkNew:()=>tkForm(),tkOpen:(d)=>tkSheet(d.id),esimFee:()=>esimFeeForm(),
+  async regGo(){
+    const n=$('[name=n]').value.trim(),u=$('[name=u]').value.trim().toLowerCase(),p=$('[name=p]').value,p2=$('[name=p2]').value,ph=digits($('[name=ph]').value),wa=digits($('[name=wa]').value),er=$('#err');
+    if(!n)return er.textContent='أدخل الاسم';
+    if(!okUser(u))return er.textContent='اسم المستخدم: 3-30 حرفاً إنجليزياً أو أرقاماً';
+    if(u===ADMIN_USER)return er.textContent='اسم المستخدم محجوز';
+    if(p.length<6)return er.textContent='كلمة المرور 6 أحرف على الأقل';
+    if(p!==p2)return er.textContent='كلمتا المرور غير متطابقتين';
+    if(ph.length<9)return er.textContent='أدخل رقم التواصل';
+    if(wa.length<9)return er.textContent='أدخل رقم الواتساب';
+    er.textContent='جارٍ إنشاء الحساب…';
+    try{const pr=await B.registerAgent(u,p,{name:n,phone:ph,whatsapp:wa});S.reg=false;enter(pr);openWA(regMsg(pr))}catch(e){er.textContent=errMsg(e)}
+  },
+  async gLogin(){
+    const er=$('#err');if(er)er.textContent='جارٍ الدخول بحساب Google…';
+    try{const r=await B.loginGoogle();if(er)er.textContent='';
+      if(r.greg){S.greg=r.greg;S.reg=false;S.setup=false;render()}else{S.reg=false;enter(r.user)}}
+    catch(e){if(er)er.textContent=errMsg(e);else toast(errMsg(e))}
+  },
+  async gRegGo(){
+    const n=$('[name=n]').value.trim(),ph=digits($('[name=ph]').value),wa=digits($('[name=wa]').value),er=$('#err');
+    if(!n)return er.textContent='أدخل الاسم';
+    if(ph.length<9)return er.textContent='أدخل رقم التواصل';
+    if(wa.length<9)return er.textContent='أدخل رقم الواتساب';
+    er.textContent='جارٍ إنشاء الحساب…';
+    try{const pr=await B.completeGoogle({name:n,phone:ph,whatsapp:wa});S.greg=null;enter(pr);openWA(regMsg(pr))}catch(e){er.textContent=errMsg(e)}
+  },
+  async gCancel(){S.greg=null;try{await B.logout()}catch(e){}render()},
+  async login(){
+    const u=$('[name=u]').value.trim().toLowerCase(),p=$('[name=p]').value,er=$('#err');
+    if(!u||!p){er.textContent='أدخل اسم المستخدم وكلمة المرور';return}
+    er.textContent='جارٍ الدخول…';
+    try{enter(await B.login(u,p))}catch(e){er.textContent=errMsg(e)}
+  },
+  async setupGo(){
+    const n=$('[name=n]').value.trim(),u=$('[name=u]').value.trim().toLowerCase(),p=$('[name=p]').value,p2=$('[name=p2]').value,er=$('#err');
+    if(!n)return er.textContent='أدخل الاسم';
+    if(u!==ADMIN_USER)return er.textContent='غير مسموح';
+    if(p.length<6)return er.textContent='كلمة المرور 6 أحرف على الأقل';
+    if(p!==p2)return er.textContent='كلمتا المرور غير متطابقتين';
+    er.textContent='جارٍ الإنشاء…';
+    try{const pr=await B.setupAdmin(u,p,n);S.needsSetup=false;S.setup=false;enter(pr)}catch(e){er.textContent=errMsg(e)}
+  },
+  logout:async()=>{if(await confirmBox('تسجيل الخروج؟','خروج'))doLogout()},
+  demoReset:async()=>{if(await confirmBox('سيتم مسح كل بيانات التجربة.','مسح',true))Local.reset()},
+  chpass:()=>{
+    const el=sheet('تغيير كلمة المرور',F.pass('o','كلمة المرور الحالية')+F.pass('n','الجديدة (6 أحرف على الأقل)')+F.pass('n2','تأكيد الجديدة')+'<div class="err" id="e2"></div><button class="btn" data-go>حفظ</button>');
+    $('[data-go]',el).onclick=async()=>{
+      const o=V(el,'o'),n=V(el,'n'),er=$('#e2',el);
+      if(n.length<6)return er.textContent='كلمة المرور 6 أحرف على الأقل';
+      if(n!==V(el,'n2'))return er.textContent='غير متطابقتين';
+      try{await B.changePassword(o,n);closeSheet(el);toast('تم تغيير كلمة المرور')}catch(e){er.textContent=errMsg(e)}
+    };
+  },
+  newOrder:(d)=>d.t==='activate'?billFlow():shopFlow(d.t),
+  pkOrder:(d)=>{const p=pk(d.id);if(!p)return;const c=co(p.companyId);if(!c)return;
+    if(isGame(c))shopOrder('game',c,p,{});else if(pkKind(p)==='card')shopOrder('card',c,p,{});else billForm('new',{companyId:c.id,packageId:p.id})},
+  orderOpen:(d)=>orderSheet(d.id),
+  agentNew:()=>agentForm(),agentOpen:(d)=>agentSheet(d.id),
+  lineOpen:(d)=>lineSheet(d.id),lineNew:()=>lineForm(),
+  coNew:()=>coForm(),coEdit:(d)=>coForm(d.id),
+  pkNew:(d,el)=>pkForm(null,!!el.dataset.offer,el.dataset.kind),pkEdit:(d)=>pkForm(d.id),
+  async coDefaults(){
+    const ops=seedOps();
+    if(!ops.length){if(catVer()!==CAT.ver)W([{t:'set',c:'settings',id:'main',d:{catVer:CAT.ver}}]);return toast('كل الشركات والباقات الافتراضية موجودة مسبقاً')}
+    if(await confirmBox('سيتم إضافة الشركات والباقات الافتراضية الناقصة فقط (لا يُعدَّل شيء موجود): '+ops.length+' عنصراً.','إضافة')){const n=ops.length;ops.push({t:'set',c:'settings',id:'main',d:{catVer:CAT.ver}});W(ops,'تمت الإضافة ('+n+')')}
+  },
+  async addBillDef(){
+    const ops=billDefOps(S.companies.filter(c=>!isGame(c)&&c.bill!==false).map(c=>c.id));
+    if(!ops.length)return toast('كل الشركات لديها باقات الفاتورة الافتراضية (500 جيجا و150 جيجا)');
+    if(await confirmBox('إضافة باقات الفاتورة الافتراضية (500 جيجا بـ 60 ₪ و150 جيجا بـ 50 ₪) — '+ops.length+' باقة ناقصة؟','إضافة'))W(ops,'تمت إضافة '+ops.length+' باقة');
+  },
+  help:()=>helpSheet()
+};
+/* الشركات والباقات الافتراضية: تأتي من catalog.js */
+const DEF_COS=CAT.cos,DEF_GAMES=CAT.games||[];
+const normN=x=>String(x||'').replace(/\s+/g,'').toLowerCase();
+function seedOps(){
+  const ops=[],now=Date.now();let k=S.companies.length;
+  DEF_COS.forEach(d=>{
+    const keys=[d.n].concat(d.al||[]).map(normN);
+    const ex=S.companies.find(c=>keys.includes(normN(c.name)));let id;
+    if(ex){id=ex.id;if(d.free&&!ex.free)ops.push({t:'set',c:'companies',id,d:{free:true,minAmt:d.minAmt||10,card:true}})}
+    else{id=B.newId('companies');ops.push({t:'set',c:'companies',id,d:{name:d.n,kind:'tel',commission:0,active:true,order:k++,card:true,bill:d.bill!==false,free:!!d.free,minAmt:d.minAmt||0,createdAt:now}})}
+    if(d.bill!==false)ops.push(...billDefOps([id]));
+    (d.cards||[]).forEach(c=>{
+      if(S.packages.some(p=>p.companyId===id&&pkKind(p)==='card'&&normN(p.name)===normN(c.name)))return;
+      ops.push({t:'set',c:'packages',id:B.newId('packages'),d:{companyId:id,kind:'card',name:c.name,minutes:c.minutes||0,sms:c.sms||0,gb:c.gb||0,unlimited:false,days:c.days||30,price:c.price,desc:c.desc||'',isOffer:false,offerEnd:'',active:!c.off,createdAt:now}});
+    });
+  });
+  DEF_GAMES.forEach(n=>{
+    if(S.companies.some(c=>normN(c.name)===normN(n)))return;
+    ops.push({t:'set',c:'companies',id:B.newId('companies'),d:{name:n,kind:'game',commission:0,active:true,order:k++,createdAt:now}});
+  });
+  return ops;
+}
+function billDefOps(ids){
+  const ops=[];
+  ids.forEach(cid=>{
+    (CAT.billDefaults||[]).forEach(d=>{
+      if(S.packages.some(p=>p.companyId===cid&&+p.gb===+d.gb&&+p.price===+d.price&&pkKind(p)==='bill'))return;
+      ops.push({t:'set',c:'packages',id:B.newId('packages'),d:{companyId:cid,kind:'bill',name:d.name,gb:d.gb,unlimited:false,days:30,price:d.price,desc:'',isOffer:false,offerEnd:'',active:true,createdAt:Date.now()}});
+    });
+  });
+  return ops;
+}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const f=ACT[el.dataset.act];if(f)f(el.dataset,el,e);
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){S.ui.q=e.target.value;const l=$('#llist');if(l)l.innerHTML=linesList()}
+  if(e.target.id==='hq'){S.ui.hq=e.target.value;const l=$('#hlist');if(l)l.innerHTML=homeSearch()}
+});
+document.addEventListener('change',e=>{
+  const s=e.target.dataset&&e.target.dataset.sel;if(s){S.ui[s]=e.target.value;render()}
+});
+
+/* ---- نموذج طلب (وكيل) ---- */
+function orderMsg(o){
+  const c=co(o.companyId),p=pk(o.packageId);
+  return['طلب جديد'+(o.no?' رقم '+o.no:'')+' — '+(TYPE[o.type]||''),'الوكيل: '+(o.agentName||''),'الشركة: '+(c?c.name:''),o.number?'رقم الهاتف: '+o.number:'',o.account?'معرّف الحساب: '+o.account:'',o.sim?'رقم الشريحة: '+o.sim:'',o.esim?'نوع الشريحة: eSIM':'',
+    p?'الباقة: '+p.name:'',o.days?'المدة: '+o.days+' يوم':'',o.customerName?'الزبون: '+o.customerName:'','المبلغ: '+money(o.suggested!=null?o.suggested:o.reqAmount)].filter(Boolean).join('\n');
+}
+function orderDone(o){
+  const el=sheet('تم إرسال الطلب','<p>وصل طلبك إلى المدير وسيتم تنفيذه، وسيصلك إشعار هنا عند التنفيذ.</p><button class="btn wa" data-go>💬 إبلاغ الدعم عبر واتساب</button><button class="btn w" data-close>إغلاق</button>');
+  $('[data-go]',el).onclick=()=>openWA(orderMsg(o));
+}
+/* ---- شحن كرت / ألعاب وتطبيقات: شركة → باقة → إدخال الرقم ---- */
+function shopFlow(kind,opts={}){
+  const game=kind==='game',cos=game?gameCos():cardCos();
+  if(!cos.length)return toast(game?'لا توجد ألعاب أو تطبيقات متاحة حالياً، تواصل مع المدير':'لا توجد باقات كروت متاحة بعد، تواصل مع المدير');
+  let cid=(opts.companyId&&cos.some(c=>c.id===opts.companyId))?opts.companyId:cos[0].id;
+  const pkTile=p=>`<div class="pkt" data-pk="${p.id}"><div class="row"><div class="grow"><b>${esc(p.name)}</b>${p.isOffer?' 🎁':''}<div class="fx">${pkChips(p)}</div></div><div class="end"><b class="pr">${money(p.price)}</b></div></div>${p.desc?`<details class="pkd"><summary>التفاصيل</summary><span translate="no">${esc(p.desc)}</span></details>`:''}</div>`;
+  const el=sheet(game?'شحن ألعاب وتطبيقات':'شحن رصيد كرت','',()=>{
+    const c=co(cid)||cos[0];const l=game?gamePk(c.id):cardPk(c.id);
+    return`<div class="cos">${cos.map(x=>`<button class="cot ${x.id===c.id?'on':''}" data-cid="${x.id}">${logo(x,36)}<span>${esc(x.name)}</span></button>`).join('')}</div>
+    ${!game&&c.free?`<div class="pkt" data-free="1"><div class="row"><div class="grow"><b>💰 شحن بمبلغ حر</b><div class="sub">الحد الأدنى ${money(+c.minAmt||10)}${+c.commission?' • عمولتك '+(+c.commission)+'%':''}</div></div><div class="end"><b class="pr">›</b></div></div></div>`:''}
+    ${l.map(pkTile).join('')||(!c.free?'<div class="empty">لا توجد باقات لهذه الشركة</div>':'')}`;
+  });
+  el.addEventListener('click',e=>{
+    if(e.target.closest('summary'))return;
+    const t=e.target.closest('[data-cid]');if(t){cid=t.dataset.cid;el.refresh();return}
+    const o2={...opts,parent:el};
+    if(e.target.closest('[data-free]')){shopOrder(kind,co(cid),null,o2);return}
+    const k=e.target.closest('[data-pk]');if(k){const p=pk(k.dataset.pk);if(p)shopOrder(kind,co(cid),p,o2)}
+  });
+}
+function shopOrder(kind,c,p,opts={}){
+  const game=kind==='game',free=!p,min=+c.minAmt||10;
+  const info=`<div class="card"><div class="row">${logo(c,44)}<div class="grow"><b>${esc(c.name)}</b><div class="sub">${p?esc(p.name):'شحن بمبلغ حر'}</div></div>${p?`<b class="pr">${money(p.price)}</b>`:''}</div>${p?`<div class="fx">${pkChips(p)}</div>`:''}</div>`;
+  const el=sheet(game?'شحن '+c.name:'شحن كرت — '+c.name,info+
+    (free?F.num('amt','المبلغ (₪) — الحد الأدنى '+min,'',{min:min}):'')+
+    (game?F.text('acct','معرّف اللاعب / رقم الحساب / البريد','',{dir:'ltr',autocapitalize:'none'})+F.text('cname','اسم الزبون (اختياري)',''):F.text('number','ادخل الرقم',opts.number||'',{inputmode:'tel',dir:'ltr'}))+
+    '<div class="prev" id="prev"></div><div class="err" id="e3"></div><button class="btn" data-go>شحن</button>');
+  const calc=()=>{
+    const s=p?+p.price||0:r2((+V(el,'amt')||0)*(1-(+c.commission||0)/100));
+    $('#prev',el).textContent='المبلغ على حسابك: '+money(s)+' • رصيدك المتاح: '+money(avail(S.me.id));return s;
+  };
+  calc();el.addEventListener('input',calc);
+  $('[data-go]',el).onclick=async()=>{
+    const er=$('#e3',el),number=digits(V(el,'number')),acct=V(el,'acct'),amt=+V(el,'amt')||0,price=calc();
+    if(game){if(acct.length<3)return er.textContent='أدخل معرّف اللاعب أو رقم الحساب'}
+    else if(number.length<9)return er.textContent='أدخل رقم هاتف صحيح';
+    if(free&&amt<min)return er.textContent='الحد الأدنى للشحن '+money(min);
+    const av=avail(S.me.id);
+    if(price>av+1e-9)return er.textContent=(av<=0?'رصيدك لا يكفي (المتاح 0 ₪).':'رصيدك المتاح '+money(av)+' لا يكفي لهذا الطلب ('+money(price)+').')+' تواصل مع الدعم لشحن رصيدك.';
+    const o={type:game?'game':'card',agentId:S.me.id,agentName:S.me.name||S.me.username,companyId:c.id,packageId:p?p.id:'',number:game?'':number,account:game?acct:'',
+      customerName:game?V(el,'cname'):'',reqAmount:free?amt:+p.price,suggested:r2(price),note:'',status:'pending',createdAt:Date.now()};
+    if(await W([{t:'set',c:'orders',id:B.newId('orders'),d:o}])){closeSheet(el);if(opts.parent)closeSheet(opts.parent);orderDone(o)}
+  };
+}
+/* ---- تفعيل فاتورة: جديد / تجديد خط قائم ---- */
+function lastCharge(l){let t=l.activatedAt||0;S.orders.forEach(o=>{if(o.status==='done'&&o.number===l.number&&(o.doneAt||0)>t)t=o.doneAt});return t}
+function discAt(l){const h=[...(l.history||[])].reverse().find(x=>x.text==='فصل');return h?h.at:(l.updatedAt||l.createdAt||0)}
+function lineInfoHTML(l){
+  const c=co(l.companyId),p=pk(l.packageId),now=Date.now(),lc=lastCharge(l);
+  let st;
+  if(l.status!=='active')st=`<b class="neg">مفصول منذ ${fmtD(discAt(l))}</b>`;
+  else if(l.expiresAt){const d=Math.ceil((l.expiresAt-now)/864e5);st=d>=0?`<b class="pos">فعّال حتى ${fmtD(l.expiresAt)} (بعد ${d} يوم)</b>`:`<b class="neg">انتهى التفعيل ${fmtD(l.expiresAt)} (منذ ${-d} يوم)</b>`}
+  else st='<b class="pos">فعّال</b>';
+  return`<div class="card"><div class="row">${logo(c,40)}<div class="grow"><b class="num">${esc(l.number)}</b><div class="sub">${esc(l.customerName||'بدون اسم')} • ${esc(c?c.name:'')}</div></div>${pill(l.status)}</div>
+  <div class="kv"><span>الحالة</span>${st}</div><div class="kv"><span>آخر شحنة</span><b>${lc?fmtD(lc):'—'}</b></div>${p?`<div class="kv"><span>الباقة</span><b>${esc(p.name)}</b></div>`:''}</div>`;
+}
+function billFlow(opts={}){
+  const el=sheet('تفعيل فاتورة',`<div class="ch2"><button data-sub="new"><span>📱</span><div><b>اشتراك فاتورة جديد</b><small>رقم جديد — شريحة SIM أو eSIM</small></div></button><button data-sub="old"><span>🔄</span><div><b>تجديد خط قائم</b><small>زبون سابق — أدخل رقمه لعرض حالته</small></div></button></div>`);
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-sub]');if(!b)return;closeSheet(el);billForm(b.dataset.sub,opts)});
+}
+function billForm(sub,opts={}){
+  const old=sub==='old',cos=billCos();
+  if(!cos.length)return toast('لا توجد شركات متاحة بعد، تواصل مع المدير');
+  const el=sheet(old?'تجديد خط قائم':'اشتراك فاتورة جديد',
+    (old?F.text('number','ادخل رقم الخط القائم',opts.number||'',{inputmode:'tel',dir:'ltr'})+'<div id="linfo"></div>':'')+
+    F.sel('co','الشركة',cos.map(c=>[c.id,c.name]),(opts.companyId&&cos.some(c=>c.id===opts.companyId))?opts.companyId:cos[0].id)+
+    F.sel('pkg','الباقة',[])+F.num('per','عدد الفترات (1 = المدة الأساسية للباقة)',1,{min:1})+
+    (old?'':`<div class="sub" style="margin-top:12px">نوع الشريحة</div>
+      <label class="opt"><input type="radio" name="stype" value="sim" checked><span>💳 شريحة عادية SIM — أدخل رقم الشريحة</span></label>
+      <label class="opt"><input type="radio" name="stype" value="esim"><span>📲 شريحة إلكترونية eSIM</span></label>
+      <div class="demo" id="esnote" style="display:none;margin-top:8px">⚠️ تكلفة تفعيل eSIM: ${money(esimFee())} تُضاف على سعر الباقة.</div>`+
+      '<div id="simbox">'+F.text('sim','رقم الشريحة','',{inputmode:'numeric',dir:'ltr'})+'</div>'+F.text('number','رقم الهاتف (إن كان معروفاً)','',{inputmode:'tel',dir:'ltr'}))+
+    F.text('cname','اسم الزبون',opts.cname||'')+(old?'':F.text('cid','رقم الهوية (اختياري)','',{inputmode:'numeric'}))+F.area('note','ملاحظات')+
+    '<div class="prev" id="prev"></div><div class="err" id="e3"></div><button class="btn" data-go>إرسال الطلب</button>');
+  const stype=()=>{const r=el.querySelector('[name=stype]:checked');return r?r.value:'sim'};
+  const fillPk=(sel)=>{
+    const s=$('[name=pkg]',el),l=billPk(V(el,'co'));
+    s.innerHTML=l.length?l.map(p=>`<option value="${p.id}">${esc(p.name)} — ${pkInfo(p)} — ${money(p.price)}</option>`).join(''):'<option value="">لا توجد باقات لهذه الشركة</option>';
+    const w=sel||opts.packageId;if(w&&l.some(p=>p.id===w))s.value=w;
+  };
+  const calc=()=>{
+    const p=pk(V(el,'pkg')),n=Math.max(1,Math.floor(+V(el,'per')||1));
+    let s=p?(+p.price||0)*n:0;const days=p?(+p.days||0)*n:0,es=!old&&stype()==='esim';
+    if(es)s+=esimFee();
+    const en=$('#esnote',el);if(en)en.style.display=es?'':'none';const sb=$('#simbox',el);if(sb)sb.style.display=es?'none':'';
+    $('#prev',el).textContent='المبلغ على حسابك: '+money(s)+(days?' • المدة: '+days+' يوم':'')+(es?' • يشمل رسوم eSIM '+money(esimFee()):'');
+    return{s:r2(s),days,n,es};
+  };
+  let picked=null;
+  const info=()=>{
+    if(!old)return;const box=$('#linfo',el),n=digits(V(el,'number'));
+    if(n.length<4){box.innerHTML='';picked=null;return}
+    const ex=S.lines.find(l=>l.number===n);
+    if(ex){
+      box.innerHTML=lineInfoHTML(ex);
+      if(picked!==ex.id){picked=ex.id;
+        if(cos.some(c=>c.id===ex.companyId)){$('[name=co]',el).value=ex.companyId;fillPk(ex.packageId)}
+        if(!V(el,'cname')&&ex.customerName)$('[name=cname]',el).value=ex.customerName;calc()}
+    }else{
+      picked=null;
+      if(n.length>=9)box.innerHTML='<div class="demo" style="margin-top:8px">⚠️ هذا الرقم غير موجود ضمن خطوطك. يمكنك إرسال الطلب وسيراجعه المدير.</div>';
+      else{const m=S.lines.filter(l=>(l.number||'').includes(n)).slice(0,5);box.innerHTML=m.length?'<div class="sug">'+m.map(l=>`<button data-fill="${esc(l.number)}">${esc(l.number)}</button>`).join('')+'</div>':''}
+    }
+  };
+  fillPk();calc();info();
+  el.addEventListener('input',e=>{calc();if(e.target.name==='number')info()});
+  el.addEventListener('change',e=>{if(e.target.name==='co')fillPk();calc()});
+  el.addEventListener('click',e=>{const f=e.target.closest('[data-fill]');if(f){$('[name=number]',el).value=f.dataset.fill;info()}});
+  $('[data-go]',el).onclick=async()=>{
+    const er=$('#e3',el),number=digits(V(el,'number')),sim=old?'':digits(V(el,'sim'));
+    const {s:price,days,n,es}=calc();
+    if(!V(el,'pkg'))return er.textContent='اختر باقة';
+    if(!old&&!es&&sim.length<8)return er.textContent='أدخل رقم الشريحة أو اختر eSIM';
+    if(old&&number.length<9)return er.textContent='أدخل رقم هاتف الزبون السابق';
+    if(number&&number.length<9)return er.textContent='رقم الهاتف غير صحيح';
+    if(!V(el,'cname'))return er.textContent='أدخل اسم الزبون';
+    const av=avail(S.me.id);
+    if(price>av+1e-9)return er.textContent=(av<=0?'رصيدك لا يكفي (المتاح 0 ₪).':'رصيدك المتاح '+money(av)+' لا يكفي لهذا الطلب ('+money(price)+').')+' تواصل مع الدعم لشحن رصيدك.';
+    const c=co(V(el,'co')),ex=old?S.lines.find(l=>l.number===number):null;
+    const o={type:'activate_'+sub,agentId:S.me.id,agentName:S.me.name||S.me.username,companyId:c.id,packageId:V(el,'pkg'),
+      number,sim:sim||(ex&&ex.sim)||'',esim:!!es,esimFee:es?esimFee():0,periods:n,days,customerName:V(el,'cname')||'',customerId:old?'':digits(V(el,'cid')),reqAmount:price,suggested:price,
+      note:V(el,'note'),status:'pending',createdAt:Date.now()};
+    if(await W([{t:'set',c:'orders',id:B.newId('orders'),d:o}])){closeSheet(el);orderDone(o)}
+  };
+}
+function orderSheet(id){
+  const o0=S.orders.find(o=>o.id===id);if(!o0)return;
+  const el=sheet('تفاصيل الطلب','',()=>{
+    const o=S.orders.find(x=>x.id===id);if(!o)return'<div class="empty">الطلب غير موجود</div>';
+    const c=co(o.companyId),p=pk(o.packageId);const adm=isAdmin();
+    const kv=(k,v)=>v?`<div class="kv"><span>${k}</span><b>${v}</b></div>`:'';
+    return`<div class="card">${kv('رقم الطلب',o.no?'#'+o.no:'')}${kv('النوع',TYPE[o.type])}${kv('الحالة',pill(o.status))}${adm?kv('الوكيل',esc(o.agentName)):''}${kv('الشركة',esc(c?c.name:''))}${kv('رقم الهاتف',o.number?'<span class="num">'+esc(o.number)+'</span>':'')}${kv('معرّف الحساب',o.account?'<span class="num">'+esc(o.account)+'</span>':'')}${kv('رقم الشريحة',o.sim?'<span class="num">'+esc(o.sim)+'</span>':'')}${kv('نوع الشريحة',o.type.startsWith('activate')?(o.esim?'eSIM (رسوم '+money(o.esimFee)+')':'شريحة عادية'):'')}
+    ${kv('الباقة',p?esc(p.name)+' ('+pkInfo(p)+')':'')}${kv('المدة',o.days?o.days+' يوم':'')}${kv('اسم الزبون',esc(o.customerName))}${kv('الهوية',esc(o.customerId))}
+    ${kv('المبلغ المطلوب',o.reqAmount?money(o.reqAmount):'')}${kv(o.status==='done'?'المحسوب على الوكيل':'المحسوب المتوقع',money(o.status==='done'?o.amount:o.suggested))}
+    ${kv('ملاحظات الوكيل',esc(o.note))}${kv('ملاحظة المدير',esc(o.adminNote))}${kv('التاريخ',fmt(o.createdAt))}${kv('وقت التنفيذ',fmt(o.doneAt))}</div>
+    ${o.status==='pending'&&adm?'<div class="btns"><button class="btn d" data-a="rej">رفض</button><button class="btn" data-a="exe">تنفيذ</button></div>':''}
+    ${adm?'<button class="btn wa" data-a="waAgent">💬 مراسلة الوكيل على واتساب</button>':''}
+    ${o.status==='pending'&&!adm?'<button class="btn wa" data-a="wa">💬 إبلاغ الدعم عبر واتساب</button><button class="btn d" data-a="can">إلغاء الطلب</button>':''}
+    ${o.status==='done'&&adm?'<button class="btn d" data-a="ref">استرجاع الطلب (إلغاء المبلغ)</button>':''}`;
+  });
+  el.addEventListener('click',async e=>{
+    const a=e.target.closest('[data-a]');if(!a)return;const o=S.orders.find(x=>x.id===id);if(!o)return;
+    if(a.dataset.a==='exe')execSheet(o);
+    if(a.dataset.a==='wa')openWA(orderMsg(o));
+    if(a.dataset.a==='waAgent'){const u=ag(o.agentId);openWA('مرحباً '+((u&&u.name)||'')+'، بخصوص طلبك: '+(TYPE[o.type]||'')+(o.number?' '+o.number:''),u&&(u.whatsapp||u.phone))}
+    if(a.dataset.a==='rej'){
+      const r=sheet('رفض الطلب',F.area('why','سبب الرفض (اختياري)')+'<button class="btn d" data-go>رفض</button>');
+      $('[data-go]',r).onclick=async()=>{if(await W([{t:'set',c:'orders',id,d:{status:'rejected',adminNote:V(r,'why'),doneAt:Date.now(),doneBy:S.me.id}}],'تم الرفض')){closeSheet(r);closeSheet(el)}};
+    }
+    if(a.dataset.a==='can'&&await confirmBox('إلغاء هذا الطلب؟','إلغاء الطلب',true)){if(await W([{t:'set',c:'orders',id,d:{status:'cancelled'}}],'تم الإلغاء'))closeSheet(el)}
+    if(a.dataset.a==='ref'&&await confirmBox('سيُخصم المبلغ من حساب الوكيل ويُعتبر الطلب مسترجعاً.','استرجاع',true)){W([{t:'set',c:'orders',id,d:{status:'refunded',refundedAt:Date.now()}}],'تم الاسترجاع')}
+  });
+}
+function execSheet(o){
+  const act=o.type.startsWith('activate'),p=pk(o.packageId);
+  const el=sheet('تنفيذ الطلب',`<div class="sub">${TYPE[o.type]} — ${esc(o.agentName)}</div>`+
+    (act?F.text('number','رقم الهاتف (مطلوب)',o.number||'',{inputmode:'tel',dir:'ltr'})+F.text('sim','رقم الشريحة',o.sim||'',{inputmode:'numeric',dir:'ltr'})+F.num('days','مدة التفعيل (أيام)',o.days||(p?p.days:30)):'')+
+    F.num('amount','المبلغ المحسوب على الوكيل (₪)',o.suggested!=null?o.suggested:o.reqAmount)+
+    F.text('note','ملاحظة (اختياري)','')+'<div class="err" id="e4"></div><button class="btn" data-go>تأكيد التنفيذ</button>');
+  $('[data-go]',el).onclick=async()=>{
+    const er=$('#e4',el),amount=+V(el,'amount'),number=act?digits(V(el,'number')):o.number;
+    if(!(amount>=0)||V(el,'amount')==='')return er.textContent='أدخل المبلغ';
+    const ab=bal(o.agentId);if(amount>ab+1e-9)return er.textContent='رصيد الوكيل غير كافٍ ('+money(ab)+')، اشحن رصيده أولاً';
+    if(act&&number.length<9)return er.textContent='أدخل رقم الهاتف';
+    const days=act?Math.floor(+V(el,'days')||0):0;if(act&&days<1)return er.textContent='أدخل مدة التفعيل بالأيام';
+    const sim=act?digits(V(el,'sim')):'';
+    const now=Date.now(),ops=[];const d={status:'done',amount,doneAt:now,doneBy:S.me.id,adminNote:V(el,'note'),number};
+    if(act){
+      d.sim=sim;d.days=days;
+      const ex=S.lines.find(l=>l.number===number);
+      if(ex&&ex.agentId!==o.agentId)return er.textContent='الرقم مسجّل عند وكيل آخر، انقله أولاً من تبويب الخطوط';
+      const lid=ex?ex.id:B.newId('lines');d.lineId=lid;
+      const base=ex&&ex.expiresAt>now?ex.expiresAt:now;
+      const hist=(ex&&ex.history||[]).concat({at:now,text:'تفعيل '+days+' يوم'});
+      ops.push({t:'set',c:'lines',id:lid,d:{number,sim:sim||(ex&&ex.sim)||'',esim:o.esim?true:!!(ex&&ex.esim),companyId:o.companyId,agentId:o.agentId,packageId:o.packageId,customerName:o.customerName||(ex&&ex.customerName)||'',customerId:o.customerId||'',status:'active',days,periods:o.periods||1,activatedAt:now,expiresAt:base+days*864e5,updatedAt:now,history:hist,...(ex?{}:{createdAt:now})}});
+    }
+    ops.push({t:'set',c:'orders',id:o.id,d});
+    if(await W(ops,'تم تنفيذ الطلب')){closeSheet(el);sheets.slice().forEach(s=>s.refresh&&s.refresh())}
+  };
+}
+/* ---- الوكلاء ---- */
+function agentForm(id){
+  const a=id?ag(id):{};
+  const el=sheet(id?'تعديل وكيل':'وكيل جديد',F.text('name','اسم الوكيل',a.name||'')+(id?'':F.text('un','اسم المستخدم (إنجليزي)','',{autocapitalize:'none',dir:'ltr'})+F.pass('pw','كلمة المرور (6 أحرف على الأقل)',{dir:'ltr'}))+
+    F.text('phone','رقم التواصل',a.phone||'',{inputmode:'tel'})+F.text('wa','رقم الواتساب',a.whatsapp||'',{inputmode:'tel'})+'<div class="err" id="e5"></div><button class="btn" data-go>حفظ</button>');
+  $('[data-go]',el).onclick=async function(){
+    const er=$('#e5',el),name=V(el,'name');if(!name)return er.textContent='أدخل الاسم';
+    const prof={name,phone:digits(V(el,'phone')),whatsapp:digits(V(el,'wa'))};
+    if(id){if(await W([{t:'set',c:'users',id,d:prof}],'تم الحفظ'))closeSheet(el);return}
+    const un=V(el,'un').toLowerCase(),pw=V(el,'pw');
+    if(!okUser(un)||un===ADMIN_USER)return er.textContent='اسم المستخدم: 3-30 حرفاً إنجليزياً أو أرقاماً';
+    if(pw.length<6)return er.textContent='كلمة المرور 6 أحرف على الأقل';
+    this.disabled=true;er.textContent='جارٍ إنشاء الحساب…';
+    try{await B.createAgent(un,pw,prof);toast('تم إنشاء الوكيل');closeSheet(el)}catch(e){er.textContent=errMsg(e);this.disabled=false}
+  };
+}
+function pwForm(id){
+  const a=ag(id);if(!a)return;
+  if(a.provider==='google')return toast('هذا الوكيل يدخل بحساب Google ولا يملك كلمة مرور في التطبيق');
+  const el=sheet('تغيير كلمة مرور '+(a.name||a.username),'<div class="sub">اسم المستخدم: <span class="num">'+esc(a.username)+'</span></div>'+F.text('pw','كلمة المرور الجديدة (6 أحرف على الأقل)','',{dir:'ltr',autocapitalize:'none',autocomplete:'off'})+F.text('pw2','أعد كتابتها','',{dir:'ltr',autocapitalize:'none',autocomplete:'off'})+'<div class="err" id="e11"></div><button class="btn" data-go>حفظ كلمة المرور</button>');
+  $('[data-go]',el).onclick=async function(){
+    const er=$('#e11',el),pw=V(el,'pw');
+    if(pw.length<6)return er.textContent='كلمة المرور 6 أحرف على الأقل';
+    if(pw!==V(el,'pw2'))return er.textContent='كلمتا المرور غير متطابقتين';
+    this.disabled=true;er.textContent='جارٍ الحفظ…';
+    try{await B.setAgentPassword(id,pw);closeSheet(el);toast('تم تغيير كلمة المرور — أبلغ الوكيل بها')}catch(e){er.textContent=errMsg(e);this.disabled=false}
+  };
+}
+function adjForm(id){
+  const a=ag(id);if(!a)return;const cur=bal(id);
+  const el=sheet('تصحيح رصيد '+(a.name||a.username),
+    `<div class="sub">للتصحيح عند حدوث خلل فني فقط. يُسجَّل في كشف الحساب ويصل الوكيل إشعار.</div><div class="prev">الرصيد الحالي: ${money(cur)}</div>`+
+    F.sel('mode','نوع التصحيح',[['add','إضافة للرصيد'],['sub','خصم من الرصيد'],['set','ضبط الرصيد على مبلغ محدد']],'add')+F.num('amt','المبلغ (₪)','',{min:0})+F.text('note','السبب (مطلوب)','')+
+    '<div class="prev" id="prev"></div><div class="err" id="e12"></div><button class="btn" data-go>تطبيق التصحيح</button>');
+  const calc=()=>{const m=V(el,'mode'),v=+V(el,'amt')||0;const delta=r2(m==='add'?v:m==='sub'?-v:v-cur);$('#prev',el).textContent='الرصيد بعد التصحيح: '+money(cur+delta)+(delta?' ('+(delta>0?'+':'−')+money(Math.abs(delta))+')':'');return delta};
+  calc();el.addEventListener('input',calc);el.addEventListener('change',calc);
+  $('[data-go]',el).onclick=async()=>{
+    const er=$('#e12',el),delta=calc(),m=V(el,'mode');
+    if(V(el,'amt')===''||(+V(el,'amt'))<0)return er.textContent='أدخل مبلغاً صحيحاً';
+    if(!delta)return er.textContent='لا يوجد تغيير في الرصيد';
+    if(r2(cur+delta)<0)return er.textContent='لا يمكن أن يصبح الرصيد سالباً';
+    if(!V(el,'note'))return er.textContent='اكتب سبب التصحيح';
+    if(!(await confirmBox('تغيير رصيد '+(a.name||a.username)+' من '+money(cur)+' إلى '+money(cur+delta)+'؟','تطبيق')))return;
+    if(await W([{t:'set',c:'payments',id:B.newId('payments'),d:{agentId:id,kind:'adjust',amount:delta,note:V(el,'note'),createdAt:Date.now(),by:S.me.id}}],'تم تصحيح الرصيد'))closeSheet(el);
+  };
+}
+function agentSheet(id){
+  const el=sheet('الوكيل','',()=>{
+    const a=ag(id);if(!a)return'';
+    const info=`<div class="card"><div class="kv"><span>${a.provider==='google'?'حساب Google':'اسم المستخدم'}</span><b class="num">${esc(a.username)}</b></div><div class="kv"><span>رقم التواصل</span><b class="num">${esc(a.phone||'—')}</b></div><div class="kv"><span>واتساب</span><b class="num">${esc(a.whatsapp||'—')}</b></div>`;
+    if(a.pending)return`<div class="card offer"><b>${esc(a.name||a.username)}</b><div class="sub">حساب جديد بانتظار التفعيل • ${fmt(a.createdAt)}</div></div>${info}</div>
+      <div class="btns"><button class="btn d" data-a="rej">رفض</button><button class="btn" data-a="app">تفعيل الحساب</button></div>
+      <button class="btn w" data-a="edit">تعديل البيانات</button>
+      <button class="btn wa" data-a="wa">💬 مراسلته على واتساب</button>`;
+    const b=bal(id);const n=S.lines.filter(l=>l.agentId===id);
+    return`<div class="bal ${b>0?'ok':'low'}"><small>${esc(a.name||a.username)} — الرصيد المتاح</small><b>${money(b)}</b></div>
+    ${info}<div class="kv"><span>الخطوط</span><b>${n.filter(l=>l.status==='active').length} فعّال / ${n.filter(l=>l.status!=='active').length} مفصول</b></div></div>
+    <button class="btn" data-a="topup">＋ شحن رصيد الوكيل</button>
+    <button class="btn w" data-a="adj">⚖️ تصحيح الرصيد (خلل فني)</button>
+    <div class="btns"><button class="btn w" data-a="edit">تعديل البيانات</button><button class="btn w" data-a="pw">🔑 كلمة المرور</button></div>
+    <div class="btns"><button class="btn w" data-a="lines">خطوطه</button><button class="btn ${a.active===false?'':'d'}" data-a="tog">${a.active===false?'تفعيل':'تعطيل'}</button></div>
+    <button class="btn wa" data-a="wa">💬 مراسلته على واتساب</button>
+    <h3>المحاسبة التلقائية</h3>${acctHTML(id)}
+    <h3>كشف الحساب</h3><div class="card">${stmtHTML(id)}</div>`;
+  });
+  el.addEventListener('click',async e=>{
+    const x=e.target.closest('[data-a]');if(!x)return;const a=ag(id);if(!a)return;
+    if(x.dataset.a==='wa')openWA('مرحباً '+(a.name||'')+'، معك الدعم الفني لتطبيق شحن رصيد.',a.whatsapp||a.phone);
+    if(x.dataset.a==='edit')agentForm(id);
+    if(x.dataset.a==='pw')pwForm(id);
+    if(x.dataset.a==='adj')adjForm(id);
+    if(x.dataset.a==='lines'){S.ui.fag=id;S.ui.lst='all';S.tab='lines';closeSheet(el);render()}
+    if(x.dataset.a==='tog'){if(await confirmBox(a.active===false?'تفعيل هذا الحساب؟':'تعطيل الحساب؟ لن يستطيع الدخول.','تأكيد',a.active!==false))W([{t:'set',c:'users',id,d:{active:a.active===false}}],'تم')}
+    if(x.dataset.a==='rej'&&await confirmBox('رفض هذا الحساب؟','رفض',true))W([{t:'set',c:'users',id,d:{active:false,pending:false,rejected:true}}],'تم الرفض');
+    if(x.dataset.a==='app')W([{t:'set',c:'users',id,d:{active:true,pending:false,approvedAt:Date.now()}}],'تم تفعيل الحساب — اشحن رصيده ليبدأ العمل');
+    if(x.dataset.a==='topup'){
+      const f=sheet('شحن رصيد '+(a.name||a.username),F.num('amt','المبلغ المُضاف (₪)')+F.text('note','ملاحظة (اختياري)','')+'<div class="err" id="e6"></div><button class="btn" data-go>شحن الرصيد</button>');
+      $('[data-go]',f).onclick=async()=>{
+        const m=+V(f,'amt');if(!(m>0))return $('#e6',f).textContent='أدخل مبلغاً صحيحاً';
+        if(await W([{t:'set',c:'payments',id:B.newId('payments'),d:{agentId:id,kind:'topup',amount:m,note:V(f,'note'),createdAt:Date.now(),by:S.me.id}}],'تم شحن الرصيد'))closeSheet(f);
+      };
+    }
+  });
+}
+/* ---- الخطوط ---- */
+function lineForm(id){
+  const l=id?S.lines.find(x=>x.id===id):{status:'active'};
+  const ags=agents().filter(a=>a.active!==false);
+  if(!ags.length)return toast('لا يوجد وكلاء مفعّلون، فعّل وكيلاً أولاً');
+  if(!S.companies.length)return toast('أضف شركة أولاً');
+  const expv=l.expiresAt?(()=>{const d=new Date(l.expiresAt);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())})():'';
+  const el=sheet(id?'تعديل خط':'خط جديد',F.text('number','رقم الهاتف',l.number||'',{inputmode:'tel',dir:'ltr'})+F.text('sim','رقم الشريحة',l.sim||'',{inputmode:'numeric',dir:'ltr'})+F.sel('agent','الوكيل',ags.map(a=>[a.id,a.name||a.username]),l.agentId||ags[0].id)+
+    F.sel('co','الشركة',S.companies.map(c=>[c.id,c.name]),l.companyId||S.companies[0].id)+F.sel('pkg','الباقة',[])+F.text('cname','اسم الزبون',l.customerName||'')+
+    `<label class="f"><span>تاريخ انتهاء التفعيل (اختياري)</span><input type="date" name="exp" value="${esc(expv)}"></label>`+
+    F.chk('esim','شريحة إلكترونية (eSIM)',l.esim)+F.sel('st','الحالة',[['active','فعّال'],['disconnected','مفصول']],l.status)+F.area('note','ملاحظات',l.note||'')+'<div class="err" id="e7"></div><button class="btn" data-go>حفظ</button>');
+  const fill=()=>{const s=$('[name=pkg]',el);const lst=S.packages.filter(p=>p.companyId===V(el,'co'));
+    s.innerHTML='<option value="">— بدون —</option>'+lst.map(p=>`<option value="${p.id}"${p.id===l.packageId?' selected':''}>${esc(p.name)}</option>`).join('')};
+  fill();el.addEventListener('change',e=>{if(e.target.name==='co')fill()});
+  $('[data-go]',el).onclick=async()=>{
+    const er=$('#e7',el),number=digits(V(el,'number'));
+    if(number.length<9)return er.textContent='أدخل رقم هاتف صحيح';
+    const dup=S.lines.find(x=>x.number===number&&x.id!==id);if(dup)return er.textContent='الرقم موجود مسبقاً';
+    const ex=V(el,'exp');
+    const d={number,sim:digits(V(el,'sim')),agentId:V(el,'agent'),companyId:V(el,'co'),packageId:V(el,'pkg'),customerName:V(el,'cname'),status:V(el,'st'),esim:V(el,'esim'),note:V(el,'note'),expiresAt:ex?new Date(ex+'T23:59:59').getTime():null,updatedAt:Date.now()};
+    if(!id){d.createdAt=Date.now();d.history=[{at:Date.now(),text:'إضافة يدوية'}]}
+    else if(l.agentId!==d.agentId)d.history=(l.history||[]).concat({at:Date.now(),text:'نقل من '+((ag(l.agentId)||{}).name||'')+' إلى '+((ag(d.agentId)||{}).name||'')});
+    if(await W([{t:'set',c:'lines',id:id||B.newId('lines'),d}],'تم الحفظ'))closeSheet(el);
+  };
+}
+function lineSheet(id){
+  const el=sheet('تفاصيل الخط','',()=>{
+    const l=S.lines.find(x=>x.id===id);if(!l)return'<div class="empty">غير موجود</div>';
+    const c=co(l.companyId),p=pk(l.packageId),adm=isAdmin();
+    return`<div class="card"><div class="row">${logo(c,46)}<div class="grow"><b class="num" style="font-size:18px">${esc(l.number)}</b><div class="sub">${esc(c?c.name:'')}</div></div>${pill(l.status)}</div></div>
+    <div class="card"><div class="kv"><span>الزبون</span><b>${esc(l.customerName||'—')}</b></div><div class="kv"><span>نوع الشريحة</span><b>${l.esim?'eSIM (إلكترونية)':'عادية'}</b></div>${l.sim?`<div class="kv"><span>رقم الشريحة</span><b class="num">${esc(l.sim)}</b></div>`:''}${adm?`<div class="kv"><span>الوكيل</span><b>${esc((ag(l.agentId)||{}).name||'—')}</b></div>`:''}
+    <div class="kv"><span>الباقة</span><b>${p?esc(p.name)+' • '+money(p.price):'—'}</b></div>${l.activatedAt?`<div class="kv"><span>آخر تفعيل</span><b>${fmtD(l.activatedAt)}${l.days?' ('+l.days+' يوم)':''}</b></div>`:''}${l.expiresAt?`<div class="kv"><span>ينتهي</span><b>${fmtD(l.expiresAt)}</b></div>`:''}${l.note?`<div class="kv"><span>ملاحظات</span><b>${esc(l.note)}</b></div>`:''}<div class="kv"><span>أُضيف</span><b>${fmt(l.createdAt)}</b></div></div>
+    ${l.status==='active'&&!adm?'<div class="btns"><button class="btn" data-a="card">شحن كرت</button><button class="btn s" data-a="renew">تجديد الخط</button></div>':''}
+    ${!adm?'<button class="btn w" data-a="tk">🛠️ رسالة للدعم عن هذا الرقم</button>':''}
+    ${adm?`<div class="btns"><button class="btn" data-a="move">نقل لوكيل</button><button class="btn w" data-a="edit">تعديل</button></div>
+    <div class="btns"><button class="btn ${l.status==='active'?'d':'s'}" data-a="tog">${l.status==='active'?'فصل الخط':'إعادة تفعيل'}</button><button class="btn d" data-a="del">حذف</button></div>`:''}
+    ${(l.history||[]).length?'<h3>السجل</h3><div class="card">'+[...l.history].reverse().map(h=>`<div class="kv"><span>${fmt(h.at)}</span><span>${esc(h.text)}</span></div>`).join('')+'</div>':''}`;
+  });
+  el.addEventListener('click',async e=>{
+    const x=e.target.closest('[data-a]');if(!x)return;const l=S.lines.find(y=>y.id===id);if(!l)return;const a=x.dataset.a;
+    if(a==='card'){closeSheet(el);shopFlow('card',{number:l.number,companyId:l.companyId})}
+    if(a==='renew'){closeSheet(el);billForm('old',{number:l.number})}
+    if(a==='tk'){closeSheet(el);tkForm(l.number)}
+    if(a==='edit')lineForm(id);
+    if(a==='tog'){const st=l.status==='active'?'disconnected':'active';W([{t:'set',c:'lines',id,d:{status:st,updatedAt:Date.now(),history:(l.history||[]).concat({at:Date.now(),text:st==='active'?'إعادة تفعيل':'فصل'})}}],'تم')}
+    if(a==='del'&&await confirmBox('حذف الخط نهائياً؟','حذف',true)){if(await W([{t:'del',c:'lines',id}],'تم الحذف'))closeSheet(el)}
+    if(a==='move'){
+      const ags=agents().filter(u=>u.active!==false&&u.id!==l.agentId);if(!ags.length)return toast('لا يوجد وكيل آخر');
+      const f=sheet('نقل الخط '+l.number,F.sel('to','نقل إلى الوكيل',ags.map(u=>[u.id,u.name||u.username]),ags[0].id)+'<button class="btn" data-go>نقل</button>');
+      $('[data-go]',f).onclick=async()=>{
+        const to=V(f,'to');
+        if(await W([{t:'set',c:'lines',id,d:{agentId:to,updatedAt:Date.now(),history:(l.history||[]).concat({at:Date.now(),text:'نقل من '+((ag(l.agentId)||{}).name||'')+' إلى '+((ag(to)||{}).name||'')})}}],'تم النقل'))closeSheet(f);
+      };
+    }
+  });
+}
+/* ---- الشركات والباقات ---- */
+function fileToLogo(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();r.onerror=rej;
+    r.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{
+      const m=160,k=Math.min(1,m/Math.max(im.width,im.height));const cv=document.createElement('canvas');
+      cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+      let u=cv.toDataURL('image/png');if(u.length>150000)u=cv.toDataURL('image/jpeg',.8);res(u)};im.src=r.result};
+    r.readAsDataURL(file);
+  });
+}
+function coForm(id){
+  const c=id?co(id):{kind:'tel'};let lg=c.logo||'';
+  const el=sheet(id?'تعديل شركة':'شركة جديدة',
+    F.sel('kind','النوع',[['tel','شركة اتصالات'],['game','لعبة / تطبيق']],c.kind==='game'?'game':'tel')+F.text('name','الاسم',c.name||'')+
+    '<div id="telo">'+F.num('com','عمولة الوكيل على الكروت % (تُطبَّق على المبلغ الحر)',c.commission||0)+F.chk('card','متاحة في شحن الكروت',c.card!==false)+F.chk('bill','متاحة في تفعيل الفواتير',c.bill!==false)+
+    F.chk('free','شحن بمبلغ حر (مثل جوال وأوريدو)',!!c.free)+F.num('minamt','الحد الأدنى للمبلغ الحر ₪',c.minAmt||10)+(id?'':F.chk('pdef','إضافة باقات الفاتورة الافتراضية (500 جيجا بـ 60 ₪ و150 جيجا بـ 50 ₪)',true))+'</div>'+
+    `<div class="logoprev"><div id="lp">${logo({name:c.name||'؟',logo:lg},56)}</div><label class="btn w" style="margin:0;text-align:center;flex:1">اختيار لوجو<input type="file" accept="image/*" hidden name="file"></label></div>`+
+    F.chk('act','مفعّلة',c.active!==false)+'<div class="err" id="e8"></div><button class="btn" data-go>حفظ</button>'+(id?'<button class="btn d" data-del>حذف</button>':''));
+  const tog=()=>{$('#telo',el).style.display=V(el,'kind')==='game'?'none':''};tog();
+  el.addEventListener('change',e=>{if(e.target.name==='kind')tog()});
+  $('[name=file]',el).onchange=async e=>{const f=e.target.files[0];if(!f)return;try{lg=await fileToLogo(f);$('#lp',el).innerHTML=logo({name:V(el,'name'),logo:lg},56)}catch(x){toast('تعذر قراءة الصورة')}};
+  $('[data-go]',el).onclick=async()=>{
+    const name=V(el,'name');if(!name)return $('#e8',el).textContent='أدخل الاسم';
+    const g=V(el,'kind')==='game';
+    const d={name,kind:g?'game':'tel',commission:g?0:(+V(el,'com')||0),card:g?false:V(el,'card'),bill:g?false:V(el,'bill'),free:g?false:V(el,'free'),minAmt:+V(el,'minamt')||10,logo:lg,active:V(el,'act'),updatedAt:Date.now()};if(!id)d.createdAt=Date.now();
+    const cid=id||B.newId('companies');const ops=[{t:'set',c:'companies',id:cid,d}];
+    if(!id&&!g&&d.bill&&V(el,'pdef'))ops.push(...billDefOps([cid]));
+    if(await W(ops,'تم الحفظ'))closeSheet(el);
+  };
+  const dl=$('[data-del]',el);
+  if(dl)dl.onclick=async()=>{
+    if(S.packages.some(p=>p.companyId===id)||S.lines.some(l=>l.companyId===id))return toast('لا يمكن الحذف: مرتبطة بباقات أو خطوط. عطّلها بدلاً من ذلك');
+    if(await confirmBox('حذف نهائياً؟','حذف',true)){if(await W([{t:'del',c:'companies',id}],'تم الحذف'))closeSheet(el)}
+  };
+}
+function pkForm(id,offer,kind0){
+  const p=id?pk(id):{isOffer:!!offer,active:true,days:30,kind:kind0==='card'?'card':'bill'};
+  if(!S.companies.length)return toast('أضف شركة أولاً');
+  const defCo=p.companyId||(kind0==='game'?(S.companies.find(isGame)||S.companies[0]):(S.companies.find(c=>!isGame(c))||S.companies[0])).id;
+  const el=sheet(id?'تعديل باقة':(offer?'عرض جديد':'باقة جديدة'),F.sel('co','الشركة / اللعبة',S.companies.map(c=>[c.id,(isGame(c)?'🎮 ':'')+c.name]),defCo)+F.text('name','اسم الباقة',p.name||'')+
+    '<div id="telf">'+F.sel('kind','نوع الباقة',[['bill','تفعيل فاتورة'],['card','شحن كرت']],pkKind(p)==='card'?'card':'bill')+F.num('minutes','الدقائق',p.minutes||'')+F.num('sms','عدد الرسائل SMS',p.sms||'')+
+    F.num('gb','حجم الجيجات GB',p.gb||'')+F.chk('unl','غير محدود',p.unlimited)+F.num('days','المدة (أيام)',p.days||30)+'</div>'+
+    F.num('price','السعر على الوكيل ₪',p.price||'')+F.area('desc','وصف / تفاصيل (اختياري)',p.desc||'')+
+    F.chk('off','🎁 عرض (يظهر في المعروضات)',p.isOffer)+`<label class="f"><span>تاريخ انتهاء العرض (اختياري)</span><input type="date" name="end" value="${esc(p.offerEnd||'')}"></label>`+
+    F.chk('ntf','🔔 إرسال إشعار للوكلاء بهذا العرض عند الحفظ',!id&&!!offer)+F.chk('act','متاحة للوكلاء',p.active!==false)+
+    '<div class="err" id="e9"></div><button class="btn" data-go>حفظ</button>'+(id?'<button class="btn d" data-del>حذف</button>':''));
+  const tog=()=>{$('#telf',el).style.display=isGame(co(V(el,'co')))?'none':''};tog();
+  el.addEventListener('change',e=>{if(e.target.name==='co')tog()});
+  $('[data-go]',el).onclick=async()=>{
+    const name=V(el,'name'),price=+V(el,'price'),g=isGame(co(V(el,'co')));
+    if(!name)return $('#e9',el).textContent='أدخل اسم الباقة';
+    if(!(price>=0)||V(el,'price')==='')return $('#e9',el).textContent='أدخل السعر';
+    const d={companyId:V(el,'co'),name,kind:g?'game':V(el,'kind'),minutes:g?0:(+V(el,'minutes')||0),sms:g?0:(+V(el,'sms')||0),gb:g?0:(+V(el,'gb')||0),unlimited:g?false:V(el,'unl'),days:g?0:(+V(el,'days')||0),price,desc:V(el,'desc'),isOffer:V(el,'off'),offerEnd:V(el,'end'),active:V(el,'act'),updatedAt:Date.now()};
+    if(!id)d.createdAt=Date.now();
+    if(V(el,'ntf')&&d.isOffer&&d.active)d.notifyAt=Date.now();
+    if(await W([{t:'set',c:'packages',id:id||B.newId('packages'),d}],'تم الحفظ'))closeSheet(el);
+  };
+  const dl=$('[data-del]',el);
+  if(dl)dl.onclick=async()=>{if(await confirmBox('حذف الباقة؟ (الخطوط والطلبات القديمة ستبقى)','حذف',true)){if(await W([{t:'del',c:'packages',id}],'تم الحذف'))closeSheet(el)}};
+}
+
+/* ---- رسائل الدعم الفني ---- */
+const TK=[['tech','خلل تقني','🛠️'],['swap','تبديل SIM','🔁'],['esim','تحويل إلى eSIM','📲'],['slow','إنترنت ضعيف','🐌'],['cut','فصل رقم','✂️']];
+const tkName=k=>(TK.find(x=>x[0]===k)||[0,k])[1];
+const tkIcon=k=>(TK.find(x=>x[0]===k)||[0,0,'🛠️'])[2];
+const openTk=()=>S.tickets.filter(t=>t.status==='open').length;
+const ticketMsg=t=>['طلب دعم — '+tkName(t.kind),'الوكيل: '+(t.agentName||''),'الرقم: '+(t.number||''),t.note?'ملاحظة: '+t.note:''].filter(Boolean).join('\n');
+function viewTickets(){
+  const adm=isAdmin();
+  const l=[...S.tickets].sort((a,b)=>a.status===b.status?b.createdAt-a.createdAt:a.status==='open'?-1:1);
+  return(l.length?l.map(t=>`<div class="card" data-act="tkOpen" data-id="${t.id}"><div class="row"><div class="logo" style="width:42px;height:42px;background:var(--p);font-size:20px">${tkIcon(t.kind)}</div>
+    <div class="grow"><b>${esc(tkName(t.kind))}</b><div class="sub"><span class="num">${esc(t.number)}</span>${adm?' • 👤 '+esc(t.agentName||''):''}</div>${t.note?`<div class="sub">${esc(t.note)}</div>`:''}</div>
+    <div class="end">${pill(t.status)}<span class="sub">${fmt(t.createdAt)}</span></div></div></div>`).join(''):'<div class="empty">لا توجد رسائل دعم</div>')+(adm?'':'<button class="fab" data-act="tkNew">＋</button>');
+}
+function tkForm(num){
+  const el=sheet('رسالة للدعم الفني',
+    F.text('number','رقم الهاتف',num||'',{inputmode:'tel',dir:'ltr'})+
+    (S.lines.length?F.sel('pick','أو اختر من خطوطك',[['','— اختر —']].concat(S.lines.map(l=>[l.number,l.number+(l.customerName?' — '+l.customerName:'')])),''):'')+
+    '<div class="sub" style="margin-top:12px">اختر نوع الطلب</div><div>'+TK.map((k,i)=>`<label class="opt"><input type="radio" name="kind" value="${k[0]}"${i===0?' checked':''}><span>${k[2]} ${k[1]}</span></label>`).join('')+'</div>'+
+    F.area('note','ملاحظة (اختياري)')+'<div class="err" id="e10"></div><button class="btn" data-go>إرسال للدعم</button>');
+  el.addEventListener('change',e=>{if(e.target.name==='pick'&&e.target.value)$('[name=number]',el).value=e.target.value});
+  $('[data-go]',el).onclick=async()=>{
+    const er=$('#e10',el),number=digits(V(el,'number')),k=el.querySelector('[name=kind]:checked');
+    if(number.length<9)return er.textContent='أدخل رقم الهاتف';
+    if(!k)return er.textContent='اختر نوع الطلب';
+    const t={agentId:S.me.id,agentName:S.me.name||S.me.username,number,kind:k.value,note:V(el,'note'),status:'open',createdAt:Date.now()};
+    if(await W([{t:'set',c:'tickets',id:B.newId('tickets'),d:t}])){
+      closeSheet(el);
+      const d=sheet('تم إرسال رسالتك','<p>وصلت رسالتك إلى الدعم الفني، وسيصلك إشعار هنا عند الرد.</p><button class="btn wa" data-go>💬 إرسالها أيضاً عبر واتساب</button><button class="btn w" data-close>إغلاق</button>');
+      $('[data-go]',d).onclick=()=>openWA(ticketMsg(t));
+    }
+  };
+}
+function tkSheet(id){
+  const el=sheet('رسالة دعم','',()=>{
+    const t=S.tickets.find(x=>x.id===id);if(!t)return'<div class="empty">غير موجودة</div>';
+    const adm=isAdmin(),ln=adm&&S.lines.find(l=>l.number===digits(t.number));
+    const kv=(k,v)=>v?`<div class="kv"><span>${k}</span><b>${v}</b></div>`:'';
+    return`<div class="card">${kv('النوع',tkIcon(t.kind)+' '+esc(tkName(t.kind)))}${kv('الرقم','<span class="num">'+esc(t.number)+'</span>')}${kv('الحالة',pill(t.status))}${adm?kv('الوكيل',esc(t.agentName)):''}
+    ${kv('ملاحظة الوكيل',esc(t.note))}${kv('التاريخ',fmt(t.createdAt))}${kv('رد الدعم',esc(t.reply))}${kv('وقت الحل',fmt(t.resolvedAt))}</div>
+    ${adm&&t.status==='open'?'<button class="btn" data-a="res">تم الحل / رد على الوكيل</button>':''}
+    ${adm?'<button class="btn wa" data-a="waAgent">💬 مراسلة الوكيل على واتساب</button>':'<button class="btn wa" data-a="wa">💬 إرسالها عبر واتساب</button>'}
+    ${ln?'<button class="btn w" data-a="line">فتح الخط</button>':''}`;
+  });
+  el.addEventListener('click',e=>{
+    const x=e.target.closest('[data-a]');if(!x)return;const t=S.tickets.find(y=>y.id===id);if(!t)return;
+    if(x.dataset.a==='wa')openWA(ticketMsg(t));
+    if(x.dataset.a==='waAgent'){const u=ag(t.agentId);openWA('مرحباً '+((u&&u.name)||'')+'، بخصوص طلب الدعم: '+tkName(t.kind)+' '+t.number,u&&(u.whatsapp||u.phone))}
+    if(x.dataset.a==='line'){const ln=S.lines.find(l=>l.number===digits(t.number));if(ln)lineSheet(ln.id)}
+    if(x.dataset.a==='res'){
+      const f=sheet('تم الحل',F.area('reply','رد للوكيل (اختياري)')+'<button class="btn" data-go>تأكيد</button>');
+      $('[data-go]',f).onclick=async()=>{if(await W([{t:'set',c:'tickets',id,d:{status:'resolved',reply:V(f,'reply'),resolvedAt:Date.now(),resolvedBy:S.me.id}}],'تم'))closeSheet(f)};
+    }
+  });
+}
+/* ---- تعليمات الوكيل (عربي / English) — تتبع لغة التطبيق ---- */
+const HELP={
+ar:[
+['🚀 البداية',`<ol><li>سجّل الدخول باسم المستخدم وكلمة المرور، أو بحساب Google.</li><li>الحساب الجديد يحتاج <b>تفعيلاً من المدير</b>: اضغط «واتساب الدعم» وأرسل رسالة التسجيل.</li><li>بعد التفعيل يظهر <b>رصيدك المتاح</b> أعلى الشاشة الرئيسية. لا يمكنك إرسال طلبات إذا كان رصيدك صفراً.</li></ol>`],
+['💰 كيف يعمل الرصيد؟',`<ul><li>الرصيد <b>مسبق الدفع</b>: لا ديون ولا آجل. المدير يشحن رصيدك بعد استلام المبلغ منك.</li><li>عند إرسال أي طلب يُحجز مبلغه مؤقتاً، ويُخصم نهائياً <b>عند التنفيذ</b>. إذا رُفض الطلب أو أُلغي يعود المبلغ.</li><li><b>الرصيد المتاح = رصيدك − المبالغ المحجوزة للطلبات المعلّقة</b>.</li><li>كل الحركات (شحن، خصم، تصحيح) تظهر في «حسابي ← كشف الحساب».</li></ul>`],
+['💳 شحن رصيد كرت',`<ol><li>من الرئيسية اضغط «شحن رصيد كرت».</li><li>اختر الشركة (سلكوم، بلفون، بارتنر، …) ثم اختر <b>الباقة</b>. اضغط «التفاصيل» لقراءة ما تشمله.</li><li>أدخل <b>رقم الهاتف فقط</b> وتأكد منه جيداً، ثم اضغط «شحن».</li><li>لشحن جوال أو أوريدو اختر «شحن بمبلغ حر» (الحد الأدنى 10 ₪).</li></ol>`],
+['📲 تفعيل فاتورة',`<p><b>اشتراك جديد:</b></p><ol><li>اختر «تفعيل فاتورة» ← «اشتراك فاتورة جديد» ثم الشركة والباقة.</li><li>أدخل <b>رقم الشريحة (SIM)</b>، أو اختر <b>eSIM</b> (تُضاف رسوم eSIM على السعر وتظهر لك قبل الإرسال).</li><li>اكتب اسم الزبون ورقم التواصل إن طُلب، ثم أرسل الطلب.</li></ol><p><b>زبون قائم (تجديد):</b></p><ol><li>اختر «زبون قائم» وأدخل رقم الخط.</li><li>تظهر معلومات الخط: <b>فعّال إلى تاريخ كذا</b> أو <b>مفصول منذ تاريخ كذا</b>، وتاريخ آخر شحنة.</li><li>اختر الباقة المطلوبة وأرسل الطلب.</li></ol>`],
+['🎮 ألعاب وتطبيقات',`<p>اختر اللعبة أو التطبيق ← الباقة ← أدخل <b>معرّف الحساب (ID)</b> بدقة ← «شحن». أي خطأ في المعرّف قد يؤدي لشحن حساب آخر.</p>`],
+['🔎 البحث السريع',`<p>في مربع «ادخل الرقم أو الاسم أو رقم الشريحة» اكتب <b>جزءاً</b> من الرقم أو من اسم الزبون أو من رقم الشريحة، وتظهر الخطوط المطابقة فوراً. اضغط على الخط لرؤية تفاصيله أو لشحنه أو تجديده.</p>`],
+['🧾 متابعة الطلبات',`<ul><li><b>قيد الانتظار</b>: وصل المدير ولم يُنفَّذ بعد. يمكنك <b>إلغاؤه</b> من تفاصيل الطلب.</li><li><b>منفّذ</b>: تم الشحن/التفعيل وخُصم المبلغ، ويصلك إشعار.</li><li><b>مرفوض / ملغي</b>: لم يُخصم شيء. قد يظهر سبب الرفض في تفاصيل الطلب.</li><li>للاستعجال اضغط «إبلاغ الدعم عبر واتساب» داخل الطلب.</li></ul>`],
+['🎁 العروض والإشعارات',`<p>تبويب «العروض» يعرض الباقات المميزة. عندما ينشر المدير عرضاً جديداً يصلك إشعار. اسمح بالإشعارات من إعدادات الهاتف حتى تصلك وأنت خارج التطبيق.</p>`],
+['🛠️ الدعم الفني',`<p>للمشاكل اضغط «رسالة للدعم الفني» لإرسال تذكرة تتابعها داخل التطبيق، أو «الدعم على واتساب» للتواصل المباشر. اذكر <b>رقم الطلب</b> إن وُجد.</p>`],
+['✅ نصائح لتجنب الأخطاء',`<ul><li>راجع الرقم والشركة والباقة <b>قبل</b> الضغط على إرسال.</li><li>لا ترسل الطلب مرتين؛ انتظر التنفيذ أو راجع «طلباتي».</li><li>الأسعار تتغير أحياناً؛ السعر الظاهر قبل الإرسال هو المعتمد.</li><li>تأكد من وجود إنترنت عند الإرسال، ثم تحقق أن الطلب ظهر في «طلباتي».</li><li>يمكنك تغيير اللغة (عربي / English) من «حسابي».</li></ul>`]
+],
+en:[
+['🚀 Getting started',`<ol><li>Sign in with your username and password, or with Google.</li><li>A new account must be <b>activated by the manager</b>: tap the WhatsApp support button and send the registration message.</li><li>After activation your <b>available balance</b> shows at the top of Home. You cannot send orders with a zero balance.</li></ol>`],
+['💰 How the balance works',`<ul><li>The balance is <b>prepaid</b>: no debts or credit. The manager tops it up after receiving your payment.</li><li>When you send an order its amount is held; it is deducted for good <b>when the order is done</b>. If rejected or cancelled the amount returns.</li><li><b>Available = balance − amounts held for pending orders</b>.</li><li>All movements (top-ups, deductions, corrections) are in Account → Statement.</li></ul>`],
+['💳 Card top-up',`<ol><li>On Home tap “Card top-up”.</li><li>Choose the company, then the <b>package</b>. Tap “Details” to see what it includes.</li><li>Enter <b>the phone number only</b>, double-check it, then tap “Top up”.</li><li>For Jawwal or Ooredoo choose “Free amount” (minimum 10 ₪).</li></ol>`],
+['📲 Bill activation',`<p><b>New subscription:</b></p><ol><li>Choose “Bill activation” → “New bill subscription”, then company and package.</li><li>Enter the <b>SIM number</b>, or choose <b>eSIM</b> (the eSIM fee is added and shown before you send).</li><li>Enter the customer name/contact if asked, then send.</li></ol><p><b>Existing customer (renewal):</b></p><ol><li>Choose “Existing customer” and enter the line number.</li><li>You will see the line info: <b>active until …</b> or <b>disconnected since …</b>, plus the last top-up date.</li><li>Pick the package and send the order.</li></ol>`],
+['🎮 Games & apps',`<p>Choose the game/app → package → enter the exact <b>account ID</b> → “Top up”. A wrong ID may credit someone else’s account.</p>`],
+['🔎 Quick search',`<p>In the search box type <b>part of</b> a number, customer name or SIM number. Matching lines appear instantly; tap one to view, top up or renew it.</p>`],
+['🧾 Following orders',`<ul><li><b>Pending</b>: received by the manager, not done yet. You can <b>cancel</b> it from the order details.</li><li><b>Done</b>: executed and deducted; you get a notification.</li><li><b>Rejected / cancelled</b>: nothing deducted. A reason may appear in the order details.</li><li>If urgent, tap “Notify support via WhatsApp” inside the order.</li></ul>`],
+['🎁 Offers & notifications',`<p>The “Offers” tab lists featured packages. You get a notification when the manager publishes a new offer. Allow notifications in your phone settings to receive them while the app is closed.</p>`],
+['🛠️ Support',`<p>For problems tap “Message to support” to send a ticket you can follow in the app, or “WhatsApp support” for direct contact. Mention the <b>order number</b> if there is one.</p>`],
+['✅ Tips to avoid mistakes',`<ul><li>Check number, company and package <b>before</b> sending.</li><li>Do not send an order twice; wait for execution or check “My orders”.</li><li>Prices can change; the price shown before sending is the one that applies.</li><li>Make sure you are online when sending, then check the order appears in “My orders”.</li><li>You can switch language (Arabic / English) from Account.</li></ul>`]
+]};
+function helpSheet(){
+  const l=HELP[LANG==='en'?'en':'ar'];
+  const el=sheet(LANG==='en'?'How to use the app':'تعليمات استخدام التطبيق',
+    `<div class="helpbox" translate="no" dir="${LANG==='en'?'ltr':'rtl'}"><div class="sub">${esc(LANG==='en'?APP.nameEn:APP.name)}</div>${l.map((x,i)=>`<details class="hlp" ${i===0?'open':''}><summary>${x[0]}</summary><div class="hb2">${x[1]}</div></details>`).join('')}</div><button class="btn" data-close>${LANG==='en'?'Got it':'فهمت'}</button>`);
+  return el;
+}
+function helpFirst(p){
+  if(!p||p.role==='admin'||p.pending||p.active===false)return;
+  let seen=false;try{seen=!!localStorage.getItem('shahn_help_'+p.id)}catch(e){}
+  if(seen)return;
+  try{localStorage.setItem('shahn_help_'+p.id,'1')}catch(e){}
+  setTimeout(()=>{if(S.me&&S.me.id===p.id&&!sheets.length)helpSheet()},900);
+}
+
+function esimFeeForm(){
+  const el=sheet('رسوم تفعيل eSIM',F.num('fee','الرسوم (₪) تُضاف على سعر الباقة',esimFee())+'<button class="btn" data-go>حفظ</button>');
+  $('[data-go]',el).onclick=async()=>{const v=+V(el,'fee');if(!(v>=0)||V(el,'fee')==='')return toast('أدخل مبلغاً صحيحاً');if(await W([{t:'set',c:'settings',id:'main',d:{esimFee:v}}],'تم الحفظ'))closeSheet(el)};
+}
+
+langInit();boot();
+</script>
+</body>
+</html>

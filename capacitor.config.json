@@ -1,0 +1,17 @@
+{
+  "appId": "com.shahnraseed.app",
+  "appName": "شحن سلكوم",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SocialLogin": {
+      "providers": {
+        "google": true,
+        "facebook": false
+      },
+      "logLevel": 1
+    }
+  }
+}

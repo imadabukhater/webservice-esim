@@ -87,6 +87,14 @@ exports.onTicketUpdated = onDocumentUpdated('tickets/{id}', async (event) => {
   if (b.status === 'open' && a.status === 'resolved') await push([a.agentId], m.ticketResolvedMsg(a));
 });
 
+// المحادثة: رسالة الوكيل تصل للمدير، ورسالة المدير تصل لذلك الوكيل
+exports.onChatMessage = onDocumentCreated('msgs/{id}', async (event) => {
+  const x = event.data && event.data.data();
+  if (!x || !x.text) return;
+  if (x.from === 'admin') await push([x.agentId], m.chatMsg(x));
+  else if (x.from === 'agent') await push(await adminUids(), m.chatMsg(x));
+});
+
 exports.onUserCreated = onDocumentCreated('users/{uid}', async (event) => {
   const u = event.data && event.data.data();
   if (u && u.role === 'agent' && u.pending) await push(await adminUids(), m.newAgentMsg(u));

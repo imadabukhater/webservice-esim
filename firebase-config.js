@@ -6,6 +6,9 @@ window.FIREBASE_CONFIG = null;
 // Firebase > Authentication > Sign-in method > Google > Web SDK configuration
 window.GOOGLE_WEB_CLIENT_ID = '';
 
+// إشعارات المتصفح (Web Push): الصق هنا «Web Push certificates → Key pair» من Firebase > Project settings > Cloud Messaging
+window.VAPID_KEY = '';
+
 // منطقة خادم الإشعارات/كلمات المرور (يجب أن تطابق السر FN_REGION في GitHub). الافتراضي us-central1
 // window.FN_REGION = 'europe-west1';
 // مثال: window.GOOGLE_WEB_CLIENT_ID = '1234567890-abcxyz.apps.googleusercontent.com';

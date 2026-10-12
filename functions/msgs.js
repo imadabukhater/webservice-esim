@@ -54,4 +54,11 @@ function offerMsg(p, companyName) {
   };
 }
 
-module.exports = { adjustMsg, offerMsg, newOrderMsg, orderDoneMsg, orderRejectedMsg, topupMsg, newTicketMsg, ticketResolvedMsg, newAgentMsg, agentActivatedMsg };
+function chatMsg(x) {
+  const t = String(x.text || '');
+  return x.from === 'admin'
+    ? { title: 'رسالة من الدعم الفني', body: t.slice(0, 120) }
+    : { title: `رسالة من ${x.agentName || 'وكيل'}`, body: t.slice(0, 120) };
+}
+
+module.exports = { chatMsg, adjustMsg, offerMsg, newOrderMsg, orderDoneMsg, orderRejectedMsg, topupMsg, newTicketMsg, ticketResolvedMsg, newAgentMsg, agentActivatedMsg };

@@ -84,6 +84,19 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // المحادثة (الوكيل ↔ الدعم): الوكيل يقرأ ويكتب محادثته فقط، والمدير يقرأ الكل ويكتب لأي وكيل. لا تعديل بعد الإرسال
+    match /msgs/{id} {
+      allow read: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
+      allow create: if request.resource.data.keys().hasOnly(['agentId','agentName','from','text','createdAt','by'])
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+                    && request.resource.data.by == request.auth.uid
+                    && ( (isAdmin() && request.resource.data.from == 'admin')
+                      || (isAgent() && request.resource.data.from == 'agent' && request.resource.data.agentId == request.auth.uid) );
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
     // إعدادات عامة (رسوم eSIM): قراءة للجميع المفعّلين، كتابة للمدير
     match /settings/{id} {
       allow read: if isAdmin() || isAgent();

@@ -14,6 +14,7 @@ import configuration from './config/configuration';
 import { LoggerMiddleware } from './lib/logger.middleware';
 import { SessionModule } from './session/session.module';
 import { EmailModule } from './email/email.module';
+import { PaymentModule } from './payment/payment.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
@@ -32,6 +33,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     DrizzleModule,
     SessionModule,
     EmailModule,
+    PaymentModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

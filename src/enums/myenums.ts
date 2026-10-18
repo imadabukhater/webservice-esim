@@ -26,4 +26,27 @@ export enum PaymentStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   REFUNDED = 'refunded',
-}
+}
+export enum PaymentMethod {
+  PAYPAL = 'paypal',
+  CREDIT_CARD = 'credit_card',
+  JAWWAL_PAY = 'jawwal_pay',
+}
+export enum WalletProvider {
+  JAWWAL_PAY = 'jawwal_pay',
+}
+export enum WalletTransactionSource {
+  MAIL = 'mail',
+  WEBHOOK = 'webhook',
+  MANUAL = 'manual',
+}
+export enum WalletTransactionStatus {
+  UNMATCHED = 'unmatched',
+  MATCHED = 'matched',
+  IGNORED = 'ignored',
+}
+export enum PaymentClaimStatus {
+  PENDING = 'pending',
+  MATCHED = 'matched',
+  REJECTED = 'rejected',
+}

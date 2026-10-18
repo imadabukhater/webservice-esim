@@ -9,6 +9,7 @@ import {
   text,
   date,
   unique,
+  foreignKey,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 import { Role } from '../auth/role';
@@ -16,8 +17,11 @@ import {
   AdminActionCategory,
   AdminActionType,
   EsimStatus,
+  PaymentClaimStatus,
   PaymentStatus,
   PurchaseStatus,
+  WalletTransactionSource,
+  WalletTransactionStatus,
 } from '../enums/myenums';
 const ESIM_STATUS_VALUES = [
   EsimStatus.AVAILABLE,
@@ -42,6 +46,21 @@ const ADMIN_ACTION_CATEGORY_VALUES = [
   AdminActionCategory.PROVIDER,
   AdminActionCategory.CUSTOMER,
   AdminActionCategory.PURCHASE,
+] as const;
+const WALLET_TRANSACTION_SOURCE_VALUES = [
+  WalletTransactionSource.MAIL,
+  WalletTransactionSource.WEBHOOK,
+  WalletTransactionSource.MANUAL,
+] as const;
+const WALLET_TRANSACTION_STATUS_VALUES = [
+  WalletTransactionStatus.UNMATCHED,
+  WalletTransactionStatus.MATCHED,
+  WalletTransactionStatus.IGNORED,
+] as const;
+const PAYMENT_CLAIM_STATUS_VALUES = [
+  PaymentClaimStatus.PENDING,
+  PaymentClaimStatus.MATCHED,
+  PaymentClaimStatus.REJECTED,
 ] as const;
 const ADMIN_ACTION_TYPE_VALUES = [
   AdminActionType.UPDATE,
@@ -167,6 +186,85 @@ export const passwordResets = mysqlTable('PasswordReset', {
   expires_at: timestamp('expires_at').notNull(),
   created_at: timestamp('created_at').defaultNow(),
 });
+/**
+ * Incoming wallet transfers (e.g. Jawwal Pay) detected from the Gmail
+ * notification e-mails, a webhook or manual admin entry. Each notification
+ * carries a unique reference number which is used for de-duplication.
+ */
+export const walletTransactions = mysqlTable(
+  'WalletTransaction',
+  {
+    wallet_transaction_id: int('wallet_transaction_id')
+      .primaryKey()
+      .autoincrement(),
+    provider: varchar('provider', { length: 30 })
+      .notNull()
+      .default('jawwal_pay'),
+    reference: varchar('reference', { length: 100 }).notNull().unique(),
+    amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+    currency: varchar('currency', { length: 3 }).notNull().default('ILS'),
+    sender_name: varchar('sender_name', { length: 150 }),
+    sender_name_normalized: varchar('sender_name_normalized', { length: 150 }),
+    sender_phone: varchar('sender_phone', { length: 20 }),
+    balance_after: decimal('balance_after', { precision: 12, scale: 2 }),
+    raw_text: text('raw_text').notNull(),
+    source: mysqlEnum('source', WALLET_TRANSACTION_SOURCE_VALUES).notNull(),
+    status: mysqlEnum('status', WALLET_TRANSACTION_STATUS_VALUES)
+      .notNull()
+      .default(WalletTransactionStatus.UNMATCHED),
+    matched_order_id: int('matched_order_id'),
+    matched_at: timestamp('matched_at'),
+    received_at: timestamp('received_at').notNull(),
+    created_at: timestamp('created_at').defaultNow(),
+    updated_at: timestamp('updated_at').defaultNow().onUpdateNow(),
+  },
+  (table) => [
+    // Named explicitly: MySQL limits identifier names to 64 characters
+    foreignKey({
+      name: 'WalletTransaction_matched_order_fk',
+      columns: [table.matched_order_id],
+      foreignColumns: [esimPurchases.esim_purchase_id],
+    }).onDelete('set null'),
+  ],
+);
+/**
+ * A customer's statement "I paid order X from wallet Y / with reference Z".
+ * A claim is matched automatically against WalletTransaction rows, either
+ * immediately when submitted or later when the matching notification arrives.
+ */
+export const paymentClaims = mysqlTable(
+  'PaymentClaim',
+  {
+    claim_id: int('claim_id').primaryKey().autoincrement(),
+    order_id: int('order_id')
+      .notNull()
+      .unique()
+      .references(() => esimPurchases.esim_purchase_id, {
+        onDelete: 'cascade',
+      }),
+    customer_id: int('customer_id')
+      .notNull()
+      .references(() => users.user_id, { onDelete: 'cascade' }),
+    sender_name: varchar('sender_name', { length: 150 }),
+    sender_name_normalized: varchar('sender_name_normalized', { length: 150 }),
+    sender_phone: varchar('sender_phone', { length: 20 }),
+    reference: varchar('reference', { length: 100 }),
+    status: mysqlEnum('status', PAYMENT_CLAIM_STATUS_VALUES)
+      .notNull()
+      .default(PaymentClaimStatus.PENDING),
+    attempts: int('attempts').notNull().default(0),
+    matched_transaction_id: int('matched_transaction_id'),
+    created_at: timestamp('created_at').defaultNow(),
+    updated_at: timestamp('updated_at').defaultNow().onUpdateNow(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'PaymentClaim_matched_transaction_fk',
+      columns: [table.matched_transaction_id],
+      foreignColumns: [walletTransactions.wallet_transaction_id],
+    }).onDelete('set null'),
+  ],
+);
 export const usersRelations = relations(users, ({ many }) => ({
   purchases: many(esimPurchases),
   favoritePlans: many(customerFavoritePlans),
@@ -223,6 +321,32 @@ export const customerFavoritePlansRelations = relations(
   }),
 );
 
+export const walletTransactionsRelations = relations(
+  walletTransactions,
+  ({ one }) => ({
+    matchedOrder: one(esimPurchases, {
+      fields: [walletTransactions.matched_order_id],
+      references: [esimPurchases.esim_purchase_id],
+    }),
+  }),
+);
+export const paymentClaimsRelations = relations(paymentClaims, ({ one }) => ({
+  order: one(esimPurchases, {
+    fields: [paymentClaims.order_id],
+    references: [esimPurchases.esim_purchase_id],
+  }),
+  customer: one(users, {
+    fields: [paymentClaims.customer_id],
+    references: [users.user_id],
+  }),
+  matchedTransaction: one(walletTransactions, {
+    fields: [paymentClaims.matched_transaction_id],
+    references: [walletTransactions.wallet_transaction_id],
+  }),
+}));
 export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
-  user: one(users, { fields: [passwordResets.user_id], references: [users.user_id] }),
+  user: one(users, {
+    fields: [passwordResets.user_id],
+    references: [users.user_id],
+  }),
 }));

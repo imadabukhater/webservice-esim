@@ -27,6 +27,7 @@ import { pickDefined } from '../common/utils/object.utils';
 import { ensureFound } from '../common/utils/service.helpers';
 import type { Session } from '../common/types/auth';
 import { Role } from '../auth/role';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class OrderService {
   private readonly logger = new Logger(OrderService.name);
@@ -36,7 +37,11 @@ export class OrderService {
     private readonly esimService: EsimService,
     private readonly adminService: AdminService,
     private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
+  private get currency(): string {
+    return this.configService.get<string>('payment.currency', 'ILS');
+  }
   async getOrders(user: Session): Promise<OrderWithDetailsResponseDto[]> {
     // Admins get all orders, customers get only their own
     if (user.role === Role.ADMIN) {
@@ -136,7 +141,7 @@ export class OrderService {
       esim_id: null,
       order_number: orderNumber,
       amount: plan.price, // Get from plan
-      currency: 'EUR', // Default currency
+      currency: this.currency, // PAYMENT_CURRENCY (defaults to ILS)
       payment_status: PaymentStatus.PENDING,
       purchase_status: PurchaseStatus.PENDING,
       activation_date: activationDate,
@@ -157,7 +162,7 @@ export class OrderService {
         orderNumber,
         planName: plan.plan_name,
         amount: plan.price,
-        currency: 'EUR',
+        currency: this.currency,
       })
       .catch(() => {
         // Ignore email send errors; order creation succeeded regardless

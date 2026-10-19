@@ -58,7 +58,7 @@ export class PlanService {
       call_minutes: createPlanDto.call_minutes,
       sms_count: createPlanDto.sms_count,
       validity_days: createPlanDto.validity_days,
-      price: createPlanDto.price.toString(),
+      price: createPlanDto.price,
       description: createPlanDto.description,
       is_active: createPlanDto.is_active ?? true,
     });
@@ -141,7 +141,7 @@ export class PlanService {
           call_minutes: updatePlanDto.call_minutes,
           sms_count: updatePlanDto.sms_count,
           validity_days: updatePlanDto.validity_days,
-          price: updatePlanDto.price?.toString(),
+          price: updatePlanDto.price,
           description: updatePlanDto.description,
           is_active: updatePlanDto.is_active,
         }),

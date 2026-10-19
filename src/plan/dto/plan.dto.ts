@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNumber,
+  IsInt,
   IsBoolean,
   IsOptional,
   Min,
@@ -41,8 +42,12 @@ export class CreatePlanRequestDto {
   @Min(1)
   @Max(365)
   validity_days: number;
-  @ApiProperty({ description: 'Price in EUR', example: 19.99, minimum: 0 })
-  @IsNumber()
+  @ApiProperty({
+    description: 'Price in whole ILS (no fils), e.g. 20',
+    example: 20,
+    minimum: 0,
+  })
+  @IsInt()
   @Min(0)
   price: number;
   @ApiPropertyOptional({
@@ -108,12 +113,12 @@ export class UpdatePlanRequestDto {
   @Max(365)
   validity_days?: number;
   @ApiPropertyOptional({
-    description: 'Price in EUR',
-    example: 29.99,
+    description: 'Price in whole ILS (no fils), e.g. 30',
+    example: 30,
     minimum: 0,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(0)
   price?: number;
   @ApiPropertyOptional({
@@ -144,8 +149,8 @@ export class PlanResponseDto {
   sms_count: number;
   @ApiProperty({ description: 'Validity in days', example: 30 })
   validity_days: number;
-  @ApiProperty({ description: 'Price in EUR', example: '19.99' })
-  price: string;
+  @ApiProperty({ description: 'Price in whole ILS (no fils)', example: 20 })
+  price: number;
   @ApiPropertyOptional({ description: 'Plan description' })
   description?: string;
   @ApiProperty({ description: 'Plan active status', example: true })

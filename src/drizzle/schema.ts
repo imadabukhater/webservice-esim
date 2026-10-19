@@ -1,10 +1,10 @@
 import {
   mysqlTable,
+  decimal,
   int,
   varchar,
   boolean,
   timestamp,
-  decimal,
   mysqlEnum,
   text,
   date,
@@ -16,10 +16,13 @@ import { Role } from '../auth/role';
 import {
   AdminActionCategory,
   AdminActionType,
+  BalanceTransactionKind,
   EsimStatus,
+  PaymentClaimPurpose,
   PaymentClaimStatus,
   PaymentStatus,
   PurchaseStatus,
+  PurchaseType,
   WalletTransactionSource,
   WalletTransactionStatus,
 } from '../enums/myenums';
@@ -62,6 +65,21 @@ const PAYMENT_CLAIM_STATUS_VALUES = [
   PaymentClaimStatus.MATCHED,
   PaymentClaimStatus.REJECTED,
 ] as const;
+const PURCHASE_TYPE_VALUES = [
+  PurchaseType.NEW,
+  PurchaseType.RENEWAL,
+  PurchaseType.EXTENSION,
+] as const;
+const PAYMENT_CLAIM_PURPOSE_VALUES = [
+  PaymentClaimPurpose.ORDER,
+  PaymentClaimPurpose.TOPUP,
+] as const;
+const BALANCE_TRANSACTION_KIND_VALUES = [
+  BalanceTransactionKind.TOPUP,
+  BalanceTransactionKind.PURCHASE,
+  BalanceTransactionKind.REFUND,
+  BalanceTransactionKind.ADJUSTMENT,
+] as const;
 const ADMIN_ACTION_TYPE_VALUES = [
   AdminActionType.UPDATE,
   AdminActionType.DELETE,
@@ -79,6 +97,8 @@ export const users = mysqlTable('User', {
   is_verified: boolean('is_verified').default(false),
   last_login: timestamp('last_login'),
   is_active: boolean('is_active').default(true),
+  // Prepaid balance in whole currency units (see BalanceTransaction ledger)
+  balance: int('balance').notNull().default(0),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
@@ -99,7 +119,8 @@ export const plans = mysqlTable('Plan', {
   call_minutes: int('call_minutes').default(0),
   sms_count: int('sms_count').default(0),
   validity_days: int('validity_days').notNull(),
-  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  // Whole currency units only (no fils), e.g. 20 ILS
+  price: int('price').notNull(),
   description: text('description'),
   is_active: boolean('is_active').default(true),
 });
@@ -115,38 +136,55 @@ export const esims = mysqlTable('ESIM', {
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
-export const esimPurchases = mysqlTable('ESIMPurchase', {
-  esim_purchase_id: int('esim_purchase_id').primaryKey().autoincrement(),
-  customer_id: int('customer_id')
-    .notNull()
-    .references(() => users.user_id, { onDelete: 'cascade' }),
-  plan_id: int('plan_id')
-    .notNull()
-    .references(() => plans.plan_id, { onDelete: 'restrict' }),
-  esim_id: int('esim_id')
-    .unique()
-    .references(() => esims.esim_id, { onDelete: 'set null' }),
-  order_number: varchar('order_number', { length: 50 }).notNull().unique(),
-  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).default('EUR'),
-  purchase_status: mysqlEnum('purchase_status', PURCHASE_STATUS_VALUES).default(
-    PurchaseStatus.PENDING,
-  ),
-  payment_status: mysqlEnum('payment_status', PAYMENT_STATUS_VALUES).default(
-    PaymentStatus.PENDING,
-  ),
-  payment_method: varchar('payment_method', { length: 20 })
-    .notNull()
-    .default('paypal'),
-  payment_reference: varchar('payment_reference', { length: 100 }).unique(),
-  transaction_id: varchar('transaction_id', { length: 100 }).unique(),
-  sent_at: timestamp('sent_at'),
-  activation_date: timestamp('activation_date'),
-  expiry_date: date('expiry_date').notNull(),
-  purchase_date: timestamp('purchase_date').defaultNow(),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow().onUpdateNow(),
-});
+export const esimPurchases = mysqlTable(
+  'ESIMPurchase',
+  {
+    esim_purchase_id: int('esim_purchase_id').primaryKey().autoincrement(),
+    customer_id: int('customer_id')
+      .notNull()
+      .references(() => users.user_id, { onDelete: 'cascade' }),
+    plan_id: int('plan_id')
+      .notNull()
+      .references(() => plans.plan_id, { onDelete: 'restrict' }),
+    esim_id: int('esim_id')
+      .unique()
+      .references(() => esims.esim_id, { onDelete: 'set null' }),
+    order_number: varchar('order_number', { length: 50 }).notNull().unique(),
+    // Whole currency units only (no fils)
+    amount: int('amount').notNull(),
+    currency: varchar('currency', { length: 3 }).default('ILS'),
+    purchase_type: mysqlEnum('purchase_type', PURCHASE_TYPE_VALUES)
+      .notNull()
+      .default(PurchaseType.NEW),
+    // For renewal / extension orders: the original purchase (same eSIM line)
+    renews_purchase_id: int('renews_purchase_id'),
+    purchase_status: mysqlEnum(
+      'purchase_status',
+      PURCHASE_STATUS_VALUES,
+    ).default(PurchaseStatus.PENDING),
+    payment_status: mysqlEnum('payment_status', PAYMENT_STATUS_VALUES).default(
+      PaymentStatus.PENDING,
+    ),
+    payment_method: varchar('payment_method', { length: 20 })
+      .notNull()
+      .default('paypal'),
+    payment_reference: varchar('payment_reference', { length: 100 }).unique(),
+    transaction_id: varchar('transaction_id', { length: 100 }).unique(),
+    sent_at: timestamp('sent_at'),
+    activation_date: timestamp('activation_date'),
+    expiry_date: date('expiry_date').notNull(),
+    purchase_date: timestamp('purchase_date').defaultNow(),
+    created_at: timestamp('created_at').defaultNow(),
+    updated_at: timestamp('updated_at').defaultNow().onUpdateNow(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'ESIMPurchase_renews_fk',
+      columns: [table.renews_purchase_id],
+      foreignColumns: [table.esim_purchase_id],
+    }).onDelete('set null'),
+  ],
+);
 export const adminActions = mysqlTable('AdminAction', {
   action_id: int('action_id').primaryKey().autoincrement(),
   admin_id: int('admin_id')
@@ -228,6 +266,44 @@ export const walletTransactions = mysqlTable(
   ],
 );
 /**
+ * Ledger of every change to a customer's prepaid balance. Users.balance is
+ * the running total; each row records the balance after the change.
+ */
+export const balanceTransactions = mysqlTable(
+  'BalanceTransaction',
+  {
+    balance_transaction_id: int('balance_transaction_id')
+      .primaryKey()
+      .autoincrement(),
+    customer_id: int('customer_id').notNull(),
+    amount: int('amount').notNull(), // signed: +credit, -debit
+    balance_after: int('balance_after').notNull(),
+    kind: mysqlEnum('kind', BALANCE_TRANSACTION_KIND_VALUES).notNull(),
+    order_id: int('order_id'),
+    wallet_transaction_id: int('wallet_transaction_id'),
+    note: varchar('note', { length: 255 }),
+    created_at: timestamp('created_at').defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'BalanceTransaction_customer_fk',
+      columns: [table.customer_id],
+      foreignColumns: [users.user_id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'BalanceTransaction_order_fk',
+      columns: [table.order_id],
+      foreignColumns: [esimPurchases.esim_purchase_id],
+    }).onDelete('set null'),
+    foreignKey({
+      name: 'BalanceTransaction_wallet_fk',
+      columns: [table.wallet_transaction_id],
+      foreignColumns: [walletTransactions.wallet_transaction_id],
+    }).onDelete('set null'),
+  ],
+);
+
+/**
  * A customer's statement "I paid order X from wallet Y / with reference Z".
  * A claim is matched automatically against WalletTransaction rows, either
  * immediately when submitted or later when the matching notification arrives.
@@ -236,12 +312,17 @@ export const paymentClaims = mysqlTable(
   'PaymentClaim',
   {
     claim_id: int('claim_id').primaryKey().autoincrement(),
-    order_id: int('order_id')
+    purpose: mysqlEnum('purpose', PAYMENT_CLAIM_PURPOSE_VALUES)
       .notNull()
+      .default(PaymentClaimPurpose.ORDER),
+    // Set for order claims; NULL for balance top-ups
+    order_id: int('order_id')
       .unique()
       .references(() => esimPurchases.esim_purchase_id, {
         onDelete: 'cascade',
       }),
+    // Requested top-up amount in whole currency units
+    topup_amount: int('topup_amount'),
     customer_id: int('customer_id')
       .notNull()
       .references(() => users.user_id, { onDelete: 'cascade' }),
@@ -344,6 +425,16 @@ export const paymentClaimsRelations = relations(paymentClaims, ({ one }) => ({
     references: [walletTransactions.wallet_transaction_id],
   }),
 }));
+export const balanceTransactionsRelations = relations(
+  balanceTransactions,
+  ({ one }) => ({
+    customer: one(users, {
+      fields: [balanceTransactions.customer_id],
+      references: [users.user_id],
+    }),
+  }),
+);
+
 export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
   user: one(users, {
     fields: [passwordResets.user_id],

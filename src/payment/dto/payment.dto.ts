@@ -3,6 +3,8 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  Max,
+  NotEquals,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,10 +13,13 @@ import {
   MinLength,
 } from 'class-validator';
 import {
+  BalanceTransactionKind,
+  PaymentClaimPurpose,
   PaymentClaimStatus,
   WalletTransactionSource,
   WalletTransactionStatus,
 } from '../../enums/myenums';
+import type { OrderWithDetailsResponseDto } from '../../order/dto/order.dto';
 
 /** Body of the customer's "I have paid" request. */
 export class SubmitPaymentClaimDto {
@@ -51,6 +56,62 @@ export class SubmitPaymentClaimDto {
   @IsString()
   @MaxLength(100)
   reference?: string;
+}
+
+/** Body of POST /payments/topups: add prepaid balance by transfer. */
+export class SubmitTopupDto {
+  @ApiProperty({
+    description: 'Amount to add to the prepaid balance, in whole ILS',
+    example: 50,
+    minimum: 1,
+  })
+  @IsInt()
+  @Min(1)
+  @Max(100000)
+  amount: number;
+
+  @ApiPropertyOptional({
+    description: 'Full name of the Jawwal Pay wallet owner who sends the money',
+    example: 'المعتز بالله عاطف ابو خاطر',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(150)
+  sender_name?: string;
+
+  @ApiPropertyOptional({ description: 'Phone of the sending wallet' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  sender_phone?: string;
+
+  @ApiPropertyOptional({ description: 'Transfer reference number' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  reference?: string;
+}
+
+/** Body of POST /payments/balances/:customerId/adjust (Admin). */
+export class AdjustBalanceDto {
+  @ApiProperty({
+    description:
+      'Signed amount in whole ILS: positive credits, negative debits',
+    example: 100,
+  })
+  @IsInt()
+  @NotEquals(0)
+  amount: number;
+
+  @ApiProperty({
+    description: 'Reason, e.g. cash top-up received in the shop',
+    example: 'Cash top-up at the office',
+  })
+  @IsString()
+  @MinLength(3)
+  @MaxLength(255)
+  note: string;
 }
 
 /** Body of POST /payments/notifications and POST /payments/transactions. */
@@ -115,7 +176,9 @@ export class WalletTransactionResponseDto {
 
 export class PaymentClaimResponseDto {
   claim_id: number;
-  order_id: number;
+  purpose: PaymentClaimPurpose;
+  order_id?: number;
+  topup_amount?: number;
   customer_id: number;
   sender_name?: string;
   sender_phone?: string;
@@ -140,8 +203,35 @@ export class ClaimResultDto {
   status: ClaimResultStatus;
   message: string;
   claim: PaymentClaimResponseDto;
-  order_payment_status: string;
-  order_purchase_status: string;
+  /** Order claims: payment and purchase status of the order. */
+  order_payment_status?: string;
+  order_purchase_status?: string;
+  /** Order claims, once matched: the eSIM with its QR code. */
+  esim?: OrderWithDetailsResponseDto['esim'];
+  /** Top-up claims, once matched: the new prepaid balance. */
+  balance?: number;
+}
+
+export class BalanceTransactionResponseDto {
+  balance_transaction_id: number;
+  amount: number;
+  balance_after: number;
+  kind: BalanceTransactionKind;
+  order_id?: number;
+  note?: string;
+  created_at: Date;
+}
+
+export class BalanceResponseDto {
+  customer_id: number;
+  balance: number;
+  currency: string;
+  transactions: BalanceTransactionResponseDto[];
+}
+
+export class PayWithBalanceResultDto {
+  order: OrderWithDetailsResponseDto;
+  balance: number;
 }
 
 export class IngestResultDto {

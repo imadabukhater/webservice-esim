@@ -29,6 +29,13 @@
       "when": 1792350953685,
       "tag": "0003_rare_zaran",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1792381958850,
+      "tag": "0004_payment_balance_renewals",
+      "breakpoints": true
     }
   ]
 }

@@ -110,7 +110,7 @@ describe('Plans', () => {
           call_minutes: 100,
           sms_count: 50,
           validity_days: 30,
-          price: 29.99,
+          price: 30,
           description: 'Test plan description',
           is_active: true,
         });
@@ -133,7 +133,7 @@ describe('Plans', () => {
           call_minutes: 0,
           sms_count: 0,
           validity_days: 15,
-          price: 19.99,
+          price: 20,
         });
 
       expect(response.statusCode).toBe(403);
@@ -147,7 +147,7 @@ describe('Plans', () => {
         call_minutes: 0,
         sms_count: 0,
         validity_days: 15,
-        price: 19.99,
+        price: 20,
       });
 
       expect(response.statusCode).toBe(401);
@@ -175,7 +175,7 @@ describe('Plans', () => {
           call_minutes: 0,
           sms_count: 0,
           validity_days: 15,
-          price: 19.99,
+          price: 20,
         });
 
       // Should fail due to foreign key constraint or validation
@@ -190,7 +190,7 @@ describe('Plans', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           plan_name: `Updated Plan ${Date.now()}`,
-          price: 34.99,
+          price: 35,
         });
 
       expect(response.statusCode).toBe(200);
@@ -258,7 +258,7 @@ describe('Plans', () => {
           call_minutes: 0,
           sms_count: 0,
           validity_days: 15,
-          price: 14.99,
+          price: 15,
           is_active: true,
         });
 

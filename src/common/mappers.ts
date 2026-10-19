@@ -1,4 +1,9 @@
-import { EsimStatus, PaymentStatus, PurchaseStatus } from '../enums/myenums';
+import {
+  EsimStatus,
+  PaymentStatus,
+  PurchaseStatus,
+  PurchaseType,
+} from '../enums/myenums';
 import { ensureBoolean, ensureDate } from './utils/mapper.utils';
 // Types from entities
 import type {
@@ -120,7 +125,9 @@ export const mapToOrderResponse = (order: OrderEntity): OrderResponseDto => ({
   esim_id: order.esim_id ?? undefined,
   order_number: order.order_number,
   amount: order.amount,
-  currency: order.currency ?? 'EUR',
+  currency: order.currency ?? 'ILS',
+  purchase_type: order.purchase_type ?? PurchaseType.NEW,
+  renews_purchase_id: order.renews_purchase_id ?? undefined,
   purchase_status: order.purchase_status ?? PurchaseStatus.PENDING,
   payment_status: order.payment_status ?? PaymentStatus.PENDING,
   payment_method: order.payment_method,

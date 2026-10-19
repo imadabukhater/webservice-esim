@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateOrderDto,
+  RenewOrderDto,
   UpdateOrderDto,
   UpdatePaymentStatusDto,
   OrderResponseDto,
@@ -83,6 +84,55 @@ export class OrderController {
     const orderData = { ...createOrderDto, customer_id: user.userId };
     return this.orderService.createOrder(orderData);
   }
+  @Post(':id/renew')
+  @UseGuards(OrderAccessGuard)
+  @Roles(Role.CUSTOMER)
+  @HttpCode(201)
+  @ApiOperation({
+    summary:
+      'Renew or extend your eSIM line (Customer only). Costs the same as the plan.',
+  })
+  @ApiParam({ name: 'id', description: 'Original order ID', example: 1 })
+  @ApiResponse({
+    status: 201,
+    description: 'Renewal order created; pay it to apply the change',
+    type: OrderResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Line cannot be renewed' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async renewOrder(
+    @CurrentUser() user: Session,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() renewOrderDto: RenewOrderDto,
+  ): Promise<OrderResponseDto> {
+    return this.orderService.createRenewalOrder(
+      user.userId,
+      id,
+      renewOrderDto.type,
+    );
+  }
+
+  @Post(':id/activate')
+  @UseGuards(OrderAccessGuard)
+  @Roles(Role.CUSTOMER)
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Activate the eSIM of a paid order (Customer only)',
+  })
+  @ApiParam({ name: 'id', description: 'Order ID', example: 1 })
+  @ApiResponse({
+    status: 200,
+    description: 'Order activated; includes the eSIM QR code',
+    type: OrderWithDetailsResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Order is not paid' })
+  async activateOrder(
+    @CurrentUser() user: Session,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrderWithDetailsResponseDto> {
+    return this.orderService.activateOrder(id, user.userId);
+  }
+
   @Put(':id')
   @Roles(Role.ADMIN)
   @HttpCode(200)

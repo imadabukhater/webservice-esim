@@ -69,7 +69,7 @@ export class EsimWithPlanResponseDto extends EsimResponseDto {
     call_minutes: number;
     sms_count: number;
     validity_days: number;
-    price: string;
+    price: number;
     provider: {
       provider_id: number;
       name: string;

@@ -23,6 +23,8 @@ import {
 import { timingSafeEqual } from 'crypto';
 import { PaymentService } from './payment.service';
 import {
+  AdjustBalanceDto,
+  BalanceResponseDto,
   ClaimResultDto,
   IngestNotificationDto,
   IngestResultDto,
@@ -31,7 +33,9 @@ import {
   MatchTransactionDto,
   PaymentClaimResponseDto,
   PaymentInstructionsDto,
+  PayWithBalanceResultDto,
   SubmitPaymentClaimDto,
+  SubmitTopupDto,
   WalletTransactionResponseDto,
 } from './dto/payment.dto';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';
@@ -92,6 +96,84 @@ export class PaymentController {
     @Param('orderId', ParseIntPipe) orderId: number,
   ): Promise<ClaimResultDto> {
     return this.paymentService.getClaimForOrder(user, orderId);
+  }
+
+  @Post('topups')
+  @Roles(Role.CUSTOMER)
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Add prepaid balance: confirm a Jawwal Pay transfer of the given amount. Credited automatically when the transfer notification arrives (or immediately if it already did).',
+  })
+  @ApiResponse({ status: 200, type: ClaimResultDto })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  submitTopup(
+    @CurrentUser() user: Session,
+    @Body() dto: SubmitTopupDto,
+  ): Promise<ClaimResultDto> {
+    return this.paymentService.submitTopup(user, dto);
+  }
+
+  @Get('topups')
+  @Roles(Role.CUSTOMER)
+  @ApiOperation({ summary: 'Your balance top-up requests and their status' })
+  @ApiResponse({ status: 200, type: [PaymentClaimResponseDto] })
+  getTopups(@CurrentUser() user: Session): Promise<PaymentClaimResponseDto[]> {
+    return this.paymentService.getTopups(user);
+  }
+
+  @Get('balance')
+  @Roles(Role.CUSTOMER)
+  @ApiOperation({ summary: 'Your prepaid balance and recent movements' })
+  @ApiResponse({ status: 200, type: BalanceResponseDto })
+  getBalance(@CurrentUser() user: Session): Promise<BalanceResponseDto> {
+    return this.paymentService.getBalance(user.userId);
+  }
+
+  @Post('orders/:orderId/pay-with-balance')
+  @Roles(Role.CUSTOMER)
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Pay a pending order (purchase, renewal or extension) from your prepaid balance. The eSIM and QR code are returned at once.',
+  })
+  @ApiParam({ name: 'orderId', example: 1 })
+  @ApiResponse({ status: 200, type: PayWithBalanceResultDto })
+  @ApiResponse({ status: 400, description: 'Insufficient balance' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  payWithBalance(
+    @CurrentUser() user: Session,
+    @Param('orderId', ParseIntPipe) orderId: number,
+  ): Promise<PayWithBalanceResultDto> {
+    return this.paymentService.payWithBalance(user, orderId);
+  }
+
+  @Get('balances/:customerId')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Balance of a customer (Admin only)' })
+  @ApiParam({ name: 'customerId', example: 2 })
+  @ApiResponse({ status: 200, type: BalanceResponseDto })
+  getCustomerBalance(
+    @Param('customerId', ParseIntPipe) customerId: number,
+  ): Promise<BalanceResponseDto> {
+    return this.paymentService.getBalance(customerId);
+  }
+
+  @Post('balances/:customerId/adjust')
+  @Roles(Role.ADMIN)
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Credit or debit a customer balance, e.g. for a cash top-up in the shop (Admin only)',
+  })
+  @ApiParam({ name: 'customerId', example: 2 })
+  @ApiResponse({ status: 200, type: BalanceResponseDto })
+  adjustBalance(
+    @CurrentUser() user: Session,
+    @Param('customerId', ParseIntPipe) customerId: number,
+    @Body() dto: AdjustBalanceDto,
+  ): Promise<BalanceResponseDto> {
+    return this.paymentService.adjustBalance(customerId, dto, user.userId);
   }
 
   // ----------------------------- ingestion -----------------------------

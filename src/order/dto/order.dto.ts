@@ -2,14 +2,21 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNumber,
+  IsInt,
   IsEnum,
+  IsIn,
   IsOptional,
   IsDateString,
   IsNotEmpty,
   Min,
   MaxLength,
 } from 'class-validator';
-import { PaymentStatus, PurchaseStatus, EsimStatus } from '../../enums/myenums';
+import {
+  PaymentStatus,
+  PurchaseStatus,
+  PurchaseType,
+  EsimStatus,
+} from '../../enums/myenums';
 export class CreateOrderDto {
   @ApiProperty({ description: 'Plan ID to purchase', example: 1 })
   @IsNumber()
@@ -23,12 +30,26 @@ export class CreateOrderDto {
   @IsDateString()
   activation_date?: string;
 }
+export class RenewOrderDto {
+  @ApiProperty({
+    description:
+      'renewal: a new validity period starts today. extension: validity is added to the current expiry. Both cost the plan price.',
+    enum: [PurchaseType.RENEWAL, PurchaseType.EXTENSION],
+    example: PurchaseType.RENEWAL,
+  })
+  @IsIn([PurchaseType.RENEWAL, PurchaseType.EXTENSION])
+  type: PurchaseType.RENEWAL | PurchaseType.EXTENSION;
+}
+
 // Internal type used by service (includes customer_id from session)
 export type CreateOrderData = CreateOrderDto & { customer_id: number };
 export class UpdateOrderDto {
-  @ApiPropertyOptional({ description: 'Order amount', example: 29.99 })
+  @ApiPropertyOptional({
+    description: 'Order amount in whole ILS (no fils)',
+    example: 30,
+  })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(0)
   amount?: number;
   @ApiPropertyOptional({ description: 'Currency code', example: 'EUR' })
@@ -129,8 +150,10 @@ export class OrderResponseDto {
   plan_id: number;
   esim_id?: number;
   order_number: string;
-  amount: string;
+  amount: number;
   currency: string;
+  purchase_type: PurchaseType;
+  renews_purchase_id?: number;
   purchase_status: PurchaseStatus;
   payment_status: PaymentStatus;
   payment_method: string;
@@ -159,7 +182,7 @@ export class OrderWithDetailsResponseDto extends OrderResponseDto {
       plan_id: number;
       plan_name: string;
       data_amount_gb: number;
-      price: string;
+      price: number;
     };
   };
 }

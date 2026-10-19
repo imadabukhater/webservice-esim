@@ -31,6 +31,7 @@ export enum PaymentMethod {
   PAYPAL = 'paypal',
   CREDIT_CARD = 'credit_card',
   JAWWAL_PAY = 'jawwal_pay',
+  BALANCE = 'balance',
 }
 export enum WalletProvider {
   JAWWAL_PAY = 'jawwal_pay',
@@ -49,4 +50,20 @@ export enum PaymentClaimStatus {
   PENDING = 'pending',
   MATCHED = 'matched',
   REJECTED = 'rejected',
+}
+
+export enum PurchaseType {
+  NEW = 'new',
+  RENEWAL = 'renewal',
+  EXTENSION = 'extension',
+}
+export enum PaymentClaimPurpose {
+  ORDER = 'order',
+  TOPUP = 'topup',
+}
+export enum BalanceTransactionKind {
+  TOPUP = 'topup',
+  PURCHASE = 'purchase',
+  REFUND = 'refund',
+  ADJUSTMENT = 'adjustment',
 }

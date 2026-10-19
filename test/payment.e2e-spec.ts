@@ -200,6 +200,7 @@ describe('Payments (Jawwal Pay automatic verification)', () => {
       expect(response.body.status).toBe('matched');
       expect(response.body.order_payment_status).toBe('completed');
       expect(response.body.claim.attempts).toBe(2);
+      expect(response.body.esim.qr_code).toBeDefined();
     });
 
     it('reports already paid on a further claim', async () => {

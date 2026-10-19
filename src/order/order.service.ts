@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   InjectDrizzle,
   type DatabaseProvider,
@@ -22,12 +28,20 @@ import {
   EsimStatus,
   PaymentStatus,
   PurchaseStatus,
+  PurchaseType,
 } from '../enums/myenums';
 import { pickDefined } from '../common/utils/object.utils';
 import { ensureFound } from '../common/utils/service.helpers';
+import {
+  fromDateOnly,
+  projectExpiry,
+  toDateOnly,
+} from '../common/utils/date.utils';
 import type { Session } from '../common/types/auth';
 import { Role } from '../auth/role';
-import { ConfigService } from '@nestjs/config';
+
+type OrderRow = typeof esimPurchases.$inferSelect;
+
 @Injectable()
 export class OrderService {
   private readonly logger = new Logger(OrderService.name);
@@ -39,9 +53,12 @@ export class OrderService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {}
+
+  /** Currency of every order (PAYMENT_CURRENCY, default ILS). */
   private get currency(): string {
     return this.configService.get<string>('payment.currency', 'ILS');
   }
+
   async getOrders(user: Session): Promise<OrderWithDetailsResponseDto[]> {
     // Admins get all orders, customers get only their own
     if (user.role === Role.ADMIN) {
@@ -49,12 +66,14 @@ export class OrderService {
     }
     return this.getOrdersByUserId(user.userId);
   }
+
   async getAllOrders(): Promise<OrderWithDetailsResponseDto[]> {
     const orders = await this.db.query.esimPurchases.findMany({
       with: { esim: { with: { plan: true } } },
     });
     return orders.map(mapToOrderWithDetails);
   }
+
   async getOrderById(id: number): Promise<OrderWithDetailsResponseDto> {
     const order = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, id),
@@ -64,6 +83,7 @@ export class OrderService {
       ensureFound(order, `Order with ID ${id} not found`),
     );
   }
+
   async getOrderByOrderNumber(
     orderNumber: string,
   ): Promise<OrderWithDetailsResponseDto> {
@@ -75,6 +95,7 @@ export class OrderService {
       ensureFound(order, `Order with number ${orderNumber} not found`),
     );
   }
+
   async getOrdersByUserId(
     userId: number,
   ): Promise<OrderWithDetailsResponseDto[]> {
@@ -84,6 +105,7 @@ export class OrderService {
     });
     return orders.map(mapToOrderWithDetails);
   }
+
   async createOrder(
     createOrderDto: CreateOrderData,
   ): Promise<OrderResponseDto> {
@@ -99,6 +121,7 @@ export class OrderService {
     if (!customer.is_active) {
       throw new BadRequestException(`Customer account is not active`);
     }
+
     // Validate plan exists and is active
     const plan = await this.db.query.plans.findFirst({
       where: eq(plans.plan_id, createOrderDto.plan_id),
@@ -131,22 +154,27 @@ export class OrderService {
     const activationDate = createOrderDto.activation_date
       ? new Date(createOrderDto.activation_date)
       : new Date();
+
     // expiry_date = activation_date + validity_days
     const expiryDate = new Date(activationDate);
     expiryDate.setDate(expiryDate.getDate() + plan.validity_days);
+
     const orderNumber = this.generateOrderNumber();
+
     const [newOrder] = await this.db.insert(esimPurchases).values({
       customer_id: createOrderDto.customer_id,
       plan_id: createOrderDto.plan_id,
       esim_id: null,
       order_number: orderNumber,
-      amount: plan.price, // Get from plan
-      currency: this.currency, // PAYMENT_CURRENCY (defaults to ILS)
+      amount: plan.price, // whole currency units, same price for every provider
+      currency: this.currency,
+      purchase_type: PurchaseType.NEW,
       payment_status: PaymentStatus.PENDING,
       purchase_status: PurchaseStatus.PENDING,
       activation_date: activationDate,
       expiry_date: expiryDate,
     });
+
     const createdOrder = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, newOrder.insertId),
     });
@@ -154,6 +182,7 @@ export class OrderService {
       createdOrder,
       'Failed to create order',
     );
+
     // Send order-received email (non-blocking)
     this.emailService
       .sendOrderReceivedEmail({
@@ -167,19 +196,139 @@ export class OrderService {
       .catch(() => {
         // Ignore email send errors; order creation succeeded regardless
       });
+
     return mapToOrderResponse(foundCreatedOrder);
   }
+
+  /**
+   * Renew or extend an existing eSIM line. Both cost the plan's current
+   * price, the same for every provider. The renewal order is paid like any
+   * other order; once payment completes the original line's expiry moves.
+   */
+  async createRenewalOrder(
+    customerId: number,
+    purchaseId: number,
+    type: PurchaseType.RENEWAL | PurchaseType.EXTENSION,
+  ): Promise<OrderResponseDto> {
+    const original = await this.db.query.esimPurchases.findFirst({
+      where: eq(esimPurchases.esim_purchase_id, purchaseId),
+    });
+    if (!original || original.customer_id !== customerId) {
+      throw new NotFoundException(`Order with ID ${purchaseId} not found`);
+    }
+    if (original.purchase_type !== PurchaseType.NEW) {
+      throw new BadRequestException(
+        'Only an original purchase can be renewed or extended',
+      );
+    }
+    if (!original.esim_id) {
+      throw new BadRequestException('This order has no eSIM line assigned yet');
+    }
+
+    const plan = await this.db.query.plans.findFirst({
+      where: eq(plans.plan_id, original.plan_id),
+    });
+    const foundPlan = ensureFound(
+      plan,
+      `Plan with ID ${original.plan_id} not found`,
+    );
+    if (!foundPlan.is_active) {
+      throw new BadRequestException(
+        `Plan ${foundPlan.plan_name} is not active and cannot be renewed`,
+      );
+    }
+
+    const today = toDateOnly(new Date());
+    const currentExpiry = toDateOnly(original.expiry_date);
+    if (type === PurchaseType.EXTENSION && currentExpiry < today) {
+      throw new BadRequestException(
+        'This line has already expired. Renew it instead of extending it.',
+      );
+    }
+
+    const pending = await this.db.query.esimPurchases.findFirst({
+      where: and(
+        eq(esimPurchases.renews_purchase_id, purchaseId),
+        eq(esimPurchases.payment_status, PaymentStatus.PENDING),
+      ),
+    });
+    if (pending) {
+      throw new BadRequestException(
+        'A renewal or extension for this line is already waiting for payment',
+      );
+    }
+
+    const orderNumber = this.generateOrderNumber();
+    await this.db.insert(esimPurchases).values({
+      customer_id: customerId,
+      plan_id: foundPlan.plan_id,
+      esim_id: null,
+      renews_purchase_id: purchaseId,
+      purchase_type: type,
+      order_number: orderNumber,
+      amount: foundPlan.price,
+      currency: this.currency,
+      payment_status: PaymentStatus.PENDING,
+      purchase_status: PurchaseStatus.PENDING,
+      // Projected expiry, recalculated when the payment completes
+      expiry_date: fromDateOnly(
+        projectExpiry(type, currentExpiry, foundPlan.validity_days, today),
+      ),
+    });
+
+    const created = ensureFound(
+      await this.db.query.esimPurchases.findFirst({
+        where: eq(esimPurchases.order_number, orderNumber),
+      }),
+      'Failed to create renewal order',
+    );
+    return mapToOrderResponse(created);
+  }
+
+  /**
+   * Customer activates the eSIM of a paid order. Idempotent: activating an
+   * already activated line returns it unchanged.
+   */
+  async activateOrder(
+    orderId: number,
+    customerId: number,
+  ): Promise<OrderWithDetailsResponseDto> {
+    const order = await this.validateOrderExists(orderId);
+    if (order.customer_id !== customerId) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+    if (order.payment_status !== PaymentStatus.COMPLETED) {
+      throw new BadRequestException('The order is not paid yet');
+    }
+    if (!order.esim_id) {
+      throw new BadRequestException(
+        'No eSIM is assigned to this order (renewal orders use the original line)',
+      );
+    }
+    if (order.purchase_status !== PurchaseStatus.ACTIVATED) {
+      await this.db
+        .update(esimPurchases)
+        .set({
+          purchase_status: PurchaseStatus.ACTIVATED,
+          activation_date: new Date(),
+        })
+        .where(eq(esimPurchases.esim_purchase_id, orderId));
+    }
+    return this.getOrderById(orderId);
+  }
+
   async updateOrder(
     id: number,
     updateOrderDto: UpdateOrderDto,
     adminId: number,
   ): Promise<OrderResponseDto> {
     await this.validateOrderExists(id);
+
     await this.db
       .update(esimPurchases)
       .set(
         pickDefined({
-          amount: updateOrderDto.amount?.toString(),
+          amount: updateOrderDto.amount,
           currency: updateOrderDto.currency,
           purchase_status: updateOrderDto.purchase_status,
           payment_method: updateOrderDto.payment_method,
@@ -198,6 +347,7 @@ export class OrderService {
         }),
       )
       .where(eq(esimPurchases.esim_purchase_id, id));
+
     await this.adminService.logAction({
       adminId,
       category: AdminActionCategory.PURCHASE,
@@ -205,6 +355,7 @@ export class OrderService {
       entityId: id,
       notes: `Updated order fields: ${Object.keys(updateOrderDto).join(',')}`,
     });
+
     const updatedOrder = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, id),
     });
@@ -212,20 +363,24 @@ export class OrderService {
       ensureFound(updatedOrder, `Order with ID ${id} not found after update`),
     );
   }
+
   async updatePaymentStatus(
     id: number,
     paymentDto: UpdatePaymentStatusDto,
   ): Promise<OrderResponseDto> {
     const order = await this.validateOrderExists(id);
+
     // Payment State Machine Validation
     const currentStatus = order.payment_status;
     const newStatus = paymentDto.payment_status;
+
     const validTransitions: Record<PaymentStatus, PaymentStatus[]> = {
       [PaymentStatus.PENDING]: [PaymentStatus.COMPLETED, PaymentStatus.FAILED],
       [PaymentStatus.COMPLETED]: [PaymentStatus.REFUNDED],
       [PaymentStatus.FAILED]: [],
       [PaymentStatus.REFUNDED]: [],
     };
+
     if (
       currentStatus &&
       !validTransitions[currentStatus]?.includes(newStatus)
@@ -235,24 +390,39 @@ export class OrderService {
           `Allowed: ${validTransitions[currentStatus]?.join(', ') || 'none'}`,
       );
     }
+
     // Require transaction_id for COMPLETED status
     if (newStatus === PaymentStatus.COMPLETED && !paymentDto.transaction_id) {
       throw new BadRequestException(
         'Transaction ID is required when marking payment as COMPLETED',
       );
     }
-    // Handle Payment Completion (Assign eSIM)
-    if (newStatus === PaymentStatus.COMPLETED && !order.esim_id) {
-      // Get customer and plan details for email
-      const customer = await this.db.query.users.findFirst({
-        where: eq(users.user_id, order.customer_id),
-      });
-      const plan = await this.db.query.plans.findFirst({
-        where: eq(plans.plan_id, order.plan_id),
-      });
 
-      await this.assignEsimToOrder(id, order, customer, plan);
+    const isRenewal = order.purchase_type !== PurchaseType.NEW;
+
+    if (newStatus === PaymentStatus.REFUNDED && isRenewal) {
+      throw new BadRequestException(
+        'Refunding a renewal or extension is not supported automatically. Adjust the line manually.',
+      );
     }
+
+    if (newStatus === PaymentStatus.COMPLETED) {
+      if (isRenewal) {
+        // Renewal / extension: move the existing line, no new eSIM
+        await this.applyRenewal(order);
+      } else if (!order.esim_id) {
+        // Handle Payment Completion (Assign eSIM)
+        const customer = await this.db.query.users.findFirst({
+          where: eq(users.user_id, order.customer_id),
+        });
+        const plan = await this.db.query.plans.findFirst({
+          where: eq(plans.plan_id, order.plan_id),
+        });
+
+        await this.assignEsimToOrder(id, order, customer, plan);
+      }
+    }
+
     // Handle Refund/Failure (Release eSIM)
     if (
       (newStatus === PaymentStatus.REFUNDED ||
@@ -261,6 +431,7 @@ export class OrderService {
     ) {
       await this.releaseEsimFromOrder(id, order.esim_id, newStatus);
     }
+
     // Update payment status
     await this.db
       .update(esimPurchases)
@@ -270,6 +441,7 @@ export class OrderService {
         payment_reference: paymentDto.payment_reference,
       })
       .where(eq(esimPurchases.esim_purchase_id, id));
+
     const updatedOrder = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, id),
     });
@@ -277,6 +449,52 @@ export class OrderService {
       ensureFound(updatedOrder, `Order with ID ${id} not found after update`),
     );
   }
+
+  /** Extend the expiry of the original line once a renewal is paid. */
+  private async applyRenewal(order: OrderRow): Promise<void> {
+    if (!order.renews_purchase_id) {
+      throw new BadRequestException('Renewal order has no original line');
+    }
+    const original = ensureFound(
+      await this.validateOrderExists(order.renews_purchase_id),
+      `Original order ${order.renews_purchase_id} not found`,
+    );
+    const plan = ensureFound(
+      await this.db.query.plans.findFirst({
+        where: eq(plans.plan_id, order.plan_id),
+      }),
+      `Plan with ID ${order.plan_id} not found`,
+    );
+
+    const today = toDateOnly(new Date());
+    const newExpiry = projectExpiry(
+      order.purchase_type,
+      toDateOnly(original.expiry_date),
+      plan.validity_days,
+      today,
+    );
+    const newExpiryDate = fromDateOnly(newExpiry);
+
+    await this.db.transaction(async (tx) => {
+      await tx
+        .update(esimPurchases)
+        .set({ expiry_date: newExpiryDate })
+        .where(eq(esimPurchases.esim_purchase_id, original.esim_purchase_id));
+      await tx
+        .update(esimPurchases)
+        .set({
+          expiry_date: newExpiryDate,
+          activation_date: new Date(),
+          purchase_status: PurchaseStatus.ACTIVATED,
+        })
+        .where(eq(esimPurchases.esim_purchase_id, order.esim_purchase_id));
+    });
+
+    this.logger.log(
+      `${order.purchase_type} applied to line ${original.esim_purchase_id}: expiry now ${newExpiry}`,
+    );
+  }
+
   private async assignEsimToOrder(
     orderId: number,
     order: {
@@ -349,6 +567,7 @@ export class OrderService {
       }
     });
   }
+
   private async releaseEsimFromOrder(
     orderId: number,
     esimId: number,
@@ -361,6 +580,7 @@ export class OrderService {
           status: EsimStatus.AVAILABLE,
         })
         .where(eq(esims.esim_id, esimId));
+
       await tx
         .update(esimPurchases)
         .set({
@@ -373,8 +593,10 @@ export class OrderService {
         .where(eq(esimPurchases.esim_purchase_id, orderId));
     });
   }
+
   async deleteOrder(id: number, adminId: number): Promise<void> {
     const order = await this.validateOrderExists(id);
+
     // If an eSIM was assigned, release it back to the pool
     if (order.esim_id) {
       await this.db
@@ -384,9 +606,11 @@ export class OrderService {
         })
         .where(eq(esims.esim_id, order.esim_id));
     }
+
     await this.db
       .delete(esimPurchases)
       .where(eq(esimPurchases.esim_purchase_id, id));
+
     await this.adminService.logAction({
       adminId,
       category: AdminActionCategory.PURCHASE,
@@ -395,12 +619,14 @@ export class OrderService {
       notes: `Deleted order ${id}${order.esim_id ? ` and released eSIM ${order.esim_id}` : ''}`,
     });
   }
+
   private async validateOrderExists(id: number) {
     const order = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, id),
     });
     return ensureFound(order, `Order with ID ${id} not found`);
   }
+
   private generateOrderNumber(): string {
     return `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   }

@@ -86,7 +86,7 @@ export class ProviderWithPlansResponseDto extends ProviderResponseDto {
     plan_id: number;
     plan_name: string;
     data_amount_gb: number;
-    price: string;
+    price: number;
     is_active: boolean;
   }>;
   @ApiProperty({ description: 'Total number of plans', example: 5 })

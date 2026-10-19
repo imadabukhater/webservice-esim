@@ -10,13 +10,15 @@ import {
   type DatabaseProvider,
 } from '../drizzle/drizzle.provider';
 import { esimPurchases, esims, plans, users } from '../drizzle/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, asc, sql } from 'drizzle-orm';
+import * as QRCode from 'qrcode';
 import {
   CreateOrderData,
   UpdateOrderDto,
   UpdatePaymentStatusDto,
   OrderResponseDto,
   OrderWithDetailsResponseDto,
+  OrderQrResponseDto,
 } from './dto/order.dto';
 import { EsimService } from '../esim/esim.service';
 import { AdminService } from '../user/admin.service';
@@ -31,6 +33,11 @@ import {
   PurchaseType,
 } from '../enums/myenums';
 import { pickDefined } from '../common/utils/object.utils';
+import {
+  newEsimTotalOf,
+  qrPriceOf,
+  renewalPriceOf,
+} from '../common/utils/pricing.utils';
 import { ensureFound } from '../common/utils/service.helpers';
 import {
   fromDateOnly,
@@ -41,6 +48,13 @@ import type { Session } from '../common/types/auth';
 import { Role } from '../auth/role';
 
 type OrderRow = typeof esimPurchases.$inferSelect;
+type PlanRow = typeof plans.$inferSelect;
+
+const ORDER_RELATIONS = { esim: true, plan: true } as const;
+
+/** Admins always see the QR; customers only when the plan shows it. */
+const qrOptions = (viewer?: Session) =>
+  viewer?.role === Role.ADMIN ? { revealQr: true } : {};
 
 @Injectable()
 export class OrderService {
@@ -62,25 +76,36 @@ export class OrderService {
   async getOrders(user: Session): Promise<OrderWithDetailsResponseDto[]> {
     // Admins get all orders, customers get only their own
     if (user.role === Role.ADMIN) {
-      return this.getAllOrders();
+      return this.getAllOrders(user);
     }
-    return this.getOrdersByUserId(user.userId);
+    return this.getOrdersByUserId(user.userId, user);
   }
 
-  async getAllOrders(): Promise<OrderWithDetailsResponseDto[]> {
+  async getAllOrders(viewer?: Session): Promise<OrderWithDetailsResponseDto[]> {
     const orders = await this.db.query.esimPurchases.findMany({
-      with: { esim: { with: { plan: true } } },
+      with: ORDER_RELATIONS,
+      orderBy: asc(esimPurchases.esim_purchase_id),
     });
-    return orders.map(mapToOrderWithDetails);
+    return orders.map((order) =>
+      mapToOrderWithDetails(order, qrOptions(viewer)),
+    );
   }
 
-  async getOrderById(id: number): Promise<OrderWithDetailsResponseDto> {
+  /**
+   * Order with details. Without a viewer the customer rule applies: the QR
+   * is only included when the plan shows it.
+   */
+  async getOrderById(
+    id: number,
+    viewer?: Session,
+  ): Promise<OrderWithDetailsResponseDto> {
     const order = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, id),
-      with: { esim: { with: { plan: true } } },
+      with: ORDER_RELATIONS,
     });
     return mapToOrderWithDetails(
       ensureFound(order, `Order with ID ${id} not found`),
+      qrOptions(viewer),
     );
   }
 
@@ -89,7 +114,7 @@ export class OrderService {
   ): Promise<OrderWithDetailsResponseDto> {
     const order = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.order_number, orderNumber),
-      with: { esim: { with: { plan: true } } },
+      with: ORDER_RELATIONS,
     });
     return mapToOrderWithDetails(
       ensureFound(order, `Order with number ${orderNumber} not found`),
@@ -98,12 +123,54 @@ export class OrderService {
 
   async getOrdersByUserId(
     userId: number,
+    viewer?: Session,
   ): Promise<OrderWithDetailsResponseDto[]> {
     const orders = await this.db.query.esimPurchases.findMany({
       where: eq(esimPurchases.customer_id, userId),
-      with: { esim: { with: { plan: true } } },
+      with: ORDER_RELATIONS,
+      orderBy: asc(esimPurchases.esim_purchase_id),
     });
-    return orders.map(mapToOrderWithDetails);
+    return orders.map((order) =>
+      mapToOrderWithDetails(order, qrOptions(viewer)),
+    );
+  }
+
+  /** QR code of a paid order as text and as a PNG data URL. */
+  async getOrderQr(
+    orderId: number,
+    viewer: Session,
+  ): Promise<OrderQrResponseDto> {
+    const order = ensureFound(
+      await this.db.query.esimPurchases.findFirst({
+        where: eq(esimPurchases.esim_purchase_id, orderId),
+        with: ORDER_RELATIONS,
+      }),
+      `Order with ID ${orderId} not found`,
+    );
+    if (viewer.role !== Role.ADMIN && order.customer_id !== viewer.userId) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+    if (order.payment_status !== PaymentStatus.COMPLETED || !order.esim) {
+      throw new BadRequestException(
+        'The QR code is available once the order is paid',
+      );
+    }
+    if (viewer.role !== Role.ADMIN && order.plan?.show_qr === false) {
+      throw new BadRequestException(
+        'This plan is activated by our team; the QR code is not shown in the store',
+      );
+    }
+    return {
+      order_id: order.esim_purchase_id,
+      iccid: order.esim.iccid,
+      phone_number: order.esim.phone_number,
+      qr_code: order.esim.qr_code,
+      qr_image: await QRCode.toDataURL(order.esim.qr_code, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 320,
+      }),
+    };
   }
 
   async createOrder(
@@ -122,33 +189,36 @@ export class OrderService {
       throw new BadRequestException(`Customer account is not active`);
     }
 
-    // Validate plan exists and is active
+    // Validate plan exists, is active and shown in the store
     const plan = await this.db.query.plans.findFirst({
       where: eq(plans.plan_id, createOrderDto.plan_id),
+      with: { provider: true },
     });
-    if (!plan) {
+    if (!plan || !plan.is_visible || !plan.provider?.is_visible) {
       throw new BadRequestException(
         `Plan with ID ${createOrderDto.plan_id} not found`,
       );
     }
-    if (!plan.is_active) {
+    if (!plan.is_active || plan.provider.is_active === false) {
       throw new BadRequestException(
         `Plan ${plan.plan_name} is not active and cannot be purchased`,
       );
     }
 
-    // Check if there are available eSIMs for this plan
+    // eSIM QR inventory belongs to the provider
     const availableEsim = await this.db.query.esims.findFirst({
       where: and(
-        eq(esims.plan_id, createOrderDto.plan_id),
+        eq(esims.provider_id, plan.provider_id),
         eq(esims.status, EsimStatus.AVAILABLE),
       ),
     });
     if (!availableEsim) {
       throw new BadRequestException(
-        `No available eSIMs for plan ID ${createOrderDto.plan_id}. Please contact support.`,
+        `No available eSIMs for ${plan.provider.name}. Please contact support.`,
       );
     }
+    const qrFee = qrPriceOf(plan.provider);
+    const total = newEsimTotalOf(plan, plan.provider);
 
     // activation_date defaults to today
     const activationDate = createOrderDto.activation_date
@@ -166,7 +236,8 @@ export class OrderService {
       plan_id: createOrderDto.plan_id,
       esim_id: null,
       order_number: orderNumber,
-      amount: plan.price, // whole currency units, same price for every provider
+      amount: total, // plan price + provider QR price, whole units
+      qr_fee: qrFee,
       currency: this.currency,
       purchase_type: PurchaseType.NEW,
       payment_status: PaymentStatus.PENDING,
@@ -190,7 +261,7 @@ export class OrderService {
         fullName: customer.full_name,
         orderNumber,
         planName: plan.plan_name,
-        amount: plan.price,
+        amount: total,
         currency: this.currency,
       })
       .catch(() => {
@@ -201,14 +272,16 @@ export class OrderService {
   }
 
   /**
-   * Renew or extend an existing eSIM line. Both cost the plan's current
-   * price, the same for every provider. The renewal order is paid like any
+   * Renew or extend an existing eSIM line. The price is the plan's renewal
+   * price (set on the plan, else on the provider, else the plan price); no
+   * QR price since the line is reused. The renewal order is paid like any
    * other order; once payment completes the original line's expiry moves.
    */
   async createRenewalOrder(
     customerId: number,
     purchaseId: number,
     type: PurchaseType.RENEWAL | PurchaseType.EXTENSION,
+    planId?: number,
   ): Promise<OrderResponseDto> {
     const original = await this.db.query.esimPurchases.findFirst({
       where: eq(esimPurchases.esim_purchase_id, purchaseId),
@@ -225,16 +298,33 @@ export class OrderService {
       throw new BadRequestException('This order has no eSIM line assigned yet');
     }
 
-    const plan = await this.db.query.plans.findFirst({
-      where: eq(plans.plan_id, original.plan_id),
-    });
-    const foundPlan = ensureFound(
-      plan,
-      `Plan with ID ${original.plan_id} not found`,
+    const line = ensureFound(
+      await this.db.query.esims.findFirst({
+        where: eq(esims.esim_id, original.esim_id),
+      }),
+      `eSIM of order ${purchaseId} not found`,
     );
+    const plan = await this.db.query.plans.findFirst({
+      where: eq(plans.plan_id, planId ?? original.plan_id),
+      with: { provider: true },
+    });
+    if (!plan || !plan.provider) {
+      throw new NotFoundException(
+        `Plan with ID ${planId ?? original.plan_id} not found`,
+      );
+    }
+    const foundPlan = plan;
+    if (foundPlan.provider_id !== line.provider_id) {
+      throw new BadRequestException(
+        'The plan must belong to the same provider as the eSIM line',
+      );
+    }
+    if (planId !== undefined && !foundPlan.is_visible) {
+      throw new NotFoundException(`Plan with ID ${planId} not found`);
+    }
     if (!foundPlan.is_active) {
       throw new BadRequestException(
-        `Plan ${foundPlan.plan_name} is not active and cannot be renewed`,
+        `Plan ${foundPlan.plan_name} is no longer sold. Choose another plan of ${foundPlan.provider.name} to renew.`,
       );
     }
 
@@ -266,7 +356,8 @@ export class OrderService {
       renews_purchase_id: purchaseId,
       purchase_type: type,
       order_number: orderNumber,
-      amount: foundPlan.price,
+      amount: renewalPriceOf(foundPlan, foundPlan.provider),
+      qr_fee: 0,
       currency: this.currency,
       payment_status: PaymentStatus.PENDING,
       purchase_status: PurchaseStatus.PENDING,
@@ -419,7 +510,12 @@ export class OrderService {
           where: eq(plans.plan_id, order.plan_id),
         });
 
-        await this.assignEsimToOrder(id, order, customer, plan);
+        await this.assignEsimToOrder(
+          id,
+          order,
+          customer,
+          ensureFound(plan, `Plan with ID ${order.plan_id} not found`),
+        );
       }
     }
 
@@ -476,10 +572,17 @@ export class OrderService {
     const newExpiryDate = fromDateOnly(newExpiry);
 
     await this.db.transaction(async (tx) => {
+      // The line now runs on the renewal's plan (it may be a new plan)
       await tx
         .update(esimPurchases)
-        .set({ expiry_date: newExpiryDate })
+        .set({ expiry_date: newExpiryDate, plan_id: order.plan_id })
         .where(eq(esimPurchases.esim_purchase_id, original.esim_purchase_id));
+      if (original.esim_id) {
+        await tx
+          .update(esims)
+          .set({ plan_id: order.plan_id })
+          .where(eq(esims.esim_id, original.esim_id));
+      }
       await tx
         .update(esimPurchases)
         .set({
@@ -504,27 +607,33 @@ export class OrderService {
       expiry_date: Date | null;
     },
     customer: { email: string; full_name: string } | undefined,
-    plan: { plan_name: string } | undefined,
+    plan: PlanRow,
   ): Promise<void> {
     const customerEmail = customer?.email ?? 'unknown';
     const customerName = customer?.full_name ?? 'Customer';
-    const planName = plan?.plan_name ?? 'eSIM Plan';
+    const planName = plan.plan_name;
 
     await this.db.transaction(async (tx) => {
+      // Any available eSIM of the provider; ones loaded for this plan first
       const [availableEsim] = await tx
         .select()
         .from(esims)
         .where(
           and(
-            eq(esims.plan_id, order.plan_id),
+            eq(esims.provider_id, plan.provider_id),
             eq(esims.status, EsimStatus.AVAILABLE),
           ),
         )
-        .limit(1);
+        .orderBy(
+          sql`case when ${esims.plan_id} = ${plan.plan_id} then 0 else 1 end`,
+          asc(esims.esim_id),
+        )
+        .limit(1)
+        .for('update');
 
       if (!availableEsim) {
         throw new BadRequestException(
-          `No available eSIMs for plan ID ${order.plan_id}. Please contact support.`,
+          `No available eSIMs for this provider (plan ${order.plan_id}). Please contact support.`,
         );
       }
 
@@ -541,11 +650,13 @@ export class OrderService {
         .update(esims)
         .set({
           status: EsimStatus.ASSIGNED,
+          plan_id: plan.plan_id,
         })
         .where(eq(esims.esim_id, availableEsim.esim_id));
 
-      // Send email with QR code
+      // Send email; the QR is left out when the plan hides it
       const emailSent = await this.emailService.sendEsimQrCode({
+        includeQr: plan.show_qr,
         customerEmail,
         customerName,
         orderNumber: order.order_number,

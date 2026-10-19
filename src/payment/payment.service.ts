@@ -392,7 +392,7 @@ export class PaymentService {
       `Order ${order.order_number} paid from balance (${amount} ${this.config.currency})`,
     );
     return {
-      order: await this.orderService.getOrderById(orderId),
+      order: await this.orderService.getOrderById(orderId, user),
       balance: debit.balance,
     };
   }

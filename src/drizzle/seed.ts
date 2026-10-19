@@ -187,6 +187,7 @@ async function seedDatabase() {
     .insert(schema.esims)
     .values([
       {
+        provider_id: insertedProviders[0].provider_id,
         plan_id: insertedPlans[0].plan_id,
         phone_number: '+32470123456',
         iccid: '8932123456789012345',
@@ -195,6 +196,7 @@ async function seedDatabase() {
         status: EsimStatus.AVAILABLE,
       },
       {
+        provider_id: insertedProviders[0].provider_id,
         plan_id: insertedPlans[0].plan_id,
         phone_number: '+32470123457',
         iccid: '8932123456789012346',
@@ -203,6 +205,7 @@ async function seedDatabase() {
         status: EsimStatus.AVAILABLE,
       },
       {
+        provider_id: insertedProviders[0].provider_id,
         plan_id: insertedPlans[1].plan_id,
         phone_number: '+32470234567',
         iccid: '8932234567890123456',
@@ -211,6 +214,7 @@ async function seedDatabase() {
         status: EsimStatus.ASSIGNED,
       },
       {
+        provider_id: insertedProviders[1].provider_id,
         plan_id: insertedPlans[2].plan_id,
         phone_number: '+33612345678',
         iccid: '8933345678901234567',
@@ -219,6 +223,7 @@ async function seedDatabase() {
         status: EsimStatus.AVAILABLE,
       },
       {
+        provider_id: insertedProviders[1].provider_id,
         plan_id: insertedPlans[3].plan_id,
         phone_number: '+34612345678',
         iccid: '8934456789012345678',
@@ -227,6 +232,7 @@ async function seedDatabase() {
         status: EsimStatus.AVAILABLE,
       },
       {
+        provider_id: insertedProviders[2].provider_id,
         plan_id: insertedPlans[4].plan_id,
         phone_number: '+49151234567',
         iccid: '8949567890123456789',

@@ -1,10 +1,14 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   InjectDrizzle,
   type DatabaseProvider,
 } from '../drizzle/drizzle.provider';
-import { providers, plans } from '../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { providers, plans, esims } from '../drizzle/schema';
+import { and, eq } from 'drizzle-orm';
 import { CreateProviderDto, UpdateProviderDto } from './dto/provider.dto';
 import { AdminService } from '../user/admin.service';
 import {
@@ -25,13 +29,21 @@ export class ProviderService {
     @InjectDrizzle() private readonly db: DatabaseProvider,
     private readonly adminService: AdminService,
   ) {}
+  /** Store listing: only providers shown to customers. */
   async getAllProviders() {
+    const providersList = await this.db.query.providers.findMany({
+      where: eq(providers.is_visible, true),
+    });
+    return providersList.map(mapToProviderResponse);
+  }
+  /** Admin listing: every provider, including hidden ones. */
+  async getAllProvidersForAdmin() {
     const providersList = await this.db.query.providers.findMany();
     return providersList.map(mapToProviderResponse);
   }
   async getProviderById(id: number) {
     const provider = await this.db.query.providers.findFirst({
-      where: eq(providers.provider_id, id),
+      where: and(eq(providers.provider_id, id), eq(providers.is_visible, true)),
     });
     const foundProvider = ensureFound(
       provider,
@@ -45,6 +57,9 @@ export class ProviderService {
       logo_url: createProviderDto.logo_url,
       description: createProviderDto.description,
       is_active: createProviderDto.is_active ?? true,
+      is_visible: createProviderDto.is_visible ?? true,
+      qr_price: createProviderDto.qr_price ?? 0,
+      renewal_price: createProviderDto.renewal_price ?? null,
     });
     const createdProvider = await this.db.query.providers.findFirst({
       where: eq(providers.provider_id, newProvider.insertId),
@@ -76,6 +91,10 @@ export class ProviderService {
           logo_url: updateProviderDto.logo_url,
           description: updateProviderDto.description,
           is_active: updateProviderDto.is_active,
+          is_visible: updateProviderDto.is_visible,
+          qr_price: updateProviderDto.qr_price,
+          // null clears the provider renewal price (plans use their own)
+          renewal_price: updateProviderDto.renewal_price,
         }),
       )
       .where(eq(providers.provider_id, id));
@@ -112,15 +131,12 @@ export class ProviderService {
         `Cannot delete provider ${id} because it still owns ${providerPlans.length} plan(s). Delete or reassign the plans first.`,
       );
     }
-    const assignedEsims = await this.db.query.esims.findMany({
-      with: { plan: { with: { provider: true } } },
+    const providerAssignedEsims = await this.db.query.esims.findMany({
+      where: and(
+        eq(esims.provider_id, id),
+        eq(esims.status, EsimStatus.ASSIGNED),
+      ),
     });
-    const providerAssignedEsims = assignedEsims.filter(
-      (esim) =>
-        esim.plan &&
-        esim.plan.provider_id === id &&
-        esim.status === EsimStatus.ASSIGNED,
-    );
     if (providerAssignedEsims.length > 0) {
       throw new BadRequestException(
         `Cannot delete active provider with ${providerAssignedEsims.length} assigned eSIM(s).
@@ -136,22 +152,24 @@ export class ProviderService {
       notes: `Deleted provider ${id}`,
     });
   }
+  /** Store: a visible provider with its visible plans. */
   async getProviderPlans(id: number) {
     const provider = await this.validateProviderExists(id);
+    if (!provider.is_visible) {
+      throw new NotFoundException(`Provider with ID ${id} not found`);
+    }
     const plansList = await this.db.query.plans.findMany({
-      where: eq(plans.provider_id, id),
+      where: and(eq(plans.provider_id, id), eq(plans.is_visible, true)),
     });
     return mapToProviderWithPlans(provider, plansList);
   }
   async getProviderEsims(id: number) {
     await this.validateProviderExists(id);
     const esimsList = await this.db.query.esims.findMany({
-      with: { plan: { with: { provider: true } } },
+      where: eq(esims.provider_id, id),
+      with: { plan: true, provider: true },
     });
-    const providerEsims = esimsList.filter(
-      (esim) => esim.plan && esim.plan.provider_id === id,
-    );
-    return providerEsims.map(mapToEsimWithPlan);
+    return esimsList.map(mapToEsimWithPlan);
   }
   private async validateProviderExists(id: number) {
     const provider = await this.db.query.providers.findFirst({

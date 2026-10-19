@@ -1,5 +1,7 @@
 # التحقق التلقائي من الدفع عبر جوال باي (Jawwal Pay)
 
+انظر أيضًا `STORE_AND_CATALOG.md` لإدارة الشركات والرزم ومتجر الزبون.
+
 هذه الوثيقة تشرح كيف يبيع الموقع الخطوط/الـ eSIM **تلقائيًا** بدون تدخل يدوي:
 الزبون يحوّل المبلغ عبر محفظة جوال باي، إشعار التحويل يصل إلى بريد Gmail الخاص بك،
 النظام يقرأ الإشعار ويطابقه مع طلب الزبون، ثم يُفعّل الطلب ويرسل الـ eSIM فورًا.
@@ -110,6 +112,7 @@ function forwardJawwalPay() {
 | GET | `/api/payments/claims?status=` | أدمن | كل طلبات التحقق |
 | POST | `/api/orders/:id/renew` | زبون | تجديد أو تمديد خط `{type: "renewal" \| "extension"}`. ينشئ طلبًا بسعر الباقة |
 | POST | `/api/orders/:id/activate` | زبون | تفعيل الـ eSIM لطلب مدفوع (يُرجع QR). آمن عند التكرار |
+| GET | `/api/orders/:id/qr` | زبون/أدمن | رمز QR نصًا وصورة PNG لطلب مدفوع (يُحجب عن الزبون إذا كانت الرزمة تخفيه) |
 | POST | `/api/payments/topups` | زبون | شحن رصيد مسبق `{amount, sender_name?, sender_phone?, reference?}` |
 | GET | `/api/payments/topups` | زبون | طلبات الشحن وحالتها |
 | GET | `/api/payments/balance` | زبون | الرصيد وآخر الحركات |

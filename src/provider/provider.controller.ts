@@ -17,7 +17,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/role';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';
 import type { Session } from '../common/types/auth';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 @Controller('providers')
 @ApiBearerAuth('JWT-auth')
 export class ProviderController {
@@ -26,6 +26,14 @@ export class ProviderController {
   @Public()
   async getAllProviders() {
     return this.providerService.getAllProviders();
+  }
+  @Get('manage/all')
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'All providers including hidden ones (Admin only)',
+  })
+  async getAllProvidersForAdmin() {
+    return this.providerService.getAllProvidersForAdmin();
   }
   @Get(':id')
   @Public()

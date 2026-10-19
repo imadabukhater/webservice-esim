@@ -3,8 +3,8 @@ import {
   InjectDrizzle,
   type DatabaseProvider,
 } from '../drizzle/drizzle.provider';
-import { esims, plans, esimPurchases } from '../drizzle/schema';
-import { eq, and } from 'drizzle-orm';
+import { esims, plans, esimPurchases, providers } from '../drizzle/schema';
+import { eq } from 'drizzle-orm';
 import {
   CreateEsimDto,
   UpdateEsimDto,
@@ -29,14 +29,14 @@ export class EsimService {
   async getAllEsims(status?: EsimStatus): Promise<EsimWithPlanResponseDto[]> {
     const esimsList = await this.db.query.esims.findMany({
       ...(status && { where: eq(esims.status, status) }),
-      with: { plan: { with: { provider: true } } },
+      with: { plan: true, provider: true },
     });
     return esimsList.map(mapToEsimWithPlan);
   }
   async getEsimById(id: number): Promise<EsimWithPlanResponseDto> {
     const esim = await this.db.query.esims.findFirst({
       where: eq(esims.esim_id, id),
-      with: { plan: { with: { provider: true } } },
+      with: { plan: true, provider: true },
     });
     const foundEsim = ensureFound(esim, `eSIM with ID ${id} not found`);
     return mapToEsimWithPlan(foundEsim);
@@ -45,20 +45,40 @@ export class EsimService {
     createEsimDto: CreateEsimDto,
     adminId: number,
   ): Promise<EsimResponseDto> {
-    const plan = await this.db.query.plans.findFirst({
-      where: eq(plans.plan_id, createEsimDto.plan_id),
-    });
-    const foundPlan = ensureFound(
-      plan,
-      `Cannot create eSIM because plan ${createEsimDto.plan_id} does not exist`,
-    );
-    if (foundPlan.is_active === false) {
-      throw new BadRequestException(
-        `Cannot create eSIM for inactive plan ${createEsimDto.plan_id}`,
+    // eSIM QR inventory belongs to a provider; the plan is optional
+    let providerId = createEsimDto.provider_id;
+    if (createEsimDto.plan_id !== undefined) {
+      const plan = await this.db.query.plans.findFirst({
+        where: eq(plans.plan_id, createEsimDto.plan_id),
+      });
+      const foundPlan = ensureFound(
+        plan,
+        `Cannot create eSIM because plan ${createEsimDto.plan_id} does not exist`,
       );
+      if (foundPlan.is_active === false) {
+        throw new BadRequestException(
+          `Cannot create eSIM for inactive plan ${createEsimDto.plan_id}`,
+        );
+      }
+      if (providerId !== undefined && providerId !== foundPlan.provider_id) {
+        throw new BadRequestException(
+          `Plan ${foundPlan.plan_id} does not belong to provider ${providerId}`,
+        );
+      }
+      providerId = foundPlan.provider_id;
     }
+    if (providerId === undefined) {
+      throw new BadRequestException('provider_id or plan_id is required');
+    }
+    ensureFound(
+      await this.db.query.providers.findFirst({
+        where: eq(providers.provider_id, providerId),
+      }),
+      `Provider with ID ${providerId} not found`,
+    );
     const [newEsim] = await this.db.insert(esims).values({
-      plan_id: createEsimDto.plan_id,
+      provider_id: providerId,
+      plan_id: createEsimDto.plan_id ?? null,
       phone_number: createEsimDto.phone_number,
       iccid: createEsimDto.iccid,
       qr_code: createEsimDto.qr_code,
@@ -73,7 +93,7 @@ export class EsimService {
       category: AdminActionCategory.ESIM,
       type: AdminActionType.CREATE,
       entityId: foundCreatedEsim.esim_id,
-      notes: 'Created eSIM for plan ' + foundCreatedEsim.plan_id,
+      notes: `Created eSIM for provider ${foundCreatedEsim.provider_id}${foundCreatedEsim.plan_id ? ` (plan ${foundCreatedEsim.plan_id})` : ''}`,
     });
     return mapToEsimResponse(foundCreatedEsim);
   }
@@ -144,22 +164,12 @@ export class EsimService {
   ): Promise<EsimWithPlanResponseDto[]> {
     const purchases = await this.db.query.esimPurchases.findMany({
       where: eq(esimPurchases.customer_id, userId),
-      with: { esim: { with: { plan: { with: { provider: true } } } } },
+      with: { esim: { with: { plan: true, provider: true } } },
     });
     const esimsList = purchases
       .map((p) => p.esim)
       .filter((e): e is NonNullable<typeof e> => e !== null);
     return esimsList.map(mapToEsimWithPlan);
-  }
-  async getAvailableEsimByPlanId(planId: number) {
-    const [esim] = await this.db
-      .select()
-      .from(esims)
-      .where(
-        and(eq(esims.plan_id, planId), eq(esims.status, EsimStatus.AVAILABLE)),
-      )
-      .limit(1);
-    return esim || null;
   }
   private async validateEsimExists(id: number) {
     const esim = await this.db.query.esims.findFirst({

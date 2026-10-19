@@ -39,6 +39,14 @@ export class RenewOrderDto {
   })
   @IsIn([PurchaseType.RENEWAL, PurchaseType.EXTENSION])
   type: PurchaseType.RENEWAL | PurchaseType.EXTENSION;
+  @ApiPropertyOptional({
+    description:
+      "Renew onto another visible plan of the same provider (e.g. after a catalog sync). Defaults to the line's current plan.",
+    example: 3,
+  })
+  @IsOptional()
+  @IsInt()
+  plan_id?: number;
 }
 
 // Internal type used by service (includes customer_id from session)
@@ -151,6 +159,8 @@ export class OrderResponseDto {
   esim_id?: number;
   order_number: string;
   amount: number;
+  /** Part of amount that is the provider QR price (new eSIM only). */
+  qr_fee: number;
   currency: string;
   purchase_type: PurchaseType;
   renews_purchase_id?: number;
@@ -172,11 +182,22 @@ export class OrderWithDetailsResponseDto extends OrderResponseDto {
     // After schema merge: customer_id directly refs users.user_id
     // User data can be queried separately if needed
   };
+  /** Whether the QR code is shown to the customer for this order. */
+  qr_visible: boolean;
+  plan?: {
+    plan_id: number;
+    provider_id: number;
+    plan_name: string;
+    data_amount_gb: number;
+    validity_days: number;
+    price: number;
+  };
   esim?: {
     esim_id: number;
     phone_number: string;
     iccid: string;
-    qr_code: string;
+    /** Omitted when the plan hides the QR from customers. */
+    qr_code?: string;
     status: EsimStatus;
     plan: {
       plan_id: number;
@@ -185,4 +206,13 @@ export class OrderWithDetailsResponseDto extends OrderResponseDto {
       price: number;
     };
   };
+}
+
+export class OrderQrResponseDto {
+  order_id: number;
+  iccid: string;
+  phone_number: string;
+  qr_code: string;
+  /** PNG data URL of the QR code, ready for an <img> tag. */
+  qr_image: string;
 }

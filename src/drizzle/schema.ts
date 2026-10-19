@@ -107,28 +107,52 @@ export const providers = mysqlTable('Provider', {
   name: varchar('name', { length: 100 }).notNull().unique(),
   logo_url: varchar('logo_url', { length: 255 }),
   is_active: boolean('is_active').default(true),
+  // Shown in the customer store
+  is_visible: boolean('is_visible').notNull().default(true),
+  // Price of a new eSIM QR from this provider, added to every new purchase
+  qr_price: int('qr_price').notNull().default(0),
+  // Default renewal / extension price for this provider's plans (NULL: plan price)
+  renewal_price: int('renewal_price'),
   description: text('description'),
 });
-export const plans = mysqlTable('Plan', {
-  plan_id: int('plan_id').primaryKey().autoincrement(),
+export const plans = mysqlTable(
+  'Plan',
+  {
+    plan_id: int('plan_id').primaryKey().autoincrement(),
+    provider_id: int('provider_id')
+      .notNull()
+      .references(() => providers.provider_id, { onDelete: 'cascade' }),
+    plan_name: varchar('plan_name', { length: 100 }).notNull(),
+    data_amount_gb: int('data_amount_gb').notNull(),
+    call_minutes: int('call_minutes').default(0),
+    sms_count: int('sms_count').default(0),
+    validity_days: int('validity_days').notNull(),
+    // Whole currency units only (no fils), e.g. 20 ILS
+    price: int('price').notNull(),
+    // Renewal / extension price; NULL falls back to the provider, then price
+    renewal_price: int('renewal_price'),
+    description: text('description'),
+    is_active: boolean('is_active').default(true),
+    // Shown to customers in the store
+    is_visible: boolean('is_visible').notNull().default(true),
+    // Show the QR code to the customer right after payment / activation
+    show_qr: boolean('show_qr').notNull().default(true),
+  },
+  (table) => [
+    // One plan name per provider: no duplicated packages
+    unique('Plan_provider_name_unique').on(table.provider_id, table.plan_name),
+  ],
+);
+export const esims = mysqlTable('ESIM', {
+  esim_id: int('esim_id').primaryKey().autoincrement(),
+  // eSIM QR inventory belongs to the provider, so plans can be re-synced
   provider_id: int('provider_id')
     .notNull()
     .references(() => providers.provider_id, { onDelete: 'cascade' }),
-  plan_name: varchar('plan_name', { length: 100 }).notNull(),
-  data_amount_gb: int('data_amount_gb').notNull(),
-  call_minutes: int('call_minutes').default(0),
-  sms_count: int('sms_count').default(0),
-  validity_days: int('validity_days').notNull(),
-  // Whole currency units only (no fils), e.g. 20 ILS
-  price: int('price').notNull(),
-  description: text('description'),
-  is_active: boolean('is_active').default(true),
-});
-export const esims = mysqlTable('ESIM', {
-  esim_id: int('esim_id').primaryKey().autoincrement(),
-  plan_id: int('plan_id')
-    .notNull()
-    .references(() => plans.plan_id, { onDelete: 'cascade' }),
+  // Plan the eSIM was loaded with (set on assignment); kept when plans change
+  plan_id: int('plan_id').references(() => plans.plan_id, {
+    onDelete: 'set null',
+  }),
   phone_number: varchar('phone_number', { length: 20 }).notNull().unique(),
   iccid: varchar('iccid', { length: 50 }).notNull().unique(),
   qr_code: text('qr_code').notNull(),
@@ -150,8 +174,10 @@ export const esimPurchases = mysqlTable(
       .unique()
       .references(() => esims.esim_id, { onDelete: 'set null' }),
     order_number: varchar('order_number', { length: 50 }).notNull().unique(),
-    // Whole currency units only (no fils)
+    // Whole currency units only (no fils); includes qr_fee
     amount: int('amount').notNull(),
+    // Provider QR price charged for a new eSIM (0 for renewals)
+    qr_fee: int('qr_fee').notNull().default(0),
     currency: varchar('currency', { length: 3 }).default('ILS'),
     purchase_type: mysqlEnum('purchase_type', PURCHASE_TYPE_VALUES)
       .notNull()
@@ -353,6 +379,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 export const providersRelations = relations(providers, ({ many }) => ({
   plans: many(plans),
+  esims: many(esims),
 }));
 export const plansRelations = relations(plans, ({ one, many }) => ({
   provider: one(providers, {
@@ -363,6 +390,10 @@ export const plansRelations = relations(plans, ({ one, many }) => ({
   favoritedBy: many(customerFavoritePlans),
 }));
 export const esimsRelations = relations(esims, ({ one }) => ({
+  provider: one(providers, {
+    fields: [esims.provider_id],
+    references: [providers.provider_id],
+  }),
   plan: one(plans, {
     fields: [esims.plan_id],
     references: [plans.plan_id],
@@ -380,6 +411,10 @@ export const esimPurchasesRelations = relations(esimPurchases, ({ one }) => ({
   esim: one(esims, {
     fields: [esimPurchases.esim_id],
     references: [esims.esim_id],
+  }),
+  plan: one(plans, {
+    fields: [esimPurchases.plan_id],
+    references: [plans.plan_id],
   }),
 }));
 export const adminActionsRelations = relations(adminActions, ({ one }) => ({

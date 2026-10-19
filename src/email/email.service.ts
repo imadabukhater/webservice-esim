@@ -12,6 +12,8 @@ export interface EsimEmailData {
   iccid: string;
   activationDate: Date;
   expiryDate: Date;
+  /** false: the plan hides the QR; our team activates the line instead. */
+  includeQr?: boolean;
 }
 
 export interface WelcomeEmailData {
@@ -131,6 +133,41 @@ export class EmailService {
         day: 'numeric',
       });
 
+    const qrBlock = `
+    <div style="text-align: center; margin: 30px 0;">
+      <h2 style="color: #1e40af;">Scan this QR Code to Activate</h2>
+      <div style="background-color: white; display: inline-block; padding: 20px; border: 2px solid #e5e7eb; border-radius: 10px;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&format=png&data=${encodeURIComponent(data.qrCodeData)}" 
+             alt="eSIM QR Code" 
+             style="width: 150px; height: 150px;">
+      </div>
+      <p style="font-size: 12px; color: #666; margin-top: 10px;">
+        Can't scan? Use this code manually:<br>
+        <code style="background-color: #f3f4f6; padding: 5px 10px; border-radius: 4px; font-size: 11px; word-break: break-all;">
+          ${data.qrCodeData}
+        </code>
+      </p>
+    </div>
+
+    <div style="background-color: #fef3c7; border-radius: 8px; padding: 15px; margin: 20px 0;">
+      <h3 style="color: #92400e; margin-top: 0;">📋 How to Install</h3>
+      <ol style="color: #78350f; font-size: 14px; margin: 0; padding-left: 20px;">
+        <li>Go to Settings → Cellular/Mobile Data</li>
+        <li>Tap "Add eSIM" or "Add Cellular Plan"</li>
+        <li>Scan the QR code above</li>
+        <li>Follow the on-screen instructions</li>
+      </ol>
+    </div>
+    `;
+    const noQrBlock = `
+    <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+      <h2 style="color: #166534; margin-top: 0;">Your eSIM is reserved</h2>
+      <p style="font-size: 14px; color: #14532d; margin: 0;">
+        Our team will activate this eSIM for you and contact you shortly.
+      </p>
+    </div>
+    `;
+
     return `
 <!DOCTYPE html>
 <html>
@@ -180,30 +217,7 @@ export class EmailService {
       </table>
     </div>
 
-    <div style="text-align: center; margin: 30px 0;">
-      <h2 style="color: #1e40af;">Scan this QR Code to Activate</h2>
-      <div style="background-color: white; display: inline-block; padding: 20px; border: 2px solid #e5e7eb; border-radius: 10px;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&format=png&data=${encodeURIComponent(data.qrCodeData)}" 
-             alt="eSIM QR Code" 
-             style="width: 150px; height: 150px;">
-      </div>
-      <p style="font-size: 12px; color: #666; margin-top: 10px;">
-        Can't scan? Use this code manually:<br>
-        <code style="background-color: #f3f4f6; padding: 5px 10px; border-radius: 4px; font-size: 11px; word-break: break-all;">
-          ${data.qrCodeData}
-        </code>
-      </p>
-    </div>
-
-    <div style="background-color: #fef3c7; border-radius: 8px; padding: 15px; margin: 20px 0;">
-      <h3 style="color: #92400e; margin-top: 0;">📋 How to Install</h3>
-      <ol style="color: #78350f; font-size: 14px; margin: 0; padding-left: 20px;">
-        <li>Go to Settings → Cellular/Mobile Data</li>
-        <li>Tap "Add eSIM" or "Add Cellular Plan"</li>
-        <li>Scan the QR code above</li>
-        <li>Follow the on-screen instructions</li>
-      </ol>
-    </div>
+    ${data.includeQr === false ? noQrBlock : qrBlock}
 
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
 

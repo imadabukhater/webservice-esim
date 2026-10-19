@@ -5,6 +5,7 @@ import {
   PurchaseType,
 } from '../enums/myenums';
 import { ensureBoolean, ensureDate } from './utils/mapper.utils';
+import { newEsimTotalOf, renewalPriceOf } from './utils/pricing.utils';
 // Types from entities
 import type {
   UserEntity,
@@ -76,6 +77,9 @@ export const mapToProviderResponse = (
   logo_url: provider.logo_url ?? undefined,
   description: provider.description ?? undefined,
   is_active: ensureBoolean(provider.is_active),
+  is_visible: provider.is_visible,
+  qr_price: provider.qr_price,
+  renewal_price: provider.renewal_price ?? undefined,
 });
 export const mapToProviderWithPlans = (
   provider: ProviderEntity,
@@ -88,6 +92,10 @@ export const mapToProviderWithPlans = (
     data_amount_gb: plan.data_amount_gb,
     price: plan.price,
     is_active: ensureBoolean(plan.is_active),
+    is_visible: plan.is_visible,
+    show_qr: plan.show_qr,
+    new_esim_total: newEsimTotalOf(plan, provider),
+    renewal_price: renewalPriceOf(plan, provider),
   })),
   total_plans: providerPlans.length,
 });
@@ -103,6 +111,9 @@ export const mapToPlanResponse = (plan: PlanEntity): PlanResponseDto => ({
   price: plan.price,
   description: plan.description ?? undefined,
   is_active: ensureBoolean(plan.is_active),
+  renewal_price: plan.renewal_price ?? undefined,
+  is_visible: plan.is_visible,
+  show_qr: plan.show_qr,
 });
 export const mapToPlanWithProviderResponse = (
   plan: PlanEntity & { provider?: ProviderEntity | null },
@@ -112,11 +123,18 @@ export const mapToPlanWithProviderResponse = (
   return {
     ...mapToPlanResponse(plan),
     provider: mapToProviderResponse(plan.provider),
+    pricing: {
+      plan_price: plan.price,
+      qr_price: plan.provider.qr_price,
+      new_esim_total: newEsimTotalOf(plan, plan.provider),
+      renewal_price: renewalPriceOf(plan, plan.provider),
+    },
   };
 };
 // --- Order Mappers ---
 type OrderWithRelations = OrderEntity & {
-  esim?: (EsimEntity & { plan: PlanEntity }) | null;
+  esim?: EsimEntity | null;
+  plan?: PlanEntity | null;
 };
 export const mapToOrderResponse = (order: OrderEntity): OrderResponseDto => ({
   esim_purchase_id: order.esim_purchase_id,
@@ -125,6 +143,7 @@ export const mapToOrderResponse = (order: OrderEntity): OrderResponseDto => ({
   esim_id: order.esim_id ?? undefined,
   order_number: order.order_number,
   amount: order.amount,
+  qr_fee: order.qr_fee ?? 0,
   currency: order.currency ?? 'ILS',
   purchase_type: order.purchase_type ?? PurchaseType.NEW,
   renews_purchase_id: order.renews_purchase_id ?? undefined,
@@ -140,34 +159,63 @@ export const mapToOrderResponse = (order: OrderEntity): OrderResponseDto => ({
   created_at: ensureDate(order.created_at),
   updated_at: ensureDate(order.updated_at),
 });
+/**
+ * Order with its plan and eSIM. The QR code is only included when the
+ * viewer may see it: admins always, customers when the plan shows the QR.
+ */
 export const mapToOrderWithDetails = (
   order: OrderWithRelations,
-): OrderWithDetailsResponseDto => ({
-  ...mapToOrderResponse(order),
-  customer: { customer_id: order.customer_id },
-  esim: order.esim
+  options: { revealQr?: boolean } = {},
+): OrderWithDetailsResponseDto => {
+  const qrVisible = options.revealQr ?? order.plan?.show_qr ?? true;
+  const planSummary = order.plan
     ? {
-        esim_id: order.esim.esim_id,
-        phone_number: order.esim.phone_number,
-        iccid: order.esim.iccid,
-        qr_code: order.esim.qr_code,
-        status: order.esim.status ?? EsimStatus.AVAILABLE,
-        plan: {
-          plan_id: order.esim.plan.plan_id,
-          plan_name: order.esim.plan.plan_name,
-          data_amount_gb: order.esim.plan.data_amount_gb,
-          price: order.esim.plan.price,
-        },
+        plan_id: order.plan.plan_id,
+        plan_name: order.plan.plan_name,
+        data_amount_gb: order.plan.data_amount_gb,
+        price: order.plan.price,
       }
-    : undefined,
-});
+    : {
+        plan_id: order.plan_id,
+        plan_name: '',
+        data_amount_gb: 0,
+        price: 0,
+      };
+  return {
+    ...mapToOrderResponse(order),
+    customer: { customer_id: order.customer_id },
+    qr_visible: qrVisible,
+    plan: order.plan
+      ? {
+          plan_id: order.plan.plan_id,
+          provider_id: order.plan.provider_id,
+          plan_name: order.plan.plan_name,
+          data_amount_gb: order.plan.data_amount_gb,
+          validity_days: order.plan.validity_days,
+          price: order.plan.price,
+        }
+      : undefined,
+    esim: order.esim
+      ? {
+          esim_id: order.esim.esim_id,
+          phone_number: order.esim.phone_number,
+          iccid: order.esim.iccid,
+          ...(qrVisible ? { qr_code: order.esim.qr_code } : {}),
+          status: order.esim.status ?? EsimStatus.AVAILABLE,
+          plan: planSummary,
+        }
+      : undefined,
+  };
+};
 // --- Esim Mappers ---
 type EsimWithPlanEntity = EsimEntity & {
-  plan: PlanEntity & { provider: ProviderEntity };
+  provider: ProviderEntity;
+  plan?: PlanEntity | null;
 };
 export const mapToEsimResponse = (esim: EsimEntity): EsimResponseDto => ({
   esim_id: esim.esim_id,
-  plan_id: esim.plan_id,
+  provider_id: esim.provider_id,
+  plan_id: esim.plan_id ?? undefined,
   phone_number: esim.phone_number,
   iccid: esim.iccid,
   qr_code: esim.qr_code,
@@ -177,20 +225,26 @@ export const mapToEsimResponse = (esim: EsimEntity): EsimResponseDto => ({
 });
 export const mapToEsimWithPlan = (
   esim: EsimWithPlanEntity,
-): EsimWithPlanResponseDto => ({
-  ...mapToEsimResponse(esim),
-  plan: {
-    plan_id: esim.plan.plan_id,
-    plan_name: esim.plan.plan_name,
-    data_amount_gb: esim.plan.data_amount_gb,
-    call_minutes: esim.plan.call_minutes ?? 0,
-    sms_count: esim.plan.sms_count ?? 0,
-    validity_days: esim.plan.validity_days,
-    price: esim.plan.price,
-    provider: {
-      provider_id: esim.plan.provider.provider_id,
-      name: esim.plan.provider.name ?? undefined,
-      logo_url: esim.plan.provider.logo_url ?? undefined,
-    },
-  },
-});
+): EsimWithPlanResponseDto => {
+  const provider = {
+    provider_id: esim.provider.provider_id,
+    name: esim.provider.name ?? undefined,
+    logo_url: esim.provider.logo_url ?? undefined,
+  };
+  return {
+    ...mapToEsimResponse(esim),
+    provider,
+    plan: esim.plan
+      ? {
+          plan_id: esim.plan.plan_id,
+          plan_name: esim.plan.plan_name,
+          data_amount_gb: esim.plan.data_amount_gb,
+          call_minutes: esim.plan.call_minutes ?? 0,
+          sms_count: esim.plan.sms_count ?? 0,
+          validity_days: esim.plan.validity_days,
+          price: esim.plan.price,
+          provider,
+        }
+      : undefined,
+  };
+};

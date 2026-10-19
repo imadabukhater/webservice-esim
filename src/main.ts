@@ -7,11 +7,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationError } from 'class-validator';
 import CustomLogger from './core/customLogger';
 import { HttpExceptionFilter } from './lib/http-exception.filter';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: process.env.LOG_DISABLED === 'true' ? false : undefined,
   });
   app.setGlobalPrefix('api');
+  // Customer store (public/store) and a redirect from / to it
+  app.useStaticAssets(join(process.cwd(), 'public'));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({

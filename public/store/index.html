@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>متجر eSIM</title>
+    <meta name="description" content="تفعيل شريحة eSIM مباشرة وشحن كرت الدفع المسبق" />
+    <link rel="stylesheet" href="./store.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">e</span>
+        <span>متجر eSIM</span>
+      </div>
+      <div class="account" id="account" hidden>
+        <span class="balance-pill" id="balancePill" title="رصيدك المسبق">0 ₪</span>
+        <span class="who" id="who"></span>
+        <button class="btn ghost small" id="logoutBtn" type="button">خروج</button>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- Sign in / register -->
+      <section id="authView" class="auth card" hidden>
+        <h1>أهلًا بك</h1>
+        <p class="muted">سجّل الدخول لتفعيل شريحة eSIM أو شحن رصيدك.</p>
+        <div class="segmented" role="tablist">
+          <button type="button" class="seg active" data-auth="login" role="tab">تسجيل الدخول</button>
+          <button type="button" class="seg" data-auth="register" role="tab">حساب جديد</button>
+        </div>
+        <form id="loginForm" class="form">
+          <label>البريد الإلكتروني<input name="email" type="email" required autocomplete="email" /></label>
+          <label>كلمة المرور<input name="password" type="password" required minlength="8" autocomplete="current-password" /></label>
+          <button class="btn primary" type="submit">دخول</button>
+        </form>
+        <form id="registerForm" class="form" hidden>
+          <label>الاسم الكامل<input name="full_name" required maxlength="100" autocomplete="name" /></label>
+          <label>البريد الإلكتروني<input name="email" type="email" required autocomplete="email" /></label>
+          <label>رقم الجوال (اختياري)<input name="phone_number" inputmode="tel" maxlength="20" autocomplete="tel" /></label>
+          <label>كلمة المرور<input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <button class="btn primary" type="submit">إنشاء الحساب</button>
+        </form>
+      </section>
+
+      <!-- Store -->
+      <section id="storeView" hidden>
+        <nav class="main-tabs" role="tablist">
+          <button type="button" class="main-tab active" data-tab="esim" role="tab">
+            <span class="tab-icon" aria-hidden="true">📶</span>
+            <span><strong>تفعيل eSIM مباشر</strong><small>شريحة إلكترونية فورية برمز QR</small></span>
+          </button>
+          <button type="button" class="main-tab" data-tab="topup" role="tab">
+            <span class="tab-icon" aria-hidden="true">💳</span>
+            <span><strong>شحن كرت دفع مسبق</strong><small>أضف رصيدًا وادفع به لاحقًا</small></span>
+          </button>
+        </nav>
+
+        <!-- Tab 1: eSIM -->
+        <div id="tab-esim" class="tab-panel">
+          <div class="section-head">
+            <h2>اختر الباقة</h2>
+            <div class="chips" id="providerChips"></div>
+          </div>
+          <div class="plans" id="plans"></div>
+
+          <div class="section-head">
+            <h2>شرائحي</h2>
+            <button type="button" class="btn ghost small" id="refreshLines">تحديث</button>
+          </div>
+          <div class="lines" id="lines"></div>
+        </div>
+
+        <!-- Tab 2: prepaid top-up -->
+        <div id="tab-topup" class="tab-panel" hidden>
+          <div class="topup-grid">
+            <div class="card balance-card">
+              <span class="muted">رصيدك الحالي</span>
+              <strong class="big" id="balanceBig">0 ₪</strong>
+              <span class="muted small">ادفع به أي شريحة أو تجديد فورًا.</span>
+            </div>
+            <div class="card">
+              <h3>اشحن رصيدك عبر جوال باي</h3>
+              <ol class="steps" id="topupSteps"></ol>
+              <form id="topupForm" class="form">
+                <label>المبلغ (شيكل)<input name="amount" type="number" min="1" step="1" required inputmode="numeric" /></label>
+                <label>اسم صاحب المحفظة المحوِّلة<input name="sender_name" maxlength="150" placeholder="كما يظهر في جوال باي" /></label>
+                <div class="row">
+                  <label>أو رقم المحفظة<input name="sender_phone" inputmode="tel" maxlength="20" /></label>
+                  <label>أو رقم المرجع<input name="reference" inputmode="numeric" maxlength="100" /></label>
+                </div>
+                <button class="btn primary" type="submit">تأكيد الشحن</button>
+                <p class="form-note" id="topupNote" hidden></p>
+              </form>
+            </div>
+          </div>
+          <div class="section-head"><h2>طلبات الشحن</h2></div>
+          <div class="list" id="topups"></div>
+          <div class="section-head"><h2>حركات الرصيد</h2></div>
+          <div class="list" id="ledger"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Checkout / result dialog -->
+    <dialog id="dialog" class="dialog">
+      <div class="dialog-head">
+        <h3 id="dialogTitle"></h3>
+        <button class="icon-btn" type="button" id="dialogClose" aria-label="إغلاق">✕</button>
+      </div>
+      <div id="dialogBody"></div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="./store.js" defer></script>
+  </body>
+</html>

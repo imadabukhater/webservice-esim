@@ -25,6 +25,7 @@ import {
   UpdatePaymentStatusDto,
   OrderResponseDto,
   OrderWithDetailsResponseDto,
+  OrderQrResponseDto,
 } from './dto/order.dto';
 import { OrderService } from './order.service';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';
@@ -63,9 +64,26 @@ export class OrderController {
   })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderById(
+    @CurrentUser() user: Session,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<OrderWithDetailsResponseDto> {
-    return this.orderService.getOrderById(id);
+    return this.orderService.getOrderById(id, user);
+  }
+
+  @Get(':id/qr')
+  @UseGuards(OrderAccessGuard)
+  @ApiOperation({
+    summary:
+      'QR code of a paid order as text and PNG image (owner or admin). Hidden for plans that do not show the QR.',
+  })
+  @ApiParam({ name: 'id', description: 'Order ID', example: 1 })
+  @ApiResponse({ status: 200, type: OrderQrResponseDto })
+  @ApiResponse({ status: 400, description: 'Not paid or QR hidden' })
+  async getOrderQr(
+    @CurrentUser() user: Session,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrderQrResponseDto> {
+    return this.orderService.getOrderQr(id, user);
   }
   @Post()
   @Roles(Role.CUSTOMER)
@@ -109,6 +127,7 @@ export class OrderController {
       user.userId,
       id,
       renewOrderDto.type,
+      renewOrderDto.plan_id,
     );
   }
 

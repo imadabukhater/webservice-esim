@@ -1,17 +1,29 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
-  IsNumber,
+  IsInt,
   IsOptional,
   IsNotEmpty,
   MaxLength,
 } from 'class-validator';
 import { EsimStatus } from '../../enums/myenums';
 export class CreateEsimDto {
-  @ApiProperty({ description: 'Plan ID', example: 1 })
-  @IsNumber()
-  @IsNotEmpty()
-  plan_id: number;
+  @ApiPropertyOptional({
+    description:
+      'Provider that issued this eSIM QR. Required unless plan_id is given.',
+    example: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  provider_id?: number;
+  @ApiPropertyOptional({
+    description:
+      'Optional plan; the provider is taken from it. eSIMs are sold for any plan of their provider.',
+    example: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  plan_id?: number;
   @ApiProperty({ description: 'Phone number', example: '+32470123456' })
   @IsString()
   @IsNotEmpty()
@@ -53,7 +65,8 @@ export class UpdateEsimDto {
 // Response DTOs
 export class EsimResponseDto {
   esim_id: number;
-  plan_id: number;
+  provider_id: number;
+  plan_id?: number;
   phone_number: string;
   iccid: string;
   qr_code: string;
@@ -62,7 +75,12 @@ export class EsimResponseDto {
   updated_at: Date;
 }
 export class EsimWithPlanResponseDto extends EsimResponseDto {
-  plan: {
+  provider: {
+    provider_id: number;
+    name: string;
+    logo_url?: string;
+  };
+  plan?: {
     plan_id: number;
     plan_name: string;
     data_amount_gb: number;

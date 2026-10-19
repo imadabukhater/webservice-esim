@@ -8,6 +8,7 @@ import {
   Patch,
   Delete,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -25,6 +26,10 @@ import {
   UpdatePlanRequestDto,
   PlanResponseDto,
   PlanWithProviderResponseDto,
+  ResetPlansDto,
+  ResetPlansResultDto,
+  SyncPlansDto,
+  SyncPlansResultDto,
 } from './dto/plan.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -55,6 +60,53 @@ export class PlanController {
       is_active === 'true' ? true : is_active === 'false' ? false : undefined;
     return this.planService.findAll(isActiveFilter);
   }
+  @Get('manage/all')
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'All plans including hidden and archived ones (Admin only)',
+  })
+  @ApiQuery({ name: 'provider_id', required: false, example: 1 })
+  @ApiResponse({ status: 200, type: [PlanWithProviderResponseDto] })
+  async getAllPlansForAdmin(
+    @Query('provider_id') providerId?: string,
+  ): Promise<PlanWithProviderResponseDto[]> {
+    const id = providerId !== undefined ? Number(providerId) : undefined;
+    if (id !== undefined && !Number.isInteger(id)) {
+      throw new BadRequestException('provider_id must be an integer');
+    }
+    return this.planService.findAllForAdmin(id);
+  }
+
+  @Post('sync')
+  @Roles(Role.ADMIN)
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      "Sync a provider's catalog (Admin only): create / update plans by name, remove the ones not listed. Never duplicates a plan for the same provider.",
+  })
+  @ApiResponse({ status: 200, type: SyncPlansResultDto })
+  async syncPlans(
+    @CurrentUser() user: Session,
+    @Body() dto: SyncPlansDto,
+  ): Promise<SyncPlansResultDto> {
+    return this.planService.syncProviderPlans(dto, user.userId);
+  }
+
+  @Post('reset')
+  @Roles(Role.ADMIN)
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Delete all plans (Admin only). Plans with orders are archived instead. Requires confirm: "DELETE ALL PLANS".',
+  })
+  @ApiResponse({ status: 200, type: ResetPlansResultDto })
+  async resetPlans(
+    @CurrentUser() user: Session,
+    @Body() dto: ResetPlansDto,
+  ): Promise<ResetPlansResultDto> {
+    return this.planService.resetPlans(dto, user.userId);
+  }
+
   @Get(':id')
   @Public()
   @ApiOperation({ summary: 'Get a plan by ID' })

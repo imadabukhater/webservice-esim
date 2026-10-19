@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تفعيل eSIM مباشر</title>
+    <meta name="description" content="تفعيل مباشر eSIM شريحة إلكترونية: اختر الرزمة، ادفع وتحقق، واستلم الكود فورًا" />
+    <link rel="stylesheet" href="/store/store.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">e</span>
+        <span>تفعيل eSIM مباشر</span>
+      </div>
+      <div class="account">
+        <span class="balance-pill" id="balancePill" hidden title="رصيدك المسبق">0 ₪</span>
+        <span class="who" id="who"></span>
+        <button class="btn ghost small" id="logoutBtn" type="button" hidden>خروج</button>
+        <button class="btn primary small" id="loginBtn" type="button" hidden>تسجيل الدخول</button>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- Hero: the flow, visible immediately -->
+      <section class="hero">
+        <h1>تفعيل مباشر eSIM — شريحة إلكترونية</h1>
+        <p class="muted">بدون زيارة ولا انتظار: اختر رزمتك، ادفع عبر جوال باي أو رصيدك، وبعد التحقق من الدفع يظهر لك كود التفعيل QR فورًا.</p>
+        <ol class="flow-steps" aria-label="خطوات الشراء">
+          <li class="flow-step current" data-step="1"><span class="step-num">1</span>اختر الرزمة من الشركات المتاحة</li>
+          <li class="flow-step" data-step="2"><span class="step-num">2</span>الدفع والتحقق من الدفع</li>
+          <li class="flow-step" data-step="3"><span class="step-num">3</span>يظهر لك كود التفعيل QR</li>
+        </ol>
+      </section>
+
+      <!-- Step 1: companies and plans, public -->
+      <section id="catalogSection">
+        <div class="section-head">
+          <h2>اختر الرزمة</h2>
+          <div class="chips" id="providerChips"></div>
+        </div>
+        <div class="plans" id="plans"><div class="empty">... جارٍ تحميل الباقات</div></div>
+      </section>
+
+      <!-- Signed-in area: my lines + prepaid top-up -->
+      <section id="memberSection" hidden>
+        <nav class="main-tabs" role="tablist">
+          <button type="button" class="main-tab active" data-tab="esim" role="tab">
+            <span class="tab-icon" aria-hidden="true">📶</span>
+            <span><strong>شرائحي</strong><small>عرض QR، تفعيل، تجديد وتمديد</small></span>
+          </button>
+          <button type="button" class="main-tab" data-tab="topup" role="tab">
+            <span class="tab-icon" aria-hidden="true">💳</span>
+            <span><strong>شحن كرت دفع مسبق</strong><small>أضف رصيدًا وادفع به فورًا</small></span>
+          </button>
+        </nav>
+
+        <div id="tab-esim" class="tab-panel">
+          <div class="section-head">
+            <h2>شرائحي</h2>
+            <button type="button" class="btn ghost small" id="refreshLines">تحديث</button>
+          </div>
+          <div class="lines" id="lines"></div>
+        </div>
+
+        <div id="tab-topup" class="tab-panel" hidden>
+          <div class="topup-grid">
+            <div class="card balance-card">
+              <span class="muted">رصيدك الحالي</span>
+              <strong class="big" id="balanceBig">0 ₪</strong>
+              <span class="muted small">ادفع به أي رزمة أو تجديد فورًا.</span>
+            </div>
+            <div class="card">
+              <h3>اشحن رصيدك عبر جوال باي</h3>
+              <ol class="steps" id="topupSteps"></ol>
+              <form id="topupForm" class="form">
+                <label>المبلغ (شيكل)<input name="amount" type="number" min="1" step="1" required inputmode="numeric" /></label>
+                <label>اسم صاحب المحفظة المحوِّلة<input name="sender_name" maxlength="150" placeholder="كما يظهر في جوال باي" /></label>
+                <div class="row">
+                  <label>أو رقم المحفظة<input name="sender_phone" inputmode="tel" maxlength="20" /></label>
+                  <label>أو رقم المرجع<input name="reference" inputmode="numeric" maxlength="100" /></label>
+                </div>
+                <button class="btn primary" type="submit">تأكيد الشحن</button>
+                <p class="form-note" id="topupNote" hidden></p>
+              </form>
+            </div>
+          </div>
+          <div class="section-head"><h2>طلبات الشحن</h2></div>
+          <div class="list" id="topups"></div>
+          <div class="section-head"><h2>حركات الرصيد</h2></div>
+          <div class="list" id="ledger"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Checkout / auth / result dialog -->
+    <dialog id="dialog" class="dialog">
+      <div class="dialog-head">
+        <h3 id="dialogTitle"></h3>
+        <button class="icon-btn" type="button" id="dialogClose" aria-label="إغلاق">✕</button>
+      </div>
+      <div id="dialogBody"></div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/store/store.js" defer></script>
+  </body>
+</html>

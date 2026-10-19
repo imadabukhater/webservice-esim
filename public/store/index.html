@@ -3,67 +3,59 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>متجر eSIM</title>
-    <meta name="description" content="تفعيل شريحة eSIM مباشرة وشحن كرت الدفع المسبق" />
-    <link rel="stylesheet" href="./store.css" />
+    <title>تفعيل eSIM مباشر</title>
+    <meta name="description" content="تفعيل مباشر eSIM شريحة إلكترونية: اختر الرزمة، ادفع وتحقق، واستلم الكود فورًا" />
+    <link rel="stylesheet" href="/store/store.css" />
   </head>
   <body>
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">e</span>
-        <span>متجر eSIM</span>
+        <span>تفعيل eSIM مباشر</span>
       </div>
-      <div class="account" id="account" hidden>
-        <span class="balance-pill" id="balancePill" title="رصيدك المسبق">0 ₪</span>
+      <div class="account">
+        <span class="balance-pill" id="balancePill" hidden title="رصيدك المسبق">0 ₪</span>
         <span class="who" id="who"></span>
-        <button class="btn ghost small" id="logoutBtn" type="button">خروج</button>
+        <button class="btn ghost small" id="logoutBtn" type="button" hidden>خروج</button>
+        <button class="btn primary small" id="loginBtn" type="button" hidden>تسجيل الدخول</button>
       </div>
     </header>
 
     <main class="page">
-      <!-- Sign in / register -->
-      <section id="authView" class="auth card" hidden>
-        <h1>أهلًا بك</h1>
-        <p class="muted">سجّل الدخول لتفعيل شريحة eSIM أو شحن رصيدك.</p>
-        <div class="segmented" role="tablist">
-          <button type="button" class="seg active" data-auth="login" role="tab">تسجيل الدخول</button>
-          <button type="button" class="seg" data-auth="register" role="tab">حساب جديد</button>
-        </div>
-        <form id="loginForm" class="form">
-          <label>البريد الإلكتروني<input name="email" type="email" required autocomplete="email" /></label>
-          <label>كلمة المرور<input name="password" type="password" required minlength="8" autocomplete="current-password" /></label>
-          <button class="btn primary" type="submit">دخول</button>
-        </form>
-        <form id="registerForm" class="form" hidden>
-          <label>الاسم الكامل<input name="full_name" required maxlength="100" autocomplete="name" /></label>
-          <label>البريد الإلكتروني<input name="email" type="email" required autocomplete="email" /></label>
-          <label>رقم الجوال (اختياري)<input name="phone_number" inputmode="tel" maxlength="20" autocomplete="tel" /></label>
-          <label>كلمة المرور<input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
-          <button class="btn primary" type="submit">إنشاء الحساب</button>
-        </form>
+      <!-- Hero: the flow, visible immediately -->
+      <section class="hero">
+        <h1>تفعيل مباشر eSIM — شريحة إلكترونية</h1>
+        <p class="muted">بدون زيارة ولا انتظار: اختر رزمتك، ادفع عبر جوال باي أو رصيدك، وبعد التحقق من الدفع يظهر لك كود التفعيل QR فورًا.</p>
+        <ol class="flow-steps" aria-label="خطوات الشراء">
+          <li class="flow-step current" data-step="1"><span class="step-num">1</span>اختر الرزمة من الشركات المتاحة</li>
+          <li class="flow-step" data-step="2"><span class="step-num">2</span>الدفع والتحقق من الدفع</li>
+          <li class="flow-step" data-step="3"><span class="step-num">3</span>يظهر لك كود التفعيل QR</li>
+        </ol>
       </section>
 
-      <!-- Store -->
-      <section id="storeView" hidden>
+      <!-- Step 1: companies and plans, public -->
+      <section id="catalogSection">
+        <div class="section-head">
+          <h2>اختر الرزمة</h2>
+          <div class="chips" id="providerChips"></div>
+        </div>
+        <div class="plans" id="plans"><div class="empty">... جارٍ تحميل الباقات</div></div>
+      </section>
+
+      <!-- Signed-in area: my lines + prepaid top-up -->
+      <section id="memberSection" hidden>
         <nav class="main-tabs" role="tablist">
           <button type="button" class="main-tab active" data-tab="esim" role="tab">
             <span class="tab-icon" aria-hidden="true">📶</span>
-            <span><strong>تفعيل eSIM مباشر</strong><small>شريحة إلكترونية فورية برمز QR</small></span>
+            <span><strong>شرائحي</strong><small>عرض QR، تفعيل، تجديد وتمديد</small></span>
           </button>
           <button type="button" class="main-tab" data-tab="topup" role="tab">
             <span class="tab-icon" aria-hidden="true">💳</span>
-            <span><strong>شحن كرت دفع مسبق</strong><small>أضف رصيدًا وادفع به لاحقًا</small></span>
+            <span><strong>شحن كرت دفع مسبق</strong><small>أضف رصيدًا وادفع به فورًا</small></span>
           </button>
         </nav>
 
-        <!-- Tab 1: eSIM -->
         <div id="tab-esim" class="tab-panel">
-          <div class="section-head">
-            <h2>اختر الباقة</h2>
-            <div class="chips" id="providerChips"></div>
-          </div>
-          <div class="plans" id="plans"></div>
-
           <div class="section-head">
             <h2>شرائحي</h2>
             <button type="button" class="btn ghost small" id="refreshLines">تحديث</button>
@@ -71,13 +63,12 @@
           <div class="lines" id="lines"></div>
         </div>
 
-        <!-- Tab 2: prepaid top-up -->
         <div id="tab-topup" class="tab-panel" hidden>
           <div class="topup-grid">
             <div class="card balance-card">
               <span class="muted">رصيدك الحالي</span>
               <strong class="big" id="balanceBig">0 ₪</strong>
-              <span class="muted small">ادفع به أي شريحة أو تجديد فورًا.</span>
+              <span class="muted small">ادفع به أي رزمة أو تجديد فورًا.</span>
             </div>
             <div class="card">
               <h3>اشحن رصيدك عبر جوال باي</h3>
@@ -102,7 +93,7 @@
       </section>
     </main>
 
-    <!-- Checkout / result dialog -->
+    <!-- Checkout / auth / result dialog -->
     <dialog id="dialog" class="dialog">
       <div class="dialog-head">
         <h3 id="dialogTitle"></h3>
@@ -112,6 +103,6 @@
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="./store.js" defer></script>
+    <script src="/store/store.js" defer></script>
   </body>
 </html>

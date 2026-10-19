@@ -31,7 +31,6 @@ import { OrderService } from './order.service';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';
 import type { Session } from '../common/types/auth';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { Public } from '../auth/decorators/public.decorator';
 import { Role } from '../auth/role';
 import { OrderAccessGuard } from '../auth/guards/orderAccess.guard';
 @ApiTags('Orders')
@@ -184,12 +183,12 @@ export class OrderController {
     return this.orderService.deleteOrder(id, user.userId);
   }
   @Patch(':id/payment-status')
-  @Public()
+  @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Update order payment status (Public for testing)',
+    summary: 'Update order payment status manually (Admin only)',
     description:
-      'Update payment status. TODO: Secure this endpoint in production!',
+      'Marks an order paid / failed / refunded by hand. Customers pay through POST /api/payments/claims or pay-with-balance, which verify the payment first.',
   })
   @ApiParam({ name: 'id', description: 'Order ID', example: 1 })
   @ApiResponse({
@@ -199,9 +198,14 @@ export class OrderController {
   })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async updatePaymentStatus(
+    @CurrentUser() user: Session,
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePaymentStatusDto: UpdatePaymentStatusDto,
   ): Promise<OrderResponseDto> {
-    return this.orderService.updatePaymentStatus(id, updatePaymentStatusDto);
+    return this.orderService.updatePaymentStatusByAdmin(
+      id,
+      updatePaymentStatusDto,
+      user.userId,
+    );
   }
 }

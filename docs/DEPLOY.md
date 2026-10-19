@@ -33,6 +33,23 @@ bash deploy/update.sh
 > قاعدة بيانات **جديدة فارغة**؟ استخدم `pnpm db:migrate` مرة واحدة بدل الخطوة 3
 > (تبني كل الجداول من الصفر)، ثم `pnpm db:seed` إن أردت كتالوج البداية.
 
+## النشر التلقائي من GitHub (اضبطه مرة واحدة ثم انسَ الأمر)
+
+بعد إضافة 3 أسرار في GitHub، كل تحديث على الفرع ينشر نفسه على خادمك تلقائيًا
+عبر `.github/workflows/deploy-gcp.yml`:
+
+GitHub ← المستودع `webservice-esim` ← Settings ← Secrets and variables ← Actions ← New repository secret:
+
+| الاسم | القيمة |
+|---|---|
+| `GCP_SSH_HOST` | `34.56.162.217` |
+| `GCP_SSH_USER` | اسم المستخدم الذي تدخل به للخادم |
+| `GCP_SSH_KEY` | مفتاح SSH خاص، ومفتاحه العام مضاف للخادم (Compute Engine ← VM ← Edit ← SSH Keys) |
+| `GCP_APP_DIR` | اختياري: مجلد المشروع إن لم يكن `~/webservice-esim` |
+
+للنشر فورًا بعد إضافتها: تبويب Actions ← Deploy to Google Cloud VM ← Run workflow.
+قبل إضافة الأسرار تُتخطّى الخطوة بدون أخطاء.
+
 ## أول نشر لهذه التحديثات: خطوات إضافية
 
 1. **متغيرات البيئة** في `.env` على الخادم (القائمة الكاملة في `.env.example`):

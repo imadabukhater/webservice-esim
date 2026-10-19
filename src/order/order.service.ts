@@ -546,6 +546,23 @@ export class OrderService {
     );
   }
 
+  /** Manual payment status change by an admin, recorded in the audit log. */
+  async updatePaymentStatusByAdmin(
+    id: number,
+    paymentDto: UpdatePaymentStatusDto,
+    adminId: number,
+  ): Promise<OrderResponseDto> {
+    const result = await this.updatePaymentStatus(id, paymentDto);
+    await this.adminService.logAction({
+      adminId,
+      category: AdminActionCategory.PURCHASE,
+      type: AdminActionType.UPDATE,
+      entityId: id,
+      notes: `Payment status set to ${paymentDto.payment_status} manually${paymentDto.transaction_id ? ` (transaction ${paymentDto.transaction_id})` : ''}`,
+    });
+    return result;
+  }
+
   /** Extend the expiry of the original line once a renewal is paid. */
   private async applyRenewal(order: OrderRow): Promise<void> {
     if (!order.renews_purchase_id) {

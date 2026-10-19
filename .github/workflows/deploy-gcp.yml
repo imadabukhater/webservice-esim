@@ -1,0 +1,51 @@
+# Deploys webservice-esim to the Google Cloud VM over SSH on every push to
+# the working branch (or by hand from the Actions tab).
+#
+# One-time setup — GitHub repo -> Settings -> Secrets and variables -> Actions:
+#   GCP_SSH_HOST     34.56.162.217
+#   GCP_SSH_USER     the Linux user on the VM (e.g. the one you SSH as)
+#   GCP_SSH_KEY      a private key whose public key is in that user's
+#                    ~/.ssh/authorized_keys (or added in GCP "SSH Keys")
+#   GCP_APP_DIR      optional, project folder on the VM (default ~/webservice-esim)
+# Until GCP_SSH_KEY is set the job is skipped, so pushes never fail.
+name: Deploy to Google Cloud VM
+
+on:
+  push:
+    branches:
+      - claude/auto-activation-payment-nweklk
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-gcp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.GCP_SSH_KEY != '' }}
+    steps:
+      - name: Skip (deploy secrets not configured)
+        if: env.HAS_KEY != 'true'
+        run: echo "GCP_SSH_KEY is not set; skipping deploy. See .github/workflows/deploy-gcp.yml"
+
+      - name: Deploy over SSH
+        if: env.HAS_KEY == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          APP_DIR: ${{ secrets.GCP_APP_DIR }}
+          BRANCH: ${{ github.ref_name }}
+        with:
+          host: ${{ secrets.GCP_SSH_HOST }}
+          username: ${{ secrets.GCP_SSH_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          envs: APP_DIR,BRANCH
+          command_timeout: 20m
+          script: |
+            set -e
+            cd "${APP_DIR:-$HOME/webservice-esim}"
+            git fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+            git pull --ff-only origin "$BRANCH"
+            bash deploy/update.sh --branch "$BRANCH"

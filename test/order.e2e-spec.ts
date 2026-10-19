@@ -216,7 +216,7 @@ describe('Orders', () => {
   describe('PATCH /api/orders/:id/payment-status (Update Payment Status)', () => {
     const url = '/api/orders';
 
-    it('should update payment status (public endpoint for testing)', async () => {
+    it('should update payment status as admin', async () => {
       // Get list of orders first to find a valid order
       const listResponse = await request(app.getHttpServer())
         .get('/api/orders')
@@ -226,6 +226,7 @@ describe('Orders', () => {
         const orderId = listResponse.body[0].esim_purchase_id;
         const response = await request(app.getHttpServer())
           .patch(`${url}/${orderId}/payment-status`)
+          .set('Authorization', `Bearer ${adminToken}`)
           .send({
             payment_status: 'completed',
           });
@@ -234,9 +235,27 @@ describe('Orders', () => {
       }
     });
 
+    it('should return 401 without authentication', async () => {
+      const response = await request(app.getHttpServer())
+        .patch(`${url}/${orderId}/payment-status`)
+        .send({ payment_status: 'completed', transaction_id: 'FAKE-1' });
+
+      expect(response.statusCode).toBe(401);
+    });
+
+    it('should return 403 for customer (no self-marking as paid)', async () => {
+      const response = await request(app.getHttpServer())
+        .patch(`${url}/${orderId}/payment-status`)
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({ payment_status: 'completed', transaction_id: 'FAKE-2' });
+
+      expect(response.statusCode).toBe(403);
+    });
+
     it('should return 404 for non-existent order', async () => {
       const response = await request(app.getHttpServer())
         .patch(`${url}/99999/payment-status`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({
           payment_status: 'completed',
         });

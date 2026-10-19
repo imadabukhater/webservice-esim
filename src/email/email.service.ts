@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
+import * as QRCode from 'qrcode';
 
 export interface EsimEmailData {
   customerEmail: string;
@@ -106,11 +107,28 @@ export class EmailService {
     const htmlContent = this.generateEsimEmailHtml(data);
 
     try {
+      // The QR is rendered locally and attached inline: the activation code
+      // is never sent to a third-party QR image service.
+      const attachments =
+        data.includeQr === false
+          ? []
+          : [
+              {
+                filename: 'esim-qr.png',
+                content: await QRCode.toBuffer(data.qrCodeData, {
+                  errorCorrectionLevel: 'M',
+                  margin: 2,
+                  width: 300,
+                }),
+                cid: 'esim-qr',
+              },
+            ];
       const info = await this.transporter.sendMail({
         from: `"${fromName}" <${fromEmail}>`,
         to: data.customerEmail,
         subject: `Your eSIM QR Code - Order ${data.orderNumber}`,
         html: htmlContent,
+        attachments,
       });
 
       this.logger.log(
@@ -137,7 +155,7 @@ export class EmailService {
     <div style="text-align: center; margin: 30px 0;">
       <h2 style="color: #1e40af;">Scan this QR Code to Activate</h2>
       <div style="background-color: white; display: inline-block; padding: 20px; border: 2px solid #e5e7eb; border-radius: 10px;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&format=png&data=${encodeURIComponent(data.qrCodeData)}" 
+        <img src="cid:esim-qr" 
              alt="eSIM QR Code" 
              style="width: 150px; height: 150px;">
       </div>

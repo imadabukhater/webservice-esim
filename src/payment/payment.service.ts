@@ -7,7 +7,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { and, asc, desc, eq, gte, inArray, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  sql,
+} from 'drizzle-orm';
 import {
   InjectDrizzle,
   type DatabaseProvider,
@@ -46,6 +56,7 @@ import {
   normalizeReference,
   parseJawwalPayNotification,
   phonesMatch,
+  type ParsedWalletNotification,
 } from './jawwal-pay.parser';
 import {
   AdjustBalanceDto,
@@ -184,7 +195,7 @@ export class PaymentService {
       wallet_name: this.config.walletName,
       steps: [
         'افتح تطبيق جوال باي وحوّل قيمة الطلب بالضبط إلى رقم المحفظة أعلاه.',
-        'بعد التحويل، أدخل اسم صاحب المحفظة التي حوّلت منها (كما هو مسجل في جوال باي) أو رقم المرجع الظاهر في الوصل.',
+        'بعد التحويل، أدخل «رقم الحركة» الظاهر في رسالة جوال باي (الأسرع والأدق)، أو اسم صاحب المحفظة التي حوّلت منها.',
         'سيتم التحقق من الدفع تلقائيًا وإرسال الخط/الـ eSIM إلى بريدك الإلكتروني فور وصول إشعار التحويل.',
       ],
     };
@@ -425,6 +436,9 @@ export class PaymentService {
       };
     }
 
+    const receivedAt = input.receivedAt ?? new Date();
+    const incoming = await this.isIncoming(parsed, receivedAt);
+
     let insertId: number;
     try {
       const [result] = await this.db.insert(walletTransactions).values({
@@ -442,8 +456,11 @@ export class PaymentService {
         balance_after: parsed.balanceAfter,
         raw_text: input.text.slice(0, 10000),
         source: input.source,
-        status: WalletTransactionStatus.UNMATCHED,
-        received_at: input.receivedAt ?? new Date(),
+        // Outgoing transfers are kept for the record but never pay an order
+        status: incoming
+          ? WalletTransactionStatus.UNMATCHED
+          : WalletTransactionStatus.IGNORED,
+        received_at: receivedAt,
       });
       insertId = result.insertId;
     } catch (error) {
@@ -468,8 +485,14 @@ export class PaymentService {
       'Failed to store wallet transaction',
     );
     this.logger.log(
-      `Stored ${transaction.provider} transfer ${transaction.reference}: ${transaction.amount} ${transaction.currency} from ${transaction.sender_name ?? transaction.sender_phone ?? 'unknown'} (${input.source})`,
+      `Stored ${incoming ? 'incoming' : 'outgoing'} ${transaction.provider} transfer ${transaction.reference}: ${transaction.amount} ${transaction.currency} from ${transaction.sender_name ?? transaction.sender_phone ?? 'unknown'} (${input.source})`,
     );
+    if (!incoming) {
+      return {
+        status: 'ignored',
+        transaction: mapToWalletTransactionResponse(transaction),
+      };
+    }
 
     const matchedOrderId = await this.matchNewTransaction(transaction);
     const fresh = await this.db.query.walletTransactions.findFirst({
@@ -480,6 +503,44 @@ export class PaymentService {
       transaction: mapToWalletTransactionResponse(fresh ?? transaction),
       matched_order_id: matchedOrderId ?? undefined,
     };
+  }
+
+  /**
+   * Did the money come in? Uses the wording when it is explicit; for the
+   * generic Jawwal Pay e-mail it compares the new wallet balance with the
+   * previous notification (balance went up -> incoming, down -> outgoing).
+   */
+  private async isIncoming(
+    parsed: ParsedWalletNotification,
+    receivedAt: Date,
+  ): Promise<boolean> {
+    if (parsed.direction === 'incoming') return true;
+    if (parsed.direction === 'outgoing') return false;
+
+    if (parsed.balanceAfter !== null) {
+      const [previous] = await this.db
+        .select({ balance_after: walletTransactions.balance_after })
+        .from(walletTransactions)
+        .where(
+          and(
+            isNotNull(walletTransactions.balance_after),
+            lte(walletTransactions.received_at, receivedAt),
+          ),
+        )
+        .orderBy(
+          desc(walletTransactions.received_at),
+          desc(walletTransactions.wallet_transaction_id),
+        )
+        .limit(1);
+      if (previous?.balance_after) {
+        const before = Number(previous.balance_after);
+        const after = Number(parsed.balanceAfter);
+        const amount = Number(parsed.amount);
+        if (Math.abs(before + amount - after) < 0.005) return true;
+        if (Math.abs(before - amount - after) < 0.005) return false;
+      }
+    }
+    return this.config.unknownDirection === 'incoming';
   }
 
   async ingestFromAdmin(

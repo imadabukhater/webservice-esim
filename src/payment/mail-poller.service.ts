@@ -110,7 +110,11 @@ export class MailPollerService implements OnModuleInit, OnModuleDestroy {
               receivedAt,
             });
             processed++;
-            if (result.status !== 'ignored' && this.config.markSeen) {
+            // Mark recognised notifications (incl. stored outgoing ones) as read
+            if (
+              (result.status !== 'ignored' || result.transaction) &&
+              this.config.markSeen
+            ) {
               await client.messageFlagsAdd(
                 { uid: String(message.uid) },
                 ['\\Seen'],

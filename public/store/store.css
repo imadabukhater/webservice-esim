@@ -647,3 +647,18 @@ h3 {
   background: var(--ok-bg);
   color: var(--ok-text);
 }
+
+/* Optional proof fields when the transaction number is missing */
+.alt-proof {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.alt-proof summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.alt-proof .row {
+  margin-top: 10px;
+}

@@ -19,7 +19,43 @@ describe('parseJawwalPayNotification', () => {
       senderPhone: null,
       balanceAfter: '424.00',
       reference: '2922922584908',
+      direction: 'incoming',
+      accountHolder: null,
     });
+  });
+
+  // Real e-mail from noreply@jawwalpay.ps
+  const EMAIL =
+    'للمشترك: المعتز بالله عاطف ابو خاطر: تمت حركة تحويل الأموال لمبلغ ILS 1.00 بنجاح! رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243.';
+
+  it('parses the Jawwal Pay e-mail (transaction number, owner, no payer)', () => {
+    expect(parseJawwalPayNotification(EMAIL)).toEqual({
+      amount: '1.00',
+      currency: 'ILS',
+      senderName: null, // the name in this e-mail is the wallet owner
+      senderPhone: null,
+      balanceAfter: '802.00',
+      reference: '2922940429243',
+      direction: 'unknown',
+      accountHolder: 'المعتز بالله عاطف ابو خاطر',
+    });
+  });
+
+  it('parses the e-mail as HTML with bidi marks and line breaks', () => {
+    const html = `<div dir="rtl">للمشترك: المعتز بالله عاطف ابو خاطر:<br>\u200fتمت حركة تحويل الأموال لمبلغ ILS ١٥.٠٠ بنجاح!<br>رصيدك الحالي: ILS 817.00.<br>رقم الحركة: 2922940429999.</div>`;
+    const parsed = parseJawwalPayNotification(html);
+    expect(parsed?.amount).toBe('15.00');
+    expect(parsed?.reference).toBe('2922940429999');
+    expect(parsed?.balanceAfter).toBe('817.00');
+    expect(parsed?.senderName).toBeNull();
+  });
+
+  it('reads a payer named with "من المشترك" as incoming', () => {
+    const parsed = parseJawwalPayNotification(
+      'تمت حركة استلام الأموال لمبلغ ILS 20.00 من المشترك: سامي خليل حسن بنجاح! رصيدك الحالي: ILS 100.00. رقم الحركة: 1234567890.',
+    );
+    expect(parsed?.direction).toBe('incoming');
+    expect(parsed?.senderName).toBe('سامي خليل حسن');
   });
 
   it('parses amounts with thousands separators and arabic digits', () => {
@@ -47,12 +83,12 @@ describe('parseJawwalPayNotification', () => {
     expect(parsed?.reference).toBe('99887766');
   });
 
-  it('ignores outgoing transfers and unrelated mails', () => {
-    expect(
-      parseJawwalPayNotification(
-        'لقد قمت بتحويل مبلغ بقيمة: ILS 20.00 الى احمد . المرجع :(123456789)',
-      ),
-    ).toBeNull();
+  it('flags outgoing transfers and ignores unrelated mails', () => {
+    const outgoing = parseJawwalPayNotification(
+      'لقد قمت بتحويل مبلغ بقيمة: ILS 20.00 الى احمد . المرجع :(123456789)',
+    );
+    expect(outgoing?.direction).toBe('outgoing');
+    expect(outgoing?.senderName).toBeNull();
     expect(parseJawwalPayNotification('Your weekly newsletter')).toBeNull();
     expect(
       parseJawwalPayNotification('لقد استلمت حركه تحويل اموال بدون مرجع'),

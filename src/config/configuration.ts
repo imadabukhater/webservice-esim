@@ -53,6 +53,13 @@ export default () => ({
     ),
     // Shared secret for POST /api/payments/notifications (x-payment-secret).
     webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || '',
+    // Jawwal Pay e-mails ("تمت حركة تحويل الأموال ...") do not say whether
+    // money came in or went out. The balance change decides when possible;
+    // otherwise: 'incoming' (default) or 'ignore'.
+    unknownDirection:
+      process.env.PAYMENT_UNKNOWN_DIRECTION === 'ignore'
+        ? 'ignore'
+        : 'incoming',
     mail: {
       // Poll the Gmail inbox (IMAP) for Jawwal Pay notifications.
       enabled: process.env.PAYMENT_MAIL_ENABLED === 'true',
@@ -63,7 +70,8 @@ export default () => ({
       pass: process.env.PAYMENT_MAIL_PASS || process.env.EMAIL_PASS || '',
       mailbox: process.env.PAYMENT_MAIL_MAILBOX || 'INBOX',
       // Optional IMAP filters: only look at mails from / with subject.
-      fromFilter: process.env.PAYMENT_MAIL_FROM_FILTER || '',
+      // Only read Jawwal Pay mails by default (set to empty to read all)
+      fromFilter: process.env.PAYMENT_MAIL_FROM_FILTER ?? 'jawwalpay.ps',
       subjectFilter: process.env.PAYMENT_MAIL_SUBJECT_FILTER || '',
       pollIntervalSeconds: parseInt(
         process.env.PAYMENT_MAIL_POLL_INTERVAL_SECONDS || '60',
@@ -116,6 +124,7 @@ export interface PaymentConfig {
   allowOverpayment: boolean;
   maxClaimAttempts: number;
   webhookSecret: string;
+  unknownDirection: 'incoming' | 'ignore';
   mail: PaymentMailConfig;
 }
 export interface ServerConfig {

@@ -95,6 +95,9 @@ export async function seedDatabase(): Promise<void> {
 
   try {
     // Reset database (delete in correct order for foreign keys)
+    await db.delete(schema.balanceTransactions);
+    await db.delete(schema.paymentClaims);
+    await db.delete(schema.walletTransactions);
     await db.delete(schema.customerFavoritePlans);
     await db.delete(schema.adminActions);
     await db.delete(schema.esimPurchases);

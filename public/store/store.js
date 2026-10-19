@@ -288,16 +288,19 @@
       el(
         'span',
         'small muted',
-        `حوّل ${ILS(order.amount)} بالضبط، ثم أدخل واحدًا مما يلي للتحقق:`,
+        `حوّل ${ILS(order.amount)} بالضبط، ثم أدخل «رقم الحركة» من رسالة جوال باي للتحقق:`,
       ),
     );
     const form = el('form', 'form');
     form.innerHTML = `
-      <label>اسم صاحب المحفظة المحوِّلة<input name="sender_name" maxlength="150" placeholder="كما يظهر في جوال باي"></label>
-      <div class="row">
-        <label>أو رقم المحفظة<input name="sender_phone" inputmode="tel" maxlength="20"></label>
-        <label>أو رقم المرجع<input name="reference" inputmode="numeric" maxlength="100"></label>
-      </div>
+      <label>رقم الحركة<input name="reference" inputmode="numeric" maxlength="100" placeholder="مثال: 2922940429243"></label>
+      <details class="alt-proof">
+        <summary>لا أجد رقم الحركة؟</summary>
+        <div class="row">
+          <label>اسم صاحب المحفظة المحوِّلة<input name="sender_name" maxlength="150" placeholder="كما يظهر في جوال باي"></label>
+          <label>أو رقم المحفظة<input name="sender_phone" inputmode="tel" maxlength="20"></label>
+        </div>
+      </details>
       <button class="btn primary" type="submit">تأكيد: لقد حوّلت المبلغ</button>
       <p class="form-note" hidden></p>`;
     const note = form.querySelector('.form-note');

@@ -20,34 +20,49 @@ describe('parseJawwalPayNotification', () => {
       balanceAfter: '424.00',
       reference: '2922922584908',
       direction: 'incoming',
-      accountHolder: null,
+      recipient: null,
     });
   });
 
-  // Real e-mail from noreply@jawwalpay.ps
-  const EMAIL =
-    'للمشترك: المعتز بالله عاطف ابو خاطر: تمت حركة تحويل الأموال لمبلغ ILS 1.00 بنجاح! رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243.';
+  // Real e-mail from noreply@jawwalpay.ps: money SENT from the wallet
+  const SENT =
+    'تمت حركة تحويل الأموال لمبلغ ILS 1.00 للمشترك: المعتز بالله عاطف ابو خاطر بنجاح! رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243.';
 
-  it('parses the Jawwal Pay e-mail (transaction number, owner, no payer)', () => {
-    expect(parseJawwalPayNotification(EMAIL)).toEqual({
+  it('reads the "للمشترك" e-mail as money sent from the wallet, never a payment', () => {
+    expect(parseJawwalPayNotification(SENT)).toEqual({
       amount: '1.00',
       currency: 'ILS',
-      senderName: null, // the name in this e-mail is the wallet owner
+      senderName: null,
       senderPhone: null,
       balanceAfter: '802.00',
       reference: '2922940429243',
-      direction: 'unknown',
-      accountHolder: 'المعتز بالله عاطف ابو خاطر',
+      direction: 'outgoing',
+      recipient: 'المعتز بالله عاطف ابو خاطر',
     });
+    // The same e-mail as Gmail shows it right-to-left
+    const shown = parseJawwalPayNotification(
+      'للمشترك: المعتز بالله عاطف ابو خاطر :تمت حركة تحويل الأموال لمبلغ ILS 1.00 بنجاح! رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243.',
+    );
+    expect(shown?.direction).toBe('outgoing');
+    expect(shown?.recipient).toBe('المعتز بالله عاطف ابو خاطر');
   });
 
-  it('parses the e-mail as HTML with bidi marks and line breaks', () => {
-    const html = `<div dir="rtl">للمشترك: المعتز بالله عاطف ابو خاطر:<br>\u200fتمت حركة تحويل الأموال لمبلغ ILS ١٥.٠٠ بنجاح!<br>رصيدك الحالي: ILS 817.00.<br>رقم الحركة: 2922940429999.</div>`;
+  it('parses an HTML e-mail with bidi marks and line breaks', () => {
+    const html = `<div dir="rtl">\u200fتمت حركة تحويل الأموال لمبلغ ILS ١٥.٠٠ للمشترك: سامي خليل بنجاح!<br>رصيدك الحالي: ILS 817.00.<br>رقم الحركة: 2922940429999.</div>`;
     const parsed = parseJawwalPayNotification(html);
     expect(parsed?.amount).toBe('15.00');
     expect(parsed?.reference).toBe('2922940429999');
     expect(parsed?.balanceAfter).toBe('817.00');
+    expect(parsed?.direction).toBe('outgoing');
     expect(parsed?.senderName).toBeNull();
+  });
+
+  it('leaves a transfer that names neither side as unknown', () => {
+    const parsed = parseJawwalPayNotification(
+      'تمت حركة تحويل الأموال لمبلغ ILS 30.00 بنجاح! رصيدك الحالي: ILS 510.00. رقم الحركة: 2922940420000.',
+    );
+    expect(parsed?.direction).toBe('unknown');
+    expect(parsed?.recipient).toBeNull();
   });
 
   it('reads a payer named with "من المشترك" as incoming', () => {

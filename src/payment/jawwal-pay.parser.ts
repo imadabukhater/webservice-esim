@@ -18,13 +18,12 @@ export interface ParsedWalletNotification {
   balanceAfter: string | null;
   reference: string;
   /**
-   * incoming / outgoing when the wording says so; unknown for the generic
-   * Jawwal Pay e-mail ("تمت حركة تحويل الأموال لمبلغ ... بنجاح") which does
-   * not say which way the money went.
+   * incoming / outgoing when the wording says so; unknown when it does not
+   * (the service then decides from the wallet balance).
    */
   direction: TransferDirection;
-  /** The wallet owner the e-mail is addressed to ("للمشترك: ..."). */
-  accountHolder: string | null;
+  /** Who the money was sent TO ("... للمشترك: <name>"), on outgoing transfers. */
+  recipient: string | null;
 }
 
 const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
@@ -166,7 +165,7 @@ const AMOUNT = '([0-9][0-9,]*(?:\\.[0-9]+)?)';
 const INCOMING_WORDS =
   /استلمت|استلام|استلم|وارد|إيداع|ايداع|received|deposit|من المشترك|من حساب|من محفظة/i;
 const OUTGOING_WORDS =
-  /قمت بتحويل|أرسلت|ارسلت|إرسال|ارسال|سحب|دفع فاتورة|شراء|إلى المشترك|الى المشترك|إلى حساب|الى حساب|إلى محفظة|الى محفظة|\bsent\b|withdraw/i;
+  /للمشترك|قمت بتحويل|أرسلت|ارسلت|إرسال|ارسال|سحب|دفع فاتورة|شراء|إلى المشترك|الى المشترك|إلى حساب|الى حساب|إلى محفظة|الى محفظة|\bsent\b|withdraw/i;
 
 /**
  * Extract the transfer details from a Jawwal Pay notification (SMS text or
@@ -174,11 +173,10 @@ const OUTGOING_WORDS =
  *
  *  1. "لقد استلمت حركه تحويل اموال بقيمة: ILS 1.00 من <payer> . الرصيد
  *     الحالي: ILS 424.00 .المرجع :(2922922584908)"           -> incoming
- *  2. noreply@jawwalpay.ps e-mail:
- *     "للمشترك: <wallet owner>: تمت حركة تحويل الأموال لمبلغ ILS 1.00
- *     بنجاح! رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243."
- *     The name here is the wallet OWNER, not the payer, and the direction
- *     is not stated (direction = unknown; the service decides it).
+ *  2. noreply@jawwalpay.ps e-mail for money SENT from the wallet:
+ *     "تمت حركة تحويل الأموال لمبلغ ILS 1.00 للمشترك: <recipient> بنجاح!
+ *     رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243."   -> outgoing
+ *     It is never a payment; the name is who received the money.
  *
  * Returns null for anything that is not a money-transfer notification.
  */
@@ -221,11 +219,12 @@ export function parseJawwalPayNotification(
   ).exec(text);
   const balanceAfter = balanceMatch ? parseAmount(balanceMatch[1]) : null;
 
-  // "للمشترك: <name>" addresses the wallet owner - never the payer
-  let accountHolder: string | null = null;
-  const holderMatch = /للمشترك\s*:?\s*(.+?)\s*(?::|تمت|تم\s|$)/.exec(text);
-  if (holderMatch && holderMatch[1].trim()) {
-    accountHolder = holderMatch[1].trim().slice(0, 150);
+  // "... للمشترك: <name>": who the wallet sent money to - never a payer
+  let recipient: string | null = null;
+  const recipientMatch =
+    /للمشترك\s*:?\s*(.+?)\s*(?::|بنجاح|تمت|تم\s|[.!]|$)/.exec(text);
+  if (recipientMatch && recipientMatch[1].trim()) {
+    recipient = recipientMatch[1].trim().slice(0, 150);
   }
 
   const incoming = INCOMING_WORDS.test(text);
@@ -262,6 +261,6 @@ export function parseJawwalPayNotification(
     balanceAfter,
     reference,
     direction,
-    accountHolder,
+    recipient,
   };
 }

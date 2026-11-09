@@ -1,17 +1,22 @@
 // test/jawwal-email.e2e-spec.ts
-// The real e-mail Jawwal Pay sends (noreply@jawwalpay.ps):
-//   "للمشترك: <wallet owner>: تمت حركة تحويل الأموال لمبلغ ILS 1.00 بنجاح!
-//    رصيدك الحالي: ILS 802.00. رقم الحركة: 2922940429243."
-// It names the wallet OWNER (not the payer) and does not say whether money
-// came in or went out.
+// Jawwal Pay notifications:
+//  - money received: "لقد استلمت حركه تحويل اموال بقيمة: ILS 70.00 من <payer> ... المرجع :(<ref>)"
+//  - money SENT from the wallet (noreply@jawwalpay.ps):
+//    "تمت حركة تحويل الأموال لمبلغ ILS 1.00 للمشترك: <recipient> بنجاح! رصيدك الحالي: ILS 802.00. رقم الحركة: <ref>."
+//    which must never pay an order.
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createApp } from './helpers/create-app';
 import { loginAdmin, loginCustomer } from './helpers/login';
 
-const OWNER = 'المعتز بالله عاطف ابو خاطر';
-const email = (amount: number, balance: string, reference: string) =>
-  `للمشترك: ${OWNER}: تمت حركة تحويل الأموال لمبلغ ILS ${amount}.00 بنجاح! رصيدك الحالي: ILS ${balance}. رقم الحركة: ${reference}.`;
+const PAYER = 'سامي خليل حسن';
+const RECIPIENT = 'المعتز بالله عاطف ابو خاطر';
+const received = (amount: number, reference: string) =>
+  `لقد استلمت حركه تحويل اموال بقيمة: ILS ${amount}.00 من ${PAYER} . الرصيد الحالي: ILS 5870.00 .المرجع :(${reference})`;
+const sent = (amount: number, balance: string, reference: string) =>
+  `تمت حركة تحويل الأموال لمبلغ ILS ${amount}.00 للمشترك: ${RECIPIENT} بنجاح! رصيدك الحالي: ILS ${balance}. رقم الحركة: ${reference}.`;
+const generic = (amount: number, balance: string, reference: string) =>
+  `تمت حركة تحويل الأموال لمبلغ ILS ${amount}.00 بنجاح! رصيدك الحالي: ILS ${balance}. رقم الحركة: ${reference}.`;
 
 describe('Jawwal Pay e-mail notifications', () => {
   let app: INestApplication;
@@ -81,23 +86,33 @@ describe('Jawwal Pay e-mail notifications', () => {
       expect(amount).toBe(70);
     });
 
-    it('stores the e-mail transfer as a payment waiting for its customer', async () => {
-      const response = await webhook(email(amount, '5870.00', reference));
+    it('never counts money SENT from the wallet as a payment', async () => {
+      const outgoing = ref(9);
+      const response = await webhook(sent(amount, '5800.00', outgoing));
+      expect(response.statusCode).toBe(200);
+      expect(response.body.status).toBe('ignored');
+      expect(response.body.transaction.status).toBe('ignored');
+
+      // Its transaction number and recipient name do not pay the order either
+      const claim = await customer('post', '/api/payments/claims', {
+        order_id: orderId,
+        reference: outgoing,
+      });
+      expect(claim.body.status).toBe('pending');
+      const byName = await customer('post', '/api/payments/claims', {
+        order_id: orderId,
+        sender_name: RECIPIENT,
+      });
+      expect(byName.body.status).toBe('pending');
+    });
+
+    it('stores a received transfer as a payment waiting for its customer', async () => {
+      const response = await webhook(received(amount, reference));
       expect(response.statusCode).toBe(200);
       expect(response.body.status).toBe('created');
       expect(response.body.transaction.reference).toBe(reference);
       expect(response.body.transaction.status).toBe('unmatched');
-      // The name in the e-mail is the wallet owner, never stored as payer
-      expect(response.body.transaction.sender_name).toBeUndefined();
-    });
-
-    it("does not accept the wallet owner's name as proof of payment", async () => {
-      const response = await customer('post', '/api/payments/claims', {
-        order_id: orderId,
-        sender_name: OWNER,
-      });
-      expect(response.statusCode).toBe(200);
-      expect(response.body.status).toBe('pending');
+      expect(response.body.transaction.sender_name).toBe(PAYER);
     });
 
     it('completes the purchase with the transaction number and shows the code', async () => {
@@ -130,14 +145,14 @@ describe('Jawwal Pay e-mail notifications', () => {
       );
       expect(start.body.status).toBe('created');
 
-      const out = await post(email(20, '480.00', ref(3)), 11);
+      const out = await post(generic(20, '480.00', ref(3)), 11);
       expect(out.statusCode).toBe(201);
       expect(out.body.status).toBe('ignored');
       expect(out.body.transaction.status).toBe('ignored');
     });
 
     it('balance went up: incoming transfer', async () => {
-      const response = await post(email(30, '510.00', ref(4)), 12);
+      const response = await post(generic(30, '510.00', ref(4)), 12);
       expect(response.body.status).toBe('created');
       expect(response.body.transaction.status).toBe('unmatched');
     });
